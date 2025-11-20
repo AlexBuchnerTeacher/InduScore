@@ -64,7 +64,7 @@ class RBSTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tagColor = color ?? RBSColors.dynamicRed;
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(RBSBorderRadius.small),
@@ -74,17 +74,13 @@ class RBSTag extends StatelessWidget {
           vertical: RBSSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: selected ? tagColor.withValues(alpha: 0.1) : Colors.transparent,
-          border: Border.all(
-            color: tagColor,
-            width: 2,
-          ),
+          color: selected
+              ? tagColor.withValues(alpha: 0.1)
+              : Colors.transparent,
+          border: Border.all(color: tagColor, width: 2),
           borderRadius: BorderRadius.circular(RBSBorderRadius.small),
         ),
-        child: Text(
-          label,
-          style: RBSTypography.tag.copyWith(color: tagColor),
-        ),
+        child: Text(label, style: RBSTypography.tag.copyWith(color: tagColor)),
       ),
     );
   }
@@ -176,6 +172,7 @@ class RBSInput extends StatelessWidget {
   final bool obscureText;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
   final IconData? prefixIcon;
   final int? maxLines;
 
@@ -188,6 +185,7 @@ class RBSInput extends StatelessWidget {
     this.obscureText = false,
     this.validator,
     this.onChanged,
+    this.onSubmitted,
     this.prefixIcon,
     this.maxLines = 1,
   });
@@ -200,6 +198,7 @@ class RBSInput extends StatelessWidget {
       obscureText: obscureText,
       validator: validator,
       onChanged: onChanged,
+      onFieldSubmitted: onSubmitted,
       maxLines: maxLines,
       style: RBSTypography.bodyMedium,
       decoration: InputDecoration(
@@ -230,7 +229,7 @@ class RBSFilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chipColor = color ?? RBSColors.dynamicRed;
-    
+
     return FilterChip(
       label: Text(label),
       selected: selected,
@@ -238,9 +237,7 @@ class RBSFilterChip extends StatelessWidget {
       backgroundColor: Colors.transparent,
       selectedColor: chipColor.withValues(alpha: 0.1),
       side: BorderSide(color: chipColor, width: 2),
-      labelStyle: RBSTypography.tag.copyWith(
-        color: chipColor,
-      ),
+      labelStyle: RBSTypography.tag.copyWith(color: chipColor),
       padding: const EdgeInsets.symmetric(
         horizontal: RBSSpacing.sm,
         vertical: RBSSpacing.xs,
@@ -274,11 +271,8 @@ class RBSDialog extends StatelessWidget {
   }) {
     return showDialog<T>(
       context: context,
-      builder: (context) => RBSDialog(
-        title: title,
-        content: content,
-        actions: actions,
-      ),
+      builder: (context) =>
+          RBSDialog(title: title, content: content, actions: actions),
     );
   }
 
@@ -294,18 +288,12 @@ class RBSDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RBSHeadline(
-              text: title,
-              level: RBSHeadlineLevel.h3,
-            ),
+            RBSHeadline(text: title, level: RBSHeadlineLevel.h3),
             const SizedBox(height: RBSSpacing.md),
             content,
             if (actions != null && actions!.isNotEmpty) ...[
               const SizedBox(height: RBSSpacing.lg),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: actions!,
-              ),
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: actions!),
             ],
           ],
         ),
@@ -343,10 +331,7 @@ class RBSSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (title != null) ...[
-            RBSHeadline(
-              text: title!,
-              level: RBSHeadlineLevel.h3,
-            ),
+            RBSHeadline(text: title!, level: RBSHeadlineLevel.h3),
             const SizedBox(height: RBSSpacing.md),
           ],
           child,

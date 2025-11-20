@@ -23,14 +23,14 @@ class DefaultFirebaseOptions {
     );
   }
 
-  // TODO: Replace with your Firebase Web configuration
-  // Run: flutterfire configure
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyCCwfDNjisa3x-xrTxL6H2-GhRBQwlEiLM',
+    appId: '1:76982828392:web:1e3817e01beb22777e2add',
+    messagingSenderId: '76982828392',
+    projectId: 'notentool',
+    authDomain: 'notentool-6e2aa.firebaseapp.com',
+    storageBucket: 'notentool.firebasestorage.app',
   );
+
+  // Run: flutterfire configure
 }

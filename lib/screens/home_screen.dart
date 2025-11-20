@@ -1,82 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../core/theme/rbs_theme.dart';
+import '../widgets/rbs_drawer.dart';
+import '../core/widgets/rbs_components.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notentool'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              // TODO: Show user profile / settings
-            },
-          ),
-        ],
-      ),
-      body: Center(
+      appBar: AppBar(title: const Text('Notentool')),
+      drawer: const RBSDrawer(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(RBSSpacing.lg),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
-              Icons.grade,
-              size: 80,
-              color: Colors.blue,
-            ),
-            const SizedBox(height: 24),
+            // Header Section
+            const RBSHeadline(text: 'Notentool', level: RBSHeadlineLevel.h1),
+            const SizedBox(height: RBSSpacing.xs),
             Text(
-              'Willkommen bei Notentool',
-              style: Theme.of(context).textTheme.headlineMedium,
+              'Berufsschule für Industrieelektronik',
+              style: RBSTypography.bodyLarge.copyWith(
+                color: RBSColors.textOnLight.withValues(alpha: 0.6),
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Ihre Notenverwaltung',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: RBSSpacing.xl),
+
+            // Feature Cards
             Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              alignment: WrapAlignment.center,
+              spacing: RBSSpacing.md,
+              runSpacing: RBSSpacing.md,
               children: [
                 _buildFeatureCard(
                   context,
-                  icon: Icons.person,
+                  icon: Icons.school_outlined,
+                  title: 'Klassen',
+                  subtitle: 'Verwalten',
+                  color: RBSColors.dynamicRed,
+                  onTap: () {
+                    context.go('/klassen');
+                  },
+                ),
+                _buildFeatureCard(
+                  context,
+                  icon: Icons.person_outline,
                   title: 'Schüler',
                   subtitle: 'Verwalten',
+                  color: RBSColors.growingElder,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Schülerverwaltung kommt in v1.0.0'),
+                      ),
+                    );
+                  },
                 ),
                 _buildFeatureCard(
                   context,
-                  icon: Icons.book,
+                  icon: Icons.book_outlined,
                   title: 'Fächer',
                   subtitle: 'Organisieren',
+                  color: RBSColors.courtGreen,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Fächerverwaltung kommt in v0.2.0'),
+                      ),
+                    );
+                  },
                 ),
                 _buildFeatureCard(
                   context,
-                  icon: Icons.assignment,
+                  icon: Icons.assignment_outlined,
                   title: 'Noten',
                   subtitle: 'Eintragen',
-                ),
-                _buildFeatureCard(
-                  context,
-                  icon: Icons.analytics,
-                  title: 'Statistiken',
-                  subtitle: 'Analysieren',
+                  color: RBSColors.dynamicRed,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Noteneingabe kommt in v1.0.0'),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Quick add grade
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Neue Note'),
       ),
     );
   }
@@ -86,31 +99,40 @@ class HomeScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
   }) {
     return SizedBox(
-      width: 160,
-      height: 160,
-      child: Card(
-        elevation: 2,
+      width: 200,
+      height: 200,
+      child: RBSCard(
         child: InkWell(
-          onTap: () {
-            // TODO: Navigate to feature
-          },
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(RBSBorderRadius.medium),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(RBSSpacing.md),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 48, color: Colors.blue),
-                const SizedBox(height: 12),
+                Icon(icon, size: 48, color: color),
+                const SizedBox(height: RBSSpacing.sm),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: RBSTypography.h4.copyWith(fontSize: 18),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: RBSSpacing.xs),
                 Text(
                   subtitle,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: RBSTypography.bodySmall.copyWith(
+                    color: RBSColors.textOnLight.withValues(alpha: 0.6),
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

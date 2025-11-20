@@ -9,26 +9,28 @@ import 'package:google_fonts/google_fonts.dart';
 class RBSColors {
   // PRIMARY COLOR - Dynamic Red (verpflichtend)
   static const Color dynamicRed = Color(0xFFFF5E35); // RGB 255/94/53
-  
+
   // SECONDARY COLORS
   static const Color growingElder = Color(0xFF9BB537); // Grünton
-  static const Color courtGreen = Color(0xFF00AB84);   // Türkis
-  
+  static const Color courtGreen = Color(0xFF00AB84); // Türkis
+
   // NEUTRAL COLORS
   static const Color white = Color(0xFFFFFFFF);
-  static const Color paper = Color(0xFFFAFAFA);        // Sehr helles Grau
-  static const Color offwhite = Color(0xFFF5F5F5);     // Offwhite für Hintergründe
-  
+  static const Color paper = Color(0xFFFAFAFA); // Sehr helles Grau
+  static const Color offwhite = Color(0xFFF5F5F5); // Offwhite für Hintergründe
+
   // TEXT COLORS (automatisch nach Kontrast)
-  static const Color textOnLight = Color(0xFF212121);  // Schwarz auf hellem Grund
-  static const Color textOnDark = Color(0xFFFFFFFF);   // Weiß auf dunklem Grund
-  static const Color textOnRed = Color(0xFFFFFFFF);    // Weiß auf Dynamic Red
-  
+  static const Color textOnLight = Color(
+    0xFF212121,
+  ); // Schwarz auf hellem Grund
+  static const Color textOnDark = Color(0xFFFFFFFF); // Weiß auf dunklem Grund
+  static const Color textOnRed = Color(0xFFFFFFFF); // Weiß auf Dynamic Red
+
   // ABLEITUNGEN (nur dezent als Hintergründe auf Content-Ebene)
-  static const Color elderLight = Color(0xFFE8F0D0);   // Heller Elder-Ton
-  static const Color greenLight = Color(0xFFCCEFE7);   // Heller Green-Ton
-  static const Color redLight = Color(0xFFFFE5DF);     // Heller Red-Ton
-  
+  static const Color elderLight = Color(0xFFE8F0D0); // Heller Elder-Ton
+  static const Color greenLight = Color(0xFFCCEFE7); // Heller Green-Ton
+  static const Color redLight = Color(0xFFFFE5DF); // Heller Red-Ton
+
   // FUNCTIONAL COLORS
   static const Color success = courtGreen;
   static const Color warning = Color(0xFFFFA726);
@@ -39,14 +41,14 @@ class RBSColors {
 class RBSTypography {
   // HEADLINE FONT - Roboto Condensed Bold
   static const String headlineFont = 'Roboto Condensed';
-  
+
   // BODY FONT - Open Sans
   static const String bodyFont = 'Open Sans';
-  
+
   // FONT WEIGHTS
   static const FontWeight bold = FontWeight.w700;
   static const FontWeight regular = FontWeight.w400;
-  
+
   // TEXT STYLES - Roboto Condensed Bold für Überschriften
   static const TextStyle h1 = TextStyle(
     fontFamily: headlineFont,
@@ -55,7 +57,7 @@ class RBSTypography {
     height: 1.2,
     letterSpacing: 0, // Laufweite normal
   );
-  
+
   static const TextStyle h2 = TextStyle(
     fontFamily: headlineFont,
     fontSize: 24,
@@ -63,7 +65,7 @@ class RBSTypography {
     height: 1.3,
     letterSpacing: 0,
   );
-  
+
   static const TextStyle h3 = TextStyle(
     fontFamily: headlineFont,
     fontSize: 20,
@@ -71,7 +73,7 @@ class RBSTypography {
     height: 1.4,
     letterSpacing: 0,
   );
-  
+
   static const TextStyle h4 = TextStyle(
     fontFamily: headlineFont,
     fontSize: 18,
@@ -79,7 +81,7 @@ class RBSTypography {
     height: 1.4,
     letterSpacing: 0,
   );
-  
+
   // BODY TEXT - Open Sans
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: bodyFont,
@@ -88,7 +90,7 @@ class RBSTypography {
     height: 1.5,
     letterSpacing: 0,
   );
-  
+
   static const TextStyle bodyMedium = TextStyle(
     fontFamily: bodyFont,
     fontSize: 14,
@@ -96,7 +98,7 @@ class RBSTypography {
     height: 1.5,
     letterSpacing: 0,
   );
-  
+
   static const TextStyle bodySmall = TextStyle(
     fontFamily: bodyFont,
     fontSize: 12,
@@ -104,7 +106,7 @@ class RBSTypography {
     height: 1.5,
     letterSpacing: 0,
   );
-  
+
   // BUTTON TEXT - Roboto Condensed Bold
   static const TextStyle button = TextStyle(
     fontFamily: headlineFont,
@@ -113,7 +115,7 @@ class RBSTypography {
     height: 1.2,
     letterSpacing: 0,
   );
-  
+
   // TAG TEXT - Roboto Condensed Bold (Outline)
   static const TextStyle tag = TextStyle(
     fontFamily: headlineFont,
@@ -132,10 +134,10 @@ class RBSSpacing {
   static const double lg = 24.0;
   static const double xl = 32.0;
   static const double xxl = 48.0;
-  
+
   // CARD PADDING (großzügig gemäß Styleguide)
   static const EdgeInsets cardPadding = EdgeInsets.all(24.0);
-  
+
   // SECTION SPACING
   static const double sectionGap = 32.0;
 }
@@ -152,7 +154,7 @@ class RBSTheme {
   static ThemeData lightTheme() {
     return ThemeData(
       useMaterial3: true,
-      
+
       // COLOR SCHEME - Dynamic Red als Primary
       colorScheme: ColorScheme.light(
         primary: RBSColors.dynamicRed,
@@ -166,7 +168,7 @@ class RBSTheme {
         error: RBSColors.error,
         onError: RBSColors.textOnDark,
       ),
-      
+
       // TYPOGRAPHY - Roboto Condensed + Open Sans via Google Fonts
       textTheme: GoogleFonts.openSansTextTheme().copyWith(
         displayLarge: GoogleFonts.robotoCondensed(
@@ -218,7 +220,7 @@ class RBSTheme {
           color: RBSColors.textOnLight,
         ),
       ),
-      
+
       // APP BAR - Dynamic Red (auf Cover-Ebene)
       appBarTheme: AppBarTheme(
         backgroundColor: RBSColors.dynamicRed,
@@ -231,7 +233,7 @@ class RBSTheme {
           color: RBSColors.textOnRed,
         ),
       ),
-      
+
       // CARD - Weiche Schatten, viel Weißraum
       cardTheme: CardThemeData(
         color: RBSColors.white,
@@ -245,7 +247,7 @@ class RBSTheme {
           vertical: RBSSpacing.sm,
         ),
       ),
-      
+
       // BUTTON - Dynamic Red, Roboto Condensed Bold
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -263,7 +265,7 @@ class RBSTheme {
           textStyle: RBSTypography.button,
         ),
       ),
-      
+
       // OUTLINED BUTTON - Für Tags und sekundäre Aktionen
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
@@ -279,7 +281,7 @@ class RBSTheme {
           textStyle: RBSTypography.tag,
         ),
       ),
-      
+
       // INPUT FIELDS - Klar, weiß, Outline bei Fokus
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -290,11 +292,15 @@ class RBSTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RBSBorderRadius.small),
-          borderSide: BorderSide(color: RBSColors.textOnLight.withValues(alpha: 0.2)),
+          borderSide: BorderSide(
+            color: RBSColors.textOnLight.withValues(alpha: 0.2),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RBSBorderRadius.small),
-          borderSide: BorderSide(color: RBSColors.textOnLight.withValues(alpha: 0.2)),
+          borderSide: BorderSide(
+            color: RBSColors.textOnLight.withValues(alpha: 0.2),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RBSBorderRadius.small),
@@ -311,17 +317,17 @@ class RBSTheme {
           color: RBSColors.textOnLight.withValues(alpha: 0.4),
         ),
       ),
-      
+
       // SCAFFOLD - Offwhite Hintergrund für Content-Ebene
       scaffoldBackgroundColor: RBSColors.offwhite,
-      
+
       // DIVIDER - Dezent
       dividerTheme: DividerThemeData(
         color: RBSColors.textOnLight.withValues(alpha: 0.1),
         thickness: 1,
         space: RBSSpacing.md,
       ),
-      
+
       // CHIP - Ähnlich wie Tag (Outline)
       chipTheme: ChipThemeData(
         backgroundColor: Colors.transparent,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
+import '../providers/app_providers.dart';
 
 /// Login Screen - RBS Cover-Ebene Design
-/// 
+///
 /// Gemäß RBS Styleguide 1.2:
 /// - Dynamic Red Hintergrund (verpflichtend)
 /// - Keyvisual (45° Pattern)
@@ -41,17 +43,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      // TODO: Implement Firebase Auth login
-      // final authService = ref.read(authServiceProvider);
-      // await authService.signInWithEmailPassword(
-      //   email: _emailController.text.trim(),
-      //   password: _passwordController.text,
-      // );
-      
-      await Future.delayed(const Duration(seconds: 1)); // Placeholder
-      
+      final authService = ref.read(authServiceProvider);
+      final input = _emailController.text.trim();
+
+      // Wenn Kürzel (2-4 Buchstaben ohne @), konvertiere zu Email
+      final email = input.contains('@')
+          ? input
+          : '${input.toLowerCase()}@notentool.de';
+
+      await authService.signInWithEmailPassword(
+        email: email,
+        password: _passwordController.text,
+      );
+
       if (mounted) {
-        // Navigation wird durch authStateProvider automatisch getriggert
+        context.go('/'); // Navigate to home after successful login
       }
     } catch (e) {
       setState(() {
@@ -64,6 +70,205 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         });
       }
     }
+  }
+
+  void _showPasswordResetDialog(BuildContext context, WidgetRef ref) {
+    final emailController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => RBSDialog(
+        title: 'Passwort zurücksetzen',
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Geben Sie Ihre E-Mail-Adresse oder Ihr Lehrerkürzel ein. Sie erhalten einen Link zum Zurücksetzen Ihres Passworts.',
+                style: RBSTypography.bodyMedium,
+              ),
+              const SizedBox(height: RBSSpacing.lg),
+              RBSInput(
+                label: 'E-Mail oder Lehrerkürzel',
+                hint: 'BU oder lehrer@berufsschule.de',
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: Icons.email_outlined,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Bitte E-Mail oder Kürzel eingeben';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Abbrechen'),
+          ),
+          RBSButton(
+            label: 'Link senden',
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                try {
+                  final authService = ref.read(authServiceProvider);
+                  final input = emailController.text.trim();
+
+                  // Kürzel-Konvertierung wie beim Login
+                  final email = input.contains('@')
+                      ? input
+                      : '${input.toLowerCase()}@notentool.de';
+
+                  await authService.sendPasswordResetEmail(email);
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          'Passwort-Reset-Link wurde gesendet. Bitte prüfen Sie Ihre E-Mails.',
+                        ),
+                        backgroundColor: RBSColors.courtGreen,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: RBSColors.dynamicRed,
+                      ),
+                    );
+                  }
+                }
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRegisterDialog() async {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    await RBSDialog.show(
+      context: context,
+      title: 'Konto erstellen',
+      content: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RBSInput(
+              label: 'E-Mail oder Lehrerkürzel',
+              hint: 'BU oder lehrer@berufsschule.de',
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              prefixIcon: Icons.person_outlined,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Bitte E-Mail oder Kürzel eingeben';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: RBSSpacing.md),
+            RBSInput(
+              label: 'Passwort',
+              hint: 'Mindestens 6 Zeichen',
+              controller: passwordController,
+              obscureText: true,
+              prefixIcon: Icons.lock_outlined,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Bitte Passwort eingeben';
+                }
+                if (value.length < 6) {
+                  return 'Passwort muss mindestens 6 Zeichen lang sein';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: RBSSpacing.md),
+            RBSInput(
+              label: 'Passwort bestätigen',
+              hint: 'Passwort wiederholen',
+              controller: confirmPasswordController,
+              obscureText: true,
+              prefixIcon: Icons.lock_outlined,
+              validator: (value) {
+                if (value != passwordController.text) {
+                  return 'Passwörter stimmen nicht überein';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Abbrechen'),
+        ),
+        RBSButton(
+          label: 'Registrieren',
+          onPressed: () async {
+            if (!formKey.currentState!.validate()) return;
+
+            try {
+              final authService = ref.read(authServiceProvider);
+              final input = emailController.text.trim();
+
+              // Wenn Kürzel (2-4 Buchstaben ohne @), konvertiere zu Email
+              final email = input.contains('@')
+                  ? input
+                  : '${input.toLowerCase()}@notentool.de';
+
+              await authService.registerWithEmailPassword(
+                email: email,
+                password: passwordController.text,
+              );
+
+              if (mounted) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Konto erfolgreich erstellt!'),
+                    backgroundColor: RBSColors.success,
+                  ),
+                );
+                context.go('/'); // Navigate to home
+              }
+            } catch (e) {
+              if (mounted) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString()),
+                    backgroundColor: RBSColors.error,
+                  ),
+                );
+              }
+            }
+          },
+        ),
+      ],
+    );
+
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
   }
 
   @override
@@ -80,7 +285,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             height: double.infinity,
             color: RBSColors.dynamicRed,
           ),
-          
+
           // KEYVISUAL: 45° Pattern (vereinfacht als Streifen)
           Positioned(
             right: -100,
@@ -103,21 +308,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          
+
           // TAG: #notentool (rechts oben)
           Positioned(
             top: RBSSpacing.lg,
             right: RBSSpacing.lg,
-            child: RBSTag(
-              label: '#notentool',
-              color: RBSColors.white,
-            ),
+            child: RBSTag(label: '#notentool', color: RBSColors.white),
           ),
-          
+
           // CONTENT: Login-Form
           Center(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(isMobile ? RBSSpacing.md : RBSSpacing.xxl),
+              padding: EdgeInsets.all(
+                isMobile ? RBSSpacing.md : RBSSpacing.xxl,
+              ),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480),
                 child: Column(
@@ -133,24 +337,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: RBSSpacing.sm),
-                    
+
                     // SUBHEADLINE (Roboto Condensed Bold, weiß)
                     Text(
                       'Bewertungen. Klassen. Übersicht.',
-                      style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                        color: RBSColors.textOnRed,
-                        fontWeight: FontWeight.w400,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium!
+                          .copyWith(
+                            color: RBSColors.textOnRed,
+                            fontWeight: FontWeight.w400,
+                          ),
                     ),
-                    
+
                     const SizedBox(height: RBSSpacing.xxl),
-                    
+
                     // LOGIN-CARD (weißer Bereich)
                     Container(
-                      padding: EdgeInsets.all(isMobile ? RBSSpacing.lg : RBSSpacing.xl),
+                      padding: EdgeInsets.all(
+                        isMobile ? RBSSpacing.lg : RBSSpacing.xl,
+                      ),
                       decoration: BoxDecoration(
                         color: RBSColors.white,
-                        borderRadius: BorderRadius.circular(RBSBorderRadius.medium),
+                        borderRadius: BorderRadius.circular(
+                          RBSBorderRadius.medium,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.2),
@@ -164,26 +373,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // E-Mail Input
+                            // E-Mail oder Lehrerkürzel Input
                             RBSInput(
-                              label: 'E-Mail',
-                              hint: 'lehrer@berufsschule.de',
+                              label: 'E-Mail oder Lehrerkürzel',
+                              hint: 'BU oder lehrer@berufsschule.de',
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
-                              prefixIcon: Icons.email_outlined,
+                              prefixIcon: Icons.person_outlined,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Bitte E-Mail eingeben';
+                                  return 'Bitte E-Mail oder Kürzel eingeben';
                                 }
-                                if (!value.contains('@')) {
-                                  return 'Ungültige E-Mail-Adresse';
-                                }
+                                // Kein Validierungs-Zwang - Backend prüft
                                 return null;
                               },
                             ),
-                            
+
                             const SizedBox(height: RBSSpacing.md),
-                            
+
                             // Passwort Input
                             RBSInput(
                               label: 'Passwort',
@@ -191,6 +398,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               controller: _passwordController,
                               obscureText: true,
                               prefixIcon: Icons.lock_outlined,
+                              onSubmitted: (_) => _handleLogin(),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Bitte Passwort eingeben';
@@ -201,14 +409,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 return null;
                               },
                             ),
-                            
+
                             if (_errorMessage != null) ...[
                               const SizedBox(height: RBSSpacing.md),
                               Container(
                                 padding: const EdgeInsets.all(RBSSpacing.sm),
                                 decoration: BoxDecoration(
                                   color: RBSColors.error.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+                                  borderRadius: BorderRadius.circular(
+                                    RBSBorderRadius.small,
+                                  ),
                                   border: Border.all(
                                     color: RBSColors.error,
                                     width: 1,
@@ -216,15 +426,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 child: Text(
                                   _errorMessage!,
-                                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                    color: RBSColors.error,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall!
+                                      .copyWith(color: RBSColors.error),
                                 ),
                               ),
                             ],
-                            
+
                             const SizedBox(height: RBSSpacing.lg),
-                            
+
                             // Login Button (RBS Dynamic Red)
                             SizedBox(
                               width: double.infinity,
@@ -235,31 +444,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 icon: Icons.login,
                               ),
                             ),
-                            
+
                             const SizedBox(height: RBSSpacing.md),
-                            
-                            // Passwort vergessen Link
-                            Center(
-                              child: TextButton(
-                                onPressed: () {
-                                  // TODO: Passwort-Reset-Dialog
-                                },
-                                child: Text(
-                                  'Passwort vergessen?',
-                                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                    color: RBSColors.dynamicRed,
-                                    decoration: TextDecoration.underline,
+
+                            // Registrierung & Passwort vergessen
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextButton(
+                                  onPressed: _showRegisterDialog,
+                                  child: Text(
+                                    'Konto erstellen',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall!
+                                        .copyWith(
+                                          color: RBSColors.dynamicRed,
+                                          decoration: TextDecoration.underline,
+                                        ),
                                   ),
                                 ),
-                              ),
+                                TextButton(
+                                  onPressed: () =>
+                                      _showPasswordResetDialog(context, ref),
+                                  child: Text(
+                                    'Passwort vergessen?',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall!
+                                        .copyWith(
+                                          color: RBSColors.dynamicRed,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: RBSSpacing.lg),
-                    
+
                     // Info-Text (weiß)
                     Center(
                       child: Text(

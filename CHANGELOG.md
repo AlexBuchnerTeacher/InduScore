@@ -7,8 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### In Progress
-- Domain-Modelle für Berufsschule (Issue #6)
+### Geplant für v1.0.0
+- Schülerverwaltung mit CSV-Import (#9)
+- Fächerverwaltung (#8)
+- Leistungsnachweise & Noteneingabe (#10)
+- Automatische Zeugnisnoten-Berechnung (#11)
+- Nachschreiber-Management (#12)
+- PDF-Export (#13)
+
+---
+
+## [0.2.0] - 2025-11-20
+
+### Added
+- **Domain-Modelle für Berufsschule** (#6)
+  - `Beruf` Enum: IE, EAT, EBT, EGS mit vollständigen Namen
+  - `Schuljahr` Klasse: Auto-Erkennung aktuelles Jahr (Aug-Dez)
+  - `Zeitgruppe` Enum: 1, 2, 3 für Nachschreiber-Management
+  - `Klasse` Model: Format "EAT321" (Beruf + Jahrgangsstufe + Zeitgruppe + Lfd.Nr.)
+  - `Leistungsnachweis` Model: Typen mit Gewichtung (Schulaufgabe 2.0x, etc.)
+  - `IHKNotenschluessel`: 92%+=1, 81%+=2, 67%+=3, 50%+=4, 30%+=5, <30%=6
+  - `Zeugnisnote` Berechnung: Gewichteter Durchschnitt + Rundung (2.5→2, 2.6→3)
+
+- **Klassenverwaltung** (#7)
+  - Full CRUD UI mit RBS-Design
+  - Listenansicht mit Beruf-farbcodierten Karten
+  - Filter nach Schuljahr und Beruf
+  - Vereinfachte Eingabe: "EAT321" wird automatisch geparst
+  - RegEx-Validierung für Klassenname-Format
+  - Löschen mit Bestätigung (inkl. Warnung vor Cascade-Delete)
+  - Empty-State mit "Erste Klasse erstellen" Button
+
+- **Navigation System** (#5 teilweise)
+  - RBS Drawer-Menü mit Dynamic Red Header
+  - Anzeige User-Email im Drawer
+  - Navigation: Dashboard, Klassen (aktiv), Schüler/Fächer/Noten (disabled)
+  - Logout-Funktion im Drawer
+  - Aktive Seite visuell hervorgehoben
+
+- **Firestore Services erweitert**
+  - Klassen CRUD: getKlassen(), createKlasse(), updateKlasse(), deleteKlasse()
+  - Leistungsnachweise CRUD: Full CRUD Operations
+  - Cascade Delete: Löschen einer Klasse entfernt alle Leistungsnachweise
+  - Filtered Queries: getKlassenBySchuljahrAndBeruf()
+
+- **Riverpod Providers erweitert**
+  - `klassenProvider`: Stream aller Klassen
+  - `currentSchuljahrProvider`: Auto-Erkennung aktuelles Schuljahr
+  - `leistungsnachweiseProvider`: Stream aller Leistungsnachweise
+  - Family Providers für filtered Data
+
+### Changed
+- HomeScreen: Logout in Drawer verschoben (vorher AppBar)
+- Login: Enter-Taste triggert Login-Funktion
+- Klassenname-Format: Von "EAT-11-1-2024/25" zu "EAT321"
+- Jahrgangsstufe: Von 10-13 zu 1-4 für bessere Lesbarkeit
+
+### Fixed
+- RenderFlex Overflow in HomeScreen (Card-Größe: 180→200px)
+- Deprecated `value` Parameter in DropdownButtonFormField → `initialValue`
+- Unused Imports bereinigt
 
 ---
 

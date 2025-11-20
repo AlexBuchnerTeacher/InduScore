@@ -1,11 +1,11 @@
 {
-    "name": "notentool_web",
-    "short_name": "notentool_web",
+    "name": "Notentool - Notenverwaltung",
+    "short_name": "Notentool",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FF5E35",
+    "theme_color": "#FF5E35",
+    "description": "Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

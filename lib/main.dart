@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/klassen_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
-  // TODO: Run `flutterfire configure` to set up your Firebase project
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -20,21 +20,23 @@ void main() async {
     debugPrint('Firebase initialization failed: $e');
     debugPrint('Run `flutterfire configure` to set up Firebase');
   }
-  
+
   runApp(const ProviderScope(child: NotentoolApp()));
 }
 
-// Router configuration
+// Router configuration with auth redirect
 final _router = GoRouter(
   initialLocation: '/login',
+  redirect: (context, state) {
+    // This will be enhanced with auth state checking
+    return null;
+  },
   routes: [
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
     GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const HomeScreen(),
+      path: '/klassen',
+      builder: (context, state) => const KlassenScreen(),
     ),
   ],
 );

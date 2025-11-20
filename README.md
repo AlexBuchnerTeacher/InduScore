@@ -1,29 +1,71 @@
 # Notentool Web
 
-Eine Flutter Web-Anwendung zur Verwaltung von Schülernoten (Notenverwaltung).
+**Notenverwaltung für Berufsschulen** - Referat für Bildung und Sport München
 
-## Tech Stack
+Eine moderne Flutter Web-Anwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-- **Framework**: Flutter 3.x (Web)
-- **Language**: Dart 3.x
-- **State Management**: Riverpod
-- **Backend**: Firebase (Firestore, Authentication)
-- **Routing**: go_router
-- **UI**: Material Design 3
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](CHANGELOG.md)
+[![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
+[![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
-## Projektstruktur
+## ✨ Features (v0.2.0)
+
+- ✅ **Klassenverwaltung**: Einfache Verwaltung von Klassen mit Format "EAT321"
+- ✅ **RBS Styleguide 1.2**: München RBS Design System (Dynamic Red, Roboto Condensed)
+- ✅ **Firebase Integration**: Firestore für Datenpersistenz, Authentication
+- ✅ **Responsive Design**: Optimiert für Desktop & Mobile
+- ✅ **IHK Bayern Notenschlüssel**: 92%+=1, 81%+=2, 67%+=3, 50%+=4, 30%+=5
+- ✅ **Berufsschul-spezifisch**: IE, EAT, EBT, EGS, Zeitgruppen, Schuljahre
+
+### 🚀 Kommende Features (v1.0.0)
+
+- 📋 Schülerverwaltung mit CSV-Import & Pseudonymisierung
+- 📚 Fächerverwaltung mit Beruf-Zuordnung
+- 📝 Leistungsnachweise & Noteneingabe
+- 🧮 Automatische Zeugnisnoten-Berechnung (gewichteter Schnitt)
+- 🔄 Nachschreiber-Management mit Zeitgruppen
+- 📄 PDF-Export für Notenlisten & Zeugnisse
+
+## 🛠 Tech Stack
+
+- **Framework**: Flutter 3.38.2 (Web)
+- **Language**: Dart 3.10.0
+- **State Management**: Riverpod 3.0.3
+- **Backend**: Firebase (Firestore, Auth)
+- **Routing**: go_router 17.0.0
+- **Design**: RBS Styleguide 1.2 (München)
+- **Fonts**: google_fonts 6.3.2 (Roboto Condensed, Open Sans)
+
+## 📁 Projektstruktur
 
 ```
 lib/
-├── main.dart                 # App-Einstiegspunkt mit Firebase-Init
-├── firebase_options.dart     # Firebase-Konfiguration
-├── models/                   # Datenmodelle (Grade, Student, Subject)
-├── providers/                # Riverpod State Provider
-├── screens/                  # UI-Bildschirme
-│   ├── home_screen.dart      # Hauptbildschirm
-│   └── login_screen.dart     # Login/Authentifizierung
-├── services/                 # Business-Logik (GradeService, AuthService)
-└── widgets/                  # Wiederverwendbare Komponenten
+├── main.dart                      # App-Einstiegspunkt
+├── firebase_options.dart          # Firebase-Konfiguration
+├── core/
+│   ├── theme/
+│   │   └── rbs_theme.dart         # RBS Design System
+│   └── widgets/
+│       └── rbs_components.dart    # RBS UI Components
+├── models/
+│   ├── beruf.dart                 # Beruf, Schuljahr, Zeitgruppe
+│   ├── klasse.dart                # Klassen-Model
+│   ├── leistungsnachweis.dart     # Leistungsnachweise & IHK-Notenschlüssel
+│   ├── zeugnisnote.dart           # Zeugnisnoten-Berechnung
+│   ├── student.dart               # Schüler-Model (v1.0.0)
+│   ├── subject.dart               # Fächer-Model (v1.0.0)
+│   └── grade.dart                 # Noten-Model (v1.0.0)
+├── providers/
+│   └── app_providers.dart         # Riverpod State Provider
+├── screens/
+│   ├── home_screen.dart           # Dashboard
+│   ├── login_screen.dart          # Login/Auth
+│   └── klassen_screen.dart        # Klassenverwaltung
+├── services/
+│   ├── auth_service.dart          # Authentifizierung
+│   └── firestore_service.dart     # Firestore CRUD
+└── widgets/
+    └── rbs_drawer.dart            # Navigation Drawer
 ```
 
 ## Setup
