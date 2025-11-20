@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'core/theme/rbs_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,23 +45,10 @@ class NotentoolApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Notentool',
+      title: 'Notentool Web',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.system,
+      theme: RBSTheme.lightTheme(), // RBS Styleguide Theme
+      themeMode: ThemeMode.light,
       routerConfig: _router,
     );
   }
