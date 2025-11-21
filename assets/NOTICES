@@ -20755,6 +20755,21 @@ json
 @copyright Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 @sa http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 --------------------------------------------------------------------------------
+induscore
+
+Copyright (c) 2025 Referat für Bildung und Sport München
+
+Alle Rechte vorbehalten.
+
+Diese Software ist privat und darf nicht ohne ausdrückliche Genehmigung
+des Referats für Bildung und Sport München vervielfältigt, verbreitet
+oder öffentlich zugänglich gemacht werden.
+
+This software is private and may not be reproduced, distributed, or made
+publicly available without the express permission of the Referat für
+Bildung und Sport München.
+
+--------------------------------------------------------------------------------
 inja
 
 
@@ -24275,21 +24290,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
---------------------------------------------------------------------------------
-notentool_web
-
-Copyright (c) 2025 Referat für Bildung und Sport München
-
-Alle Rechte vorbehalten.
-
-Diese Software ist privat und darf nicht ohne ausdrückliche Genehmigung
-des Referats für Bildung und Sport München vervielfältigt, verbreitet
-oder öffentlich zugänglich gemacht werden.
-
-This software is private and may not be reproduced, distributed, or made
-publicly available without the express permission of the Referat für
-Bildung und Sport München.
 
 --------------------------------------------------------------------------------
 objective_c

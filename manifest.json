@@ -1,11 +1,11 @@
 {
-    "name": "Notentool - Notenverwaltung",
-    "short_name": "Notentool",
+    "name": "InduScore - Notenverwaltung",
+    "short_name": "InduScore",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FF5E35",
     "theme_color": "#FF5E35",
-    "description": "Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München",
+    "description": "InduScore - Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
