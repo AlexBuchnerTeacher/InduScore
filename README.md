@@ -4,11 +4,13 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-[![Version](https://img.shields.io/badge/version-0.2.0%2B2-blue.svg)](CHANGELOG.md)
+![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
-## Features (v0.2.0)
+
+## Features (v0.3.0)
+- **Fächerverwaltung**: CRUD, Beruf-Zuordnung, Farbcodierung, Wochenstunden, Credits
 - **Klassenverwaltung**: Einfache Verwaltung von Klassen mit Format "EAT321"
 - **RBS Styleguide 1.2**: Dynamic Red, Roboto Condensed
 - **Firebase Integration**: Firestore & Authentication
@@ -16,13 +18,17 @@ Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, 
 - **IHK Bayern Notenschlüssel**: 92%+=1, 81%+=2, 67%+=3, 50%+=4, 30%+=5
 - **Berufsschul-spezifisch**: IE, EAT, EBT, EGS, Zeitgruppen, Schuljahre
 
+
 ### Kommende Features (v1.0.0)
 - Schülerverwaltung mit CSV-Import & Pseudonymisierung
-- Fächerverwaltung mit Beruf-Zuordnung
 - Leistungsnachweise & Noteneingabe
 - Automatische Zeugnisnoten-Berechnung (gewichteter Schnitt)
 - Nachschreiber-Management mit Zeitgruppen
 - PDF-Export für Notenlisten & Zeugnisse
+# Release v0.3.0
+
+Die Version v0.3.0 ist als Web-App über GitHub Pages verfügbar:
+https://alexbuchnerteacher.github.io/InduScore/
 
 ## Tech Stack
 - **Framework**: Flutter 3.38.2 (Web)

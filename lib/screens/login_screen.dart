@@ -441,31 +441,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextButton(
-                                  onPressed: _showRegisterDialog,
-                                  child: Text(
-                                    'Konto erstellen',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall!
-                                        .copyWith(
-                                          color: RBSColors.dynamicRed,
-                                          decoration: TextDecoration.underline,
-                                        ),
+                                Expanded(
+                                  child: TextButton(
+                                    onPressed: _showRegisterDialog,
+                                    child: Text(
+                                      'Konto erstellen',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                            color: RBSColors.dynamicRed,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                    ),
                                   ),
                                 ),
-                                TextButton(
-                                  onPressed: () =>
-                                      _showPasswordResetDialog(context, ref),
-                                  child: Text(
-                                    'Passwort vergessen?',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall!
-                                        .copyWith(
-                                          color: RBSColors.dynamicRed,
-                                          decoration: TextDecoration.underline,
-                                        ),
+                                Expanded(
+                                  child: TextButton(
+                                    onPressed: () =>
+                                        _showPasswordResetDialog(context, ref),
+                                    child: Text(
+                                      'Passwort vergessen?',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                            color: RBSColors.dynamicRed,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                    ),
                                   ),
                                 ),
                               ],

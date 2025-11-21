@@ -13,8 +13,16 @@
 
 1. **Repository klonen**
 ```bash
-git clone https://github.com/AlexBuchnerTeacher/notentool_web.git
-cd notentool_web
+git clone https://github.com/AlexBuchnerTeacher/InduScore.git
+cd InduScore
+# 🌐 Web Deployment (GitHub Pages)
+
+Die Web-App ist direkt über GitHub Pages verfügbar:
+https://alexbuchnerteacher.github.io/InduScore/
+
+## Release v0.3.0
+
+Features: Fächerverwaltung, Firestore-Integration, RBS Styleguide, Bugfixes
 ```
 
 2. **Dependencies installieren**
