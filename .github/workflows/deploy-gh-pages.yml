@@ -48,7 +48,8 @@ jobs:
       - name: Build Web
         run: |
           flutter config --enable-web
-          flutter build web --release
+          flutter build web --release --base-href /InduScore/ --source-maps
+          cp build/web/index.html build/web/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
