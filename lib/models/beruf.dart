@@ -23,11 +23,22 @@ class Schuljahr {
   final int startYear;
   final int endYear;
 
-  Schuljahr(this.startYear, this.endYear);
+  const Schuljahr(this.startYear, this.endYear);
 
-  Schuljahr.fromString(String schuljahr)
-    : startYear = int.parse(schuljahr.split('/')[0]),
-      endYear = int.parse(schuljahr.split('/')[1]);
+  factory Schuljahr.fromString(String schuljahr) {
+    final value = schuljahr.trim();
+    final match = RegExp(r'^(\d{4})[/-]?(\d{2,4})$').firstMatch(value);
+    if (match == null) {
+      throw const FormatException('Schuljahr muss z.B. 2024/25 sein');
+    }
+    final start = int.parse(match.group(1)!);
+    final endRaw = match.group(2)!;
+    final end = endRaw.length == 2
+        ? int.parse('${start.toString().substring(0, 2)}$endRaw')
+        : int.parse(endRaw);
+
+    return Schuljahr(start, end);
+  }
 
   /// Erstellt Schuljahr aus aktuellem Datum
   /// (Aug-Dez = aktuelles Jahr, Jan-Jul = Vorjahr)

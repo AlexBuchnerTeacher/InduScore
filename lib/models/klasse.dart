@@ -34,13 +34,20 @@ class Klasse {
   // Firestore Serialization
   factory Klasse.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    Schuljahr parsedSchuljahr;
+    try {
+      parsedSchuljahr = Schuljahr.fromString(data['schuljahr'] as String);
+    } catch (_) {
+      parsedSchuljahr = Schuljahr.current();
+    }
+
     return Klasse(
       id: doc.id,
       beruf: Beruf.fromCode(data['beruf'] as String),
       jahrgangsstufe: data['jahrgangsstufe'] as int,
       zeitgruppe: Zeitgruppe.fromNummer(data['zeitgruppe'] as int),
       laufendeNummer: data['laufendeNummer'] as int,
-      schuljahr: Schuljahr.fromString(data['schuljahr'] as String),
+      schuljahr: parsedSchuljahr,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );

@@ -169,8 +169,6 @@ class FirestoreService {
   Stream<List<Klasse>> getKlassen() {
     return _klassen
         .orderBy('schuljahr', descending: true)
-        .orderBy('beruf')
-        .orderBy('jahrgangsstufe')
         .snapshots()
         .map(
           (snapshot) =>

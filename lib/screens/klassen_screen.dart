@@ -278,54 +278,96 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
           RBSButton(
             label: isEdit ? 'Speichern' : 'Erstellen',
             onPressed: () async {
-              if (formKey.currentState!.validate()) {
-                try {
-                  // Parse Klassenname (z.B. "EAT321")
-                  final name = klassenNameController.text.trim();
-                  final berufMatch = RegExp(
-                    r'^(IE|EAT|EBT|EGS)',
-                  ).firstMatch(name)!;
-                  final berufCode = berufMatch.group(0)!;
-                  final digits = name.substring(berufCode.length);
+              if (!formKey.currentState!.validate()) return;
 
-                  final firestoreService = ref.read(firestoreServiceProvider);
-                  final newKlasse = Klasse(
-                    id: klasse?.id ?? '',
-                    beruf: Beruf.fromCode(berufCode),
-                    jahrgangsstufe: int.parse(digits[0]),
-                    zeitgruppe: Zeitgruppe.fromNummer(int.parse(digits[1])),
-                    laufendeNummer: int.parse(digits[2]),
-                    schuljahr: Schuljahr.fromString(schuljahrController.text),
-                    createdAt: klasse?.createdAt ?? DateTime.now(),
-                    updatedAt: DateTime.now(),
+              final rawName = klassenNameController.text.trim();
+              final berufMatch = RegExp(r'^(IE|EAT|EBT|EGS)')
+                  .firstMatch(rawName);
+              if (berufMatch == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Klassenname ungültig')),
+                );
+                return;
+              }
+              final berufCode = berufMatch.group(0)!;
+              final digits = rawName.substring(berufCode.length);
+
+              // Sicheres Parsen der Bestandteile, sonst Abbruch mit Meldung
+              if (digits.length != 3 || int.tryParse(digits) == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Format: Beruf + 3 Ziffern, z.B. EAT321'),
+                  ),
+                );
+                return;
+              }
+              final jahrgangsstufe = int.parse(digits[0]);
+              final zeitgruppeNummer = int.parse(digits[1]);
+              final laufendeNummer = int.parse(digits[2]);
+
+              Zeitgruppe? zeitgruppe;
+              try {
+                zeitgruppe = Zeitgruppe.fromNummer(zeitgruppeNummer);
+              } catch (_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Zeitgruppe muss 1-3 sein'),
+                  ),
+                );
+                return;
+              }
+
+              final schuljahrText = schuljahrController.text.trim();
+              Schuljahr schuljahr;
+              try {
+                schuljahr = Schuljahr.fromString(schuljahrText);
+              } on FormatException {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Schuljahr-Format: YYYY/YY (z.B. 2024/25)'),
+                  ),
+                );
+                return;
+              }
+
+              try {
+                final firestoreService = ref.read(firestoreServiceProvider);
+                final newKlasse = Klasse(
+                  id: klasse?.id ?? '',
+                  beruf: Beruf.fromCode(berufCode),
+                  jahrgangsstufe: jahrgangsstufe,
+                  zeitgruppe: zeitgruppe,
+                  laufendeNummer: laufendeNummer,
+                  schuljahr: schuljahr,
+                  createdAt: klasse?.createdAt ?? DateTime.now(),
+                  updatedAt: DateTime.now(),
+                );
+
+                if (isEdit) {
+                  await firestoreService.updateKlasse(newKlasse);
+                } else {
+                  await firestoreService.createKlasse(newKlasse);
+                }
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isEdit ? 'Klasse aktualisiert' : 'Klasse erstellt',
+                      ),
+                      backgroundColor: RBSColors.courtGreen,
+                    ),
                   );
-
-                  if (isEdit) {
-                    await firestoreService.updateKlasse(newKlasse);
-                  } else {
-                    await firestoreService.createKlasse(newKlasse);
-                  }
-
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isEdit ? 'Klasse aktualisiert' : 'Klasse erstellt',
-                        ),
-                        backgroundColor: RBSColors.courtGreen,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Fehler: $e'),
-                        backgroundColor: RBSColors.dynamicRed,
-                      ),
-                    );
-                  }
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Fehler: $e'),
+                      backgroundColor: RBSColors.dynamicRed,
+                    ),
+                  );
                 }
               }
             },
