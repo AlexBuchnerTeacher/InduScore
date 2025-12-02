@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +11,31 @@ import 'screens/login_screen.dart';
 import 'screens/klassen_screen.dart';
 import 'screens/faecher_screen.dart';
 import 'core/theme/rbs_theme.dart';
+
+/// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
+/// This replaces the deprecated GoRouterRefreshStream from go_router < 10.0.
+/// 
+/// Usage:
+/// ```dart
+/// GoRouter(
+///   refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
+///   // ...
+/// )
+/// ```
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,8 +56,15 @@ void main() async {
 // Router configuration with auth redirect
 final _router = GoRouter(
   initialLocation: '/login',
+  refreshListenable: GoRouterRefreshStream(
+    FirebaseAuth.instance.authStateChanges(),
+  ),
   redirect: (context, state) {
-    // This will be enhanced with auth state checking
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
+    final loggingIn = state.fullPath == '/login';
+
+    if (!isLoggedIn && !loggingIn) return '/login';
+    if (isLoggedIn && loggingIn) return '/';
     return null;
   },
   routes: [
