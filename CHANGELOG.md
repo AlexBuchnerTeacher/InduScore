@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.0] - 2025-12-02
+
+### Added
+- **Schülerverwaltung** (#9)
+  - Neuer SchuelerScreen mit CRUD-Funktionalität
+  - Filter nach Klasse
+  - DSGVO-konforme Pseudonymisierung (nur Pseudonyme in Firestore)
+  - Student Model mit `pseudonym`, `klasseId`
+  - `studentsByKlasseProvider` für gefilterte Abfragen
+  - Navigation im Drawer aktiviert
+
+### Fixed
+- **Design-Angleichung** (#25)
+  - Fächer-Screen Design wie Klassen-Screen
+  - Einheitliche AppBar, Filter-Chips, Add-Buttons
+- **CI-Pipeline**
+  - Veralteten Version-Check entfernt
+  - Single Source of Truth: nur pubspec.yaml
+- **Android Chrome Favicon**
+  - Verbesserte Icon-Unterstützung
+
+---
+
 ## [0.3.1] - 2025-12-02
 
 ### Fixed
