@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased] - PR #32
+
+### Added
+- **Leistungsnachweise + schnelle Noteneingabe** (#10)
+  - LeistungsnachweiseScreen: CRUD für Schulaufgaben, Stegreifaufgaben, mündliche Noten
+  - NotenEingabeScreen: Excel-Style Notenliste für alle Schüler einer Klasse
+  - IHK Bayern Notenschlüssel (92-100%=1, 81-91%=2, 67-80%=3, 50-66%=4, 30-49%=5, <30%=6)
+  - Automatische Notenberechnung aus Punkten
+  - Kommentar-Feld zu jeder Note (Tooltip)
+  - Statistiken: Durchschnitt und Notenverteilung
+  - Grade Model refactored: note, punkte, kommentar, leistungsnachweisId
+  - Neue Provider: gradesByLeistungsnachweisProvider
+  - Navigation im Drawer unter "Leistungsnachweise"
+
+### Fixed
+- **Firestore Index-Fehler**
+  - Queries mit where+orderBy auf clientseitige Sortierung umgestellt
+  - Betrifft: getStudentsByKlasse, getGradesByStudent, getLeistungsnachweiseByKlasse/Subject
+
+---
+
 ## [0.4.0] - 2025-12-02
 
 ### Added

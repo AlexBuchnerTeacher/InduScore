@@ -9,6 +9,13 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  errors:
+    # Treat deprecation warnings as info, not errors
+    deprecated_member_use: info
+    # Allow unused named parameters in error handlers
+    unnecessary_underscores: info
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

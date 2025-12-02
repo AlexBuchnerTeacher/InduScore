@@ -1,34 +1,28 @@
 ﻿import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum GradeType {
-  test, // Klassenarbeit
-  oral, // MÃ¼ndlich
-  homework, // Hausaufgabe
-  presentation, // Referat
-  other, // Sonstiges
-}
-
+/// Note zu einem Leistungsnachweis
+/// 
+/// Eine Note gehört immer zu einem Schüler und einem Leistungsnachweis.
+/// Die Gewichtung wird vom Leistungsnachweis-Typ abgeleitet.
 class Grade {
   final String id;
   final String studentId;
-  final String subjectId;
-  final double value; // 1.0 - 6.0 in Germany
-  final GradeType type;
-  final String? description;
-  final double weight; // Gewichtung (z.B. 2.0 fÃ¼r Klassenarbeiten)
-  final DateTime date;
+  final String leistungsnachweisId; // Zuordnung zum Leistungsnachweis
+  final double? punkte; // Erreichte Punkte (optional, für IHK-Schlüssel)
+  final int note; // 1-6 (kann direkt eingegeben oder aus Punkten berechnet werden)
+  final String? kommentar; // Tooltip-Kommentar für die Note
   final DateTime createdAt;
+  final DateTime updatedAt;
 
   Grade({
     required this.id,
     required this.studentId,
-    required this.subjectId,
-    required this.value,
-    required this.type,
-    this.description,
-    this.weight = 1.0,
-    required this.date,
+    required this.leistungsnachweisId,
+    this.punkte,
+    required this.note,
+    this.kommentar,
     required this.createdAt,
+    required this.updatedAt,
   });
 
   factory Grade.fromFirestore(DocumentSnapshot doc) {
@@ -36,53 +30,49 @@ class Grade {
     return Grade(
       id: doc.id,
       studentId: data['studentId'] as String,
-      subjectId: data['subjectId'] as String,
-      value: (data['value'] as num).toDouble(),
-      type: GradeType.values.firstWhere(
-        (e) => e.name == data['type'],
-        orElse: () => GradeType.other,
-      ),
-      description: data['description'] as String?,
-      weight: (data['weight'] as num?)?.toDouble() ?? 1.0,
-      date: (data['date'] as Timestamp).toDate(),
+      leistungsnachweisId: data['leistungsnachweisId'] as String,
+      punkte: (data['punkte'] as num?)?.toDouble(),
+      note: data['note'] as int,
+      kommentar: data['kommentar'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
       'studentId': studentId,
-      'subjectId': subjectId,
-      'value': value,
-      'type': type.name,
-      'description': description,
-      'weight': weight,
-      'date': Timestamp.fromDate(date),
+      'leistungsnachweisId': leistungsnachweisId,
+      'punkte': punkte,
+      'note': note,
+      'kommentar': kommentar,
       'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 
   Grade copyWith({
     String? id,
     String? studentId,
-    String? subjectId,
-    double? value,
-    GradeType? type,
-    String? description,
-    double? weight,
-    DateTime? date,
+    String? leistungsnachweisId,
+    double? punkte,
+    int? note,
+    String? kommentar,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Grade(
       id: id ?? this.id,
       studentId: studentId ?? this.studentId,
-      subjectId: subjectId ?? this.subjectId,
-      value: value ?? this.value,
-      type: type ?? this.type,
-      description: description ?? this.description,
-      weight: weight ?? this.weight,
-      date: date ?? this.date,
+      leistungsnachweisId: leistungsnachweisId ?? this.leistungsnachweisId,
+      punkte: punkte ?? this.punkte,
+      note: note ?? this.note,
+      kommentar: kommentar ?? this.kommentar,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  /// Prüft, ob ein Kommentar vorhanden ist
+  bool get hasKommentar => kommentar != null && kommentar!.isNotEmpty;
 }

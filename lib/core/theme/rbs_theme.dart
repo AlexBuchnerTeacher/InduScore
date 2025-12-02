@@ -124,6 +124,16 @@ class RBSTypography {
     height: 1.0,
     letterSpacing: 0,
   );
+
+  // LABEL TEXT - Open Sans, kleiner, für Formulare
+  static const TextStyle label = TextStyle(
+    fontFamily: bodyFont,
+    fontSize: 12,
+    fontWeight: bold,
+    height: 1.4,
+    letterSpacing: 0,
+    color: RBSColors.textOnLight,
+  );
 }
 
 class RBSSpacing {

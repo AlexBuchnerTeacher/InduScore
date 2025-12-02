@@ -1,1 +1,17 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"notentool","configurations":{"web":"1:76982828392:web:1e3817e01beb22777e2add"}}}}}}
+{
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "notentool",
+          "configurations": {
+            "web": "1:76982828392:web:1e3817e01beb22777e2add"
+          }
+        }
+      }
+    }
+  }
+}

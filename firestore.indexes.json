@@ -1,0 +1,29 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "students",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "klasseId", "order": "ASCENDING" },
+        { "fieldPath": "pseudonym", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "grades",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "studentId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "leistungsnachweise",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "klasseId", "order": "ASCENDING" },
+        { "fieldPath": "datum", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

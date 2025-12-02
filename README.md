@@ -4,12 +4,15 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
 
-## Features (v0.3.0)
+## Features (v0.4.0)
+- **Schülerverwaltung**: DSGVO-konforme Pseudonymisierung, Filter nach Klasse
+- **Leistungsnachweise** *(PR #32)*: Schulaufgaben, Stegreifaufgaben, mündliche Noten
+- **Excel-Style Noteneingabe** *(PR #32)*: Schnelle Eingabe für ganze Klasse
 - **Fächerverwaltung**: CRUD, Beruf-Zuordnung, Farbcodierung, Wochenstunden, Credits
 - **Klassenverwaltung**: Einfache Verwaltung von Klassen mit Format "EAT321"
 - **RBS Styleguide 1.2**: Dynamic Red, Roboto Condensed
@@ -20,8 +23,6 @@ Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, 
 
 
 ### Kommende Features (v1.0.0)
-- Schülerverwaltung mit CSV-Import & Pseudonymisierung
-- Leistungsnachweise & Noteneingabe
 - Automatische Zeugnisnoten-Berechnung (gewichteter Schnitt)
 - Nachschreiber-Management mit Zeitgruppen
 - PDF-Export für Notenlisten & Zeugnisse
@@ -52,15 +53,18 @@ https://alexbuchnerteacher.github.io/InduScore/
 │   │   ├── klasse.dart                # Klassen-Model
 │   │   ├── leistungsnachweis.dart     # Leistungsnachweise & IHK-Notenschlüssel
 │   │   ├── zeugnisnote.dart           # Zeugnisnoten-Berechnung
-│   │   ├── student.dart               # Schüler-Model
+│   │   ├── student.dart               # Schüler-Model (DSGVO-Pseudonymisierung)
 │   │   ├── subject.dart               # Fächer-Model
-│   │   └── grade.dart                 # Noten-Model
+│   │   └── grade.dart                 # Noten-Model (Note, Punkte, Kommentar)
 │   ├── providers/app_providers.dart   # Riverpod State Provider
 │   ├── screens/
 │   │   ├── home_screen.dart           # Dashboard
 │   │   ├── login_screen.dart          # Login/Auth
 │   │   ├── klassen_screen.dart        # Klassenverwaltung
-│   │   └── faecher_screen.dart        # Fächerverwaltung
+│   │   ├── faecher_screen.dart        # Fächerverwaltung
+│   │   ├── schueler_screen.dart       # Schülerverwaltung
+│   │   ├── leistungsnachweise_screen.dart  # Leistungsnachweise
+│   │   └── noten_eingabe_screen.dart  # Excel-Style Noteneingabe
 │   ├── services/
 │   │   ├── auth_service.dart          # Authentifizierung
 │   │   └── firestore_service.dart     # Firestore CRUD
