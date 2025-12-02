@@ -64,7 +64,6 @@ class RBSDrawer extends ConsumerWidget {
                   icon: Icons.person_outline,
                   title: 'Schüler',
                   route: '/schueler',
-                  disabled: true,
                 ),
                 _buildDrawerItem(
                   context,

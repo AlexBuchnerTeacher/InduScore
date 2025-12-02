@@ -62,6 +62,15 @@ final studentProvider = FutureProvider.family<Student, String>((ref, id) async {
   return firestoreService.getStudent(id);
 });
 
+// Students by Klasse
+final studentsByKlasseProvider = StreamProvider.family<List<Student>, String>((
+  ref,
+  klasseId,
+) {
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  return firestoreService.getStudentsByKlasse(klasseId);
+});
+
 // ============ SUBJECT PROVIDERS ============
 
 // All subjects stream

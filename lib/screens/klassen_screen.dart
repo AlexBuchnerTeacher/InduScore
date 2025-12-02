@@ -597,12 +597,15 @@ Future<void> _importNow() async {
       );
 
       final students = preview.students
+          .asMap()
+          .entries
           .map(
-            (s) => Student(
+            (entry) => Student(
               id: '',
-              firstName: s.firstName,
-              lastName: s.lastName,
-              className: klasse.name,
+              pseudonym: Student.generatePseudonym(entry.key),
+              firstName: entry.value.firstName,
+              lastName: entry.value.lastName,
+              klasseId: '', // Will be set by importKlasseMitSchuelern
               createdAt: DateTime.now(),
             ),
           )
