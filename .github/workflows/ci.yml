@@ -38,17 +38,5 @@ jobs:
       - name: Test
         run: flutter test --coverage
 
-      - name: Verify version consistency
-        run: |
-          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
-          FILE_VERSION=$(cat VERSION | tr -d '\r\n')
-          DART_VERSION=$(grep 'appVersion' lib/version.dart | sed "s/[^0-9+.]//g")
-
-          echo "pubspec version: ${PUBSPEC_VERSION}"
-          echo "VERSION file:    ${FILE_VERSION}"
-          echo "lib/version.dart:${DART_VERSION}"
-
-          if [ "$PUBSPEC_VERSION" != "$FILE_VERSION" ] || [ "$PUBSPEC_VERSION" != "$DART_VERSION" ]; then
-            echo "Version mismatch detected. Keep pubspec.yaml, VERSION, and lib/version.dart in sync."
-            exit 1
-          fi
+      # Version check removed - now using package_info_plus
+      # which reads version directly from pubspec.yaml (single source of truth)
