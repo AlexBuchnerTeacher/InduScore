@@ -56,6 +56,26 @@ class FirestoreService {
     await batch.commit();
   }
 
+  /// Schüler nach Klasse abrufen
+  Stream<List<Student>> getStudentsByKlasse(String klasseId) {
+    return _students
+        .where('klasseId', isEqualTo: klasseId)
+        .orderBy('pseudonym')
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Student.fromFirestore(doc)).toList(),
+        );
+  }
+
+  /// Nächstes verfügbares Pseudonym für eine Klasse
+  Future<String> getNextPseudonym(String klasseId) async {
+    final snapshot = await _students
+        .where('klasseId', isEqualTo: klasseId)
+        .get();
+    return Student.generatePseudonym(snapshot.docs.length);
+  }
+
   // ============ SUBJECTS ============
 
   Stream<List<Subject>> getSubjects() {
@@ -304,7 +324,7 @@ class FirestoreService {
         student
             .copyWith(
               id: studentId,
-              className: klasse.name,
+              klasseId: klasseId,
             )
             .toFirestore(),
       );

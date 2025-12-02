@@ -10,6 +10,7 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/klassen_screen.dart';
 import 'screens/faecher_screen.dart';
+import 'screens/schueler_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -77,6 +78,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/faecher',
       builder: (context, state) => const FaecherScreen(),
+    ),
+    GoRoute(
+      path: '/schueler',
+      builder: (context, state) => const SchuelerScreen(),
     ),
   ],
 );
