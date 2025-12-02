@@ -93,6 +93,13 @@ final gradesProvider = StreamProvider<List<Grade>>((ref) {
   return firestoreService.getGrades();
 });
 
+// Grades by Leistungsnachweis
+final gradesByLeistungsnachweisProvider =
+    StreamProvider.family<List<Grade>, String>((ref, leistungsnachweisId) {
+      final firestoreService = ref.watch(firestoreServiceProvider);
+      return firestoreService.getGradesByLeistungsnachweis(leistungsnachweisId);
+    });
+
 // Grades by student
 final gradesByStudentProvider = StreamProvider.family<List<Grade>, String>((
   ref,
@@ -100,46 +107,6 @@ final gradesByStudentProvider = StreamProvider.family<List<Grade>, String>((
 ) {
   final firestoreService = ref.watch(firestoreServiceProvider);
   return firestoreService.getGradesByStudent(studentId);
-});
-
-// Grades by subject
-final gradesBySubjectProvider = StreamProvider.family<List<Grade>, String>((
-  ref,
-  subjectId,
-) {
-  final firestoreService = ref.watch(firestoreServiceProvider);
-  return firestoreService.getGradesBySubject(subjectId);
-});
-
-// Grades by student and subject
-final gradesByStudentAndSubjectProvider =
-    StreamProvider.family<List<Grade>, ({String studentId, String subjectId})>((
-      ref,
-      params,
-    ) {
-      final firestoreService = ref.watch(firestoreServiceProvider);
-      return firestoreService.getGradesByStudentAndSubject(
-        params.studentId,
-        params.subjectId,
-      );
-    });
-
-// ============ STATISTICS PROVIDERS ============
-
-// Average by subject for a student
-final averagesBySubjectProvider =
-    FutureProvider.family<Map<String, double>, String>((ref, studentId) async {
-      final firestoreService = ref.read(firestoreServiceProvider);
-      return firestoreService.getAveragesBySubject(studentId);
-    });
-
-// Calculate average for a list of grades
-final gradeAverageProvider = FutureProvider.family<double, List<Grade>>((
-  ref,
-  grades,
-) async {
-  final firestoreService = ref.read(firestoreServiceProvider);
-  return firestoreService.calculateAverage(grades);
 });
 
 // ============ KLASSEN PROVIDERS ============

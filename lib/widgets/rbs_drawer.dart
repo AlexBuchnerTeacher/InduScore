@@ -74,9 +74,8 @@ class RBSDrawer extends ConsumerWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.assignment_outlined,
-                  title: 'Noten',
-                  route: '/noten',
-                  disabled: true,
+                  title: 'Leistungsnachweise',
+                  route: '/leistungsnachweise',
                 ),
                 const Divider(),
                 _buildDrawerItem(

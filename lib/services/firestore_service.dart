@@ -120,7 +120,7 @@ class FirestoreService {
 
   Stream<List<Grade>> getGrades() {
     return _grades
-        .orderBy('date', descending: true)
+        .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
           (snapshot) =>
@@ -128,36 +128,22 @@ class FirestoreService {
         );
   }
 
+  /// Noten für einen Leistungsnachweis abrufen
+  Stream<List<Grade>> getGradesByLeistungsnachweis(String leistungsnachweisId) {
+    return _grades
+        .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Grade.fromFirestore(doc)).toList(),
+        );
+  }
+
+  /// Alle Noten eines Schülers abrufen
   Stream<List<Grade>> getGradesByStudent(String studentId) {
     return _grades
         .where('studentId', isEqualTo: studentId)
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Grade.fromFirestore(doc)).toList(),
-        );
-  }
-
-  Stream<List<Grade>> getGradesBySubject(String subjectId) {
-    return _grades
-        .where('subjectId', isEqualTo: subjectId)
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Grade.fromFirestore(doc)).toList(),
-        );
-  }
-
-  Stream<List<Grade>> getGradesByStudentAndSubject(
-    String studentId,
-    String subjectId,
-  ) {
-    return _grades
-        .where('studentId', isEqualTo: studentId)
-        .where('subjectId', isEqualTo: subjectId)
-        .orderBy('date', descending: true)
+        .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
           (snapshot) =>
@@ -176,12 +162,42 @@ class FirestoreService {
     return docRef.id;
   }
 
+  /// Mehrere Noten auf einmal speichern (Batch-Operation)
+  Future<void> saveGrades(List<Grade> grades) async {
+    if (grades.isEmpty) return;
+    
+    final batch = _db.batch();
+    for (final grade in grades) {
+      if (grade.id.isEmpty) {
+        // Neue Note
+        final docRef = _grades.doc();
+        batch.set(docRef, grade.copyWith(id: docRef.id).toFirestore());
+      } else {
+        // Bestehende Note aktualisieren
+        batch.update(_grades.doc(grade.id), grade.toFirestore());
+      }
+    }
+    await batch.commit();
+  }
+
   Future<void> updateGrade(Grade grade) async {
     await _grades.doc(grade.id).update(grade.toFirestore());
   }
 
   Future<void> deleteGrade(String id) async {
     await _grades.doc(id).delete();
+  }
+
+  /// Alle Noten eines Leistungsnachweises löschen
+  Future<void> deleteGradesByLeistungsnachweis(String leistungsnachweisId) async {
+    final snapshot = await _grades
+        .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
+        .get();
+    final batch = _db.batch();
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
   }
 
   // ============ KLASSEN ============
@@ -297,6 +313,8 @@ class FirestoreService {
   }
 
   Future<void> deleteLeistungsnachweis(String id) async {
+    // Auch alle zugehörigen Noten löschen
+    await deleteGradesByLeistungsnachweis(id);
     await _leistungsnachweise.doc(id).delete();
   }
 
@@ -336,36 +354,26 @@ class FirestoreService {
 
   // ============ STATISTICS ============
 
-  Future<double> calculateAverage(List<Grade> grades) async {
+  /// Berechnet den gewichteten Notendurchschnitt
+  /// Die Gewichtung kommt vom Leistungsnachweis-Typ (muss separat übergeben werden)
+  double calculateSimpleAverage(List<Grade> grades) {
     if (grades.isEmpty) return 0.0;
+    final sum = grades.fold<int>(0, (sum, g) => sum + g.note);
+    return sum / grades.length;
+  }
+
+  /// Berechnet den gewichteten Durchschnitt für Noten mit Gewichtungen
+  double calculateWeightedAverage(List<({Grade grade, double gewichtung})> gradesWithWeight) {
+    if (gradesWithWeight.isEmpty) return 0.0;
 
     double totalWeighted = 0.0;
     double totalWeight = 0.0;
 
-    for (final grade in grades) {
-      totalWeighted += grade.value * grade.weight;
-      totalWeight += grade.weight;
+    for (final item in gradesWithWeight) {
+      totalWeighted += item.grade.note * item.gewichtung;
+      totalWeight += item.gewichtung;
     }
 
     return totalWeight > 0 ? totalWeighted / totalWeight : 0.0;
-  }
-
-  Future<Map<String, double>> getAveragesBySubject(String studentId) async {
-    final subjects = await _subjects.get();
-    final Map<String, double> averages = {};
-
-    for (final subjectDoc in subjects.docs) {
-      final gradesSnapshot = await _grades
-          .where('studentId', isEqualTo: studentId)
-          .where('subjectId', isEqualTo: subjectDoc.id)
-          .get();
-
-      final grades = gradesSnapshot.docs
-          .map((doc) => Grade.fromFirestore(doc))
-          .toList();
-      averages[subjectDoc.id] = await calculateAverage(grades);
-    }
-
-    return averages;
   }
 }
