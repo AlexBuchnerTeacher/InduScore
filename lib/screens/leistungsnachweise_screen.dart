@@ -356,7 +356,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.xs),
                     klassenAsync.when(
                       data: (klassen) => DropdownButtonFormField<String>(
-                        value: selectedKlasseId,
+                        initialValue: selectedKlasseId,
                         decoration: const InputDecoration(
                           hintText: 'Klasse wählen',
                           border: OutlineInputBorder(),
@@ -376,7 +376,7 @@ class _LeistungsnachweiseScreenState
                             value == null ? 'Bitte Klasse wählen' : null,
                       ),
                       loading: () => const CircularProgressIndicator(),
-                      error: (_, _s) => const Text('Fehler beim Laden'),
+                      error: (error, stack) => const Text('Fehler beim Laden'),
                     ),
                     const SizedBox(height: RBSSpacing.md),
 
@@ -385,7 +385,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.xs),
                     subjectsAsync.when(
                       data: (subjects) => DropdownButtonFormField<String>(
-                        value: selectedSubjectId,
+                        initialValue: selectedSubjectId,
                         decoration: const InputDecoration(
                           hintText: 'Fach wählen',
                           border: OutlineInputBorder(),
@@ -406,7 +406,7 @@ class _LeistungsnachweiseScreenState
                             value == null ? 'Bitte Fach wählen' : null,
                       ),
                       loading: () => const CircularProgressIndicator(),
-                      error: (_, _s) => const Text('Fehler beim Laden'),
+                      error: (error, stack) => const Text('Fehler beim Laden'),
                     ),
                     const SizedBox(height: RBSSpacing.md),
 
@@ -414,7 +414,7 @@ class _LeistungsnachweiseScreenState
                     Text('Typ *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     DropdownButtonFormField<LeistungsnachweisTyp>(
-                      value: selectedTyp,
+                      initialValue: selectedTyp,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
