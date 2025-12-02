@@ -4,15 +4,15 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
 
-## Features (v0.4.0)
+## Features (v0.5.0)
+- **Leistungsnachweise**: Schulaufgaben, Stegreifaufgaben, mündliche Noten verwalten
+- **Excel-Style Noteneingabe**: Schnelle Eingabe für ganze Klasse mit Statistiken
 - **Schülerverwaltung**: DSGVO-konforme Pseudonymisierung, Filter nach Klasse
-- **Leistungsnachweise** *(PR #32)*: Schulaufgaben, Stegreifaufgaben, mündliche Noten
-- **Excel-Style Noteneingabe** *(PR #32)*: Schnelle Eingabe für ganze Klasse
 - **Fächerverwaltung**: CRUD, Beruf-Zuordnung, Farbcodierung, Wochenstunden, Credits
 - **Klassenverwaltung**: Einfache Verwaltung von Klassen mit Format "EAT321"
 - **RBS Styleguide 1.2**: Dynamic Red, Roboto Condensed
