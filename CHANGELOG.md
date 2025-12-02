@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Fixed
+- **Mobile Favicon** (#24)
+  - Relative Pfade für Favicons (kompatibel mit `<base href>`)
+  - Eigenes `apple-touch-icon.png` für iOS-Geräte
+  - UTF-8 Encoding-Fix in index.html
+- **go_router 17+ Kompatibilität**
+  - Custom `GoRouterRefreshStream` Klasse implementiert
+  - Ersetzt entfernte built-in Klasse für Auth-Refresh
+
+---
+
 ## [0.3.0] - 2025-11-21
 
 ### Added
