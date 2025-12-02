@@ -33,43 +33,39 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        // RBS Styleguide: Headline, Farben
-        title: Text(
-          'Fächer',
-          style: RBSTypography.h2.copyWith(color: RBSColors.textOnRed),
-        ),
-        backgroundColor: RBSColors.dynamicRed,
-        foregroundColor: RBSColors.textOnRed,
-        elevation: 0,
+        title: const Text('Fächerverwaltung'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showSubjectDialog(),
+            tooltip: 'Neues Fach',
+          ),
+        ],
       ),
       drawer: const RBSDrawer(),
       body: Column(
         children: [
-          // Filter-Chips für Beruf
+          // Filter Section
           Container(
-            padding: const EdgeInsets.all(16),
-            color: RBSColors.offwhite,
+            padding: const EdgeInsets.all(RBSSpacing.md),
+            color: RBSColors.paper,
             child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: RBSSpacing.sm,
+              runSpacing: RBSSpacing.sm,
               children: [
                 // Beruf Filter (IE, EAT, EBT, EGS)
-                RBSFilterChip(
-                  label: _selectedBeruf?.name ?? 'Alle Berufe',
-                  selected: _selectedBeruf != null,
-                  color: RBSColors.dynamicRed,
-                  onSelected: (_) => _showBerufDialog(),
-                ),
-                // Filter zurücksetzen
-                if (_selectedBeruf != null)
-                  ActionChip(
-                    label: const Text('Filter zurücksetzen'),
-                    onPressed: () {
+                ...Beruf.values.map(
+                  (beruf) => RBSFilterChip(
+                    label: beruf.code,
+                    selected: _selectedBeruf == beruf,
+                    color: _getBerufColor(beruf),
+                    onSelected: (selected) {
                       setState(() {
-                        _selectedBeruf = null;
+                        _selectedBeruf = selected ? beruf : null;
                       });
                     },
                   ),
+                ),
               ],
             ),
           ),
@@ -149,57 +145,6 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
             ),
           ),
         ],
-      ),
-      // Floating Action Button zum Hinzufügen eines neuen Fachs
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showSubjectDialog(),
-        backgroundColor: RBSColors.dynamicRed,
-        foregroundColor: RBSColors.textOnRed,
-        icon: const Icon(Icons.add),
-        label: const Text('Neues Fach'),
-      ),
-    );
-  }
-
-  void _showBerufDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Beruf auswählen'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Alle Berufe'),
-              selected: _selectedBeruf == null,
-              onTap: () {
-                setState(() => _selectedBeruf = null);
-                Navigator.pop(context);
-              },
-            ),
-            ...Beruf.values.map(
-              (beruf) => ListTile(
-                title: Text(beruf.name),
-                leading: CircleAvatar(
-                  backgroundColor: _getBerufColor(beruf),
-                  child: Text(
-                    beruf.code,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                selected: _selectedBeruf == beruf,
-                onTap: () {
-                  setState(() => _selectedBeruf = beruf);
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
