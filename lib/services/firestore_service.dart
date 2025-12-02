@@ -60,12 +60,14 @@ class FirestoreService {
   Stream<List<Student>> getStudentsByKlasse(String klasseId) {
     return _students
         .where('klasseId', isEqualTo: klasseId)
-        .orderBy('pseudonym')
         .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Student.fromFirestore(doc)).toList(),
-        );
+        .map((snapshot) {
+          final students = snapshot.docs
+              .map((doc) => Student.fromFirestore(doc))
+              .toList();
+          students.sort((a, b) => a.pseudonym.compareTo(b.pseudonym));
+          return students;
+        });
   }
 
   /// Nächstes verfügbares Pseudonym für eine Klasse
@@ -143,12 +145,14 @@ class FirestoreService {
   Stream<List<Grade>> getGradesByStudent(String studentId) {
     return _grades
         .where('studentId', isEqualTo: studentId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Grade.fromFirestore(doc)).toList(),
-        );
+        .map((snapshot) {
+          final grades = snapshot.docs
+              .map((doc) => Grade.fromFirestore(doc))
+              .toList();
+          grades.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return grades;
+        });
   }
 
   Future<Grade> getGrade(String id) async {
@@ -225,13 +229,18 @@ class FirestoreService {
     return _klassen
         .where('schuljahr', isEqualTo: schuljahr)
         .where('beruf', isEqualTo: berufCode)
-        .orderBy('jahrgangsstufe')
-        .orderBy('zeitgruppe')
         .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Klasse.fromFirestore(doc)).toList(),
-        );
+        .map((snapshot) {
+          final klassen = snapshot.docs
+              .map((doc) => Klasse.fromFirestore(doc))
+              .toList();
+          klassen.sort((a, b) {
+            final jahrCompare = a.jahrgangsstufe.compareTo(b.jahrgangsstufe);
+            if (jahrCompare != 0) return jahrCompare;
+            return a.zeitgruppe.nummer.compareTo(b.zeitgruppe.nummer);
+          });
+          return klassen;
+        });
   }
 
   Future<String> createKlasse(Klasse klasse) async {
@@ -280,13 +289,14 @@ class FirestoreService {
   ) {
     return _leistungsnachweise
         .where('klasseId', isEqualTo: klasseId)
-        .orderBy('datum', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final lns = snapshot.docs
               .map((doc) => Leistungsnachweis.fromFirestore(doc))
-              .toList(),
-        );
+              .toList();
+          lns.sort((a, b) => b.datum.compareTo(a.datum));
+          return lns;
+        });
   }
 
   Stream<List<Leistungsnachweis>> getLeistungsnachweiseBySubject(
@@ -294,13 +304,14 @@ class FirestoreService {
   ) {
     return _leistungsnachweise
         .where('subjectId', isEqualTo: subjectId)
-        .orderBy('datum', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final lns = snapshot.docs
               .map((doc) => Leistungsnachweis.fromFirestore(doc))
-              .toList(),
-        );
+              .toList();
+          lns.sort((a, b) => b.datum.compareTo(a.datum));
+          return lns;
+        });
   }
 
   Future<String> createLeistungsnachweis(Leistungsnachweis ln) async {
