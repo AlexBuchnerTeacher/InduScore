@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:typed_data';
 import '../core/theme/rbs_theme.dart';
 import '../widgets/rbs_drawer.dart';
 import '../core/widgets/rbs_components.dart';
 import '../models/klasse.dart';
 import '../models/beruf.dart';
+import '../models/student.dart';
 import '../providers/app_providers.dart';
+import '../services/pdf_import_service.dart';
 
 class KlassenScreen extends ConsumerStatefulWidget {
   const KlassenScreen({super.key});
@@ -17,6 +21,7 @@ class KlassenScreen extends ConsumerStatefulWidget {
 class _KlassenScreenState extends ConsumerState<KlassenScreen> {
   String? _selectedBeruf;
   String? _selectedSchuljahr;
+  bool _isImporting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +36,17 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
             icon: const Icon(Icons.add),
             onPressed: () => _showKlasseDialog(context),
             tooltip: 'Neue Klasse',
+          ),
+          IconButton(
+            icon: _isImporting
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.upload_file),
+            onPressed: _isImporting ? null : _handlePdfImport,
+            tooltip: 'Klasseliste importieren (PDF)',
           ),
         ],
       ),
@@ -423,4 +439,206 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
       ),
     );
   }
+
+  Future<void> _handlePdfImport() async {
+    final schuljahr = ref.read(currentSchuljahrProvider);
+    try {
+      setState(() => _isImporting = true);
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        withData: true,
+      );
+      if (picked == null) return;
+      final file = picked.files.single;
+      final Uint8List? bytes = file.bytes;
+      if (bytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('PDF konnte nicht gelesen werden.')),
+          );
+        }
+        return;
+      }
+
+      final importService = PdfImportService();
+      final preview = await importService.parseClassList(bytes);
+
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        builder: (_) => _ImportPreviewDialog(
+          preview: preview,
+          schuljahr: schuljahr,
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Import fehlgeschlagen: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isImporting = false);
+    }
+  }
 }
+
+class _ImportPreviewDialog extends ConsumerStatefulWidget {
+  final ClassImportPreview preview;
+  final Schuljahr schuljahr;
+
+  const _ImportPreviewDialog({
+    required this.preview,
+    required this.schuljahr,
+  });
+
+  @override
+  ConsumerState<_ImportPreviewDialog> createState() => _ImportPreviewDialogState();
+}
+
+class _ImportPreviewDialogState extends ConsumerState<_ImportPreviewDialog> {
+  bool _isSaving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = widget.preview;
+    final students = preview.students;
+
+    return AlertDialog(
+      title: const Text('Klasseliste importieren'),
+      content: SizedBox(
+        width: 520,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Klasse: ${preview.rawClassName} (${widget.schuljahr})',
+              style: RBSTypography.h4,
+            ),
+            if (preview.klassenleiterCode != null)
+              Padding(
+                padding: const EdgeInsets.only(top: RBSSpacing.xs),
+                child: Text(
+                  'Klassenleiter: ${preview.klassenleiterCode}',
+                  style: RBSTypography.bodyMedium,
+                ),
+              ),
+            const SizedBox(height: RBSSpacing.md),
+            Text('Gefundene Schueler (${students.length}):', style: RBSTypography.bodyMedium),
+            const SizedBox(height: RBSSpacing.xs),
+            SizedBox(
+              height: 240,
+              child: ListView.builder(
+                itemCount: students.length,
+                itemBuilder: (context, index) {
+                  final s = students[index];
+                  return ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.person_outline),
+                    title: Text('${s.firstName} ${s.lastName}'),
+                  );
+                },
+              ),
+            ),
+            if (preview.invalidLines.isNotEmpty) ...[
+              const SizedBox(height: RBSSpacing.sm),
+              Text('Nicht erkannte Zeilen:', style: RBSTypography.bodyMedium),
+              ...preview.invalidLines.map(
+                (l) => Text(
+                  '• $l',
+                  style: RBSTypography.bodySmall.copyWith(color: RBSColors.error),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSaving ? null : () => Navigator.pop(context),
+          child: const Text('Abbrechen'),
+        ),
+        ElevatedButton(
+          onPressed: _isSaving ? null : _importNow,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: RBSColors.dynamicRed,
+            foregroundColor: RBSColors.textOnRed,
+          ),
+          child: _isSaving
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Import durchführen'),
+        ),
+      ],
+    );
+  }
+
+  
+Future<void> _importNow() async {
+    final preview = widget.preview;
+    try {
+      setState(() => _isSaving = true);
+      final firestoreService = ref.read(firestoreServiceProvider);
+      final parsed = preview.parsedName;
+      final klasse = Klasse(
+        id: '',
+        beruf: parsed.beruf,
+        jahrgangsstufe: parsed.jahrgangsstufe,
+        zeitgruppe: parsed.zeitgruppe,
+        laufendeNummer: parsed.laufendeNummer,
+        schuljahr: widget.schuljahr,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final students = preview.students
+          .map(
+            (s) => Student(
+              id: '',
+              firstName: s.firstName,
+              lastName: s.lastName,
+              className: klasse.name,
+              createdAt: DateTime.now(),
+            ),
+          )
+          .toList();
+
+      await firestoreService.importKlasseMitSchuelern(
+        klasse: klasse,
+        schueler: students,
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Klasse ${klasse.name} mit ${students.length} Schuelern importiert.'),
+          backgroundColor: RBSColors.courtGreen,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Import fehlgeschlagen: $e'),
+          backgroundColor: RBSColors.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+}
+
+
+
+
+
+
+
+

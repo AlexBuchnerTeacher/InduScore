@@ -280,6 +280,40 @@ class FirestoreService {
     await _leistungsnachweise.doc(id).delete();
   }
 
+  // ============ IMPORT (KLASSE + STUDENTS) ============
+
+  Future<String> importKlasseMitSchuelern({
+    required Klasse klasse,
+    required List<Student> schueler,
+    String importSource = 'pdf',
+  }) async {
+    final klasseId = klasse.id.isEmpty ? _klassen.doc().id : klasse.id;
+    final klasseData = klasse.copyWith(id: klasseId).toFirestore()
+      ..addAll({
+        'importSource': importSource,
+        'importTimestamp': Timestamp.now(),
+      });
+
+    final batch = _db.batch();
+    batch.set(_klassen.doc(klasseId), klasseData);
+
+    for (final student in schueler) {
+      final studentId = student.id.isEmpty ? _students.doc().id : student.id;
+      batch.set(
+        _students.doc(studentId),
+        student
+            .copyWith(
+              id: studentId,
+              className: klasse.name,
+            )
+            .toFirestore(),
+      );
+    }
+
+    await batch.commit();
+    return klasseId;
+  }
+
   // ============ STATISTICS ============
 
   Future<double> calculateAverage(List<Grade> grades) async {

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/student.dart';
@@ -8,6 +9,14 @@ import '../models/grade.dart';
 import '../models/klasse.dart';
 import '../models/leistungsnachweis.dart';
 import '../models/beruf.dart';
+
+// ============ APP INFO PROVIDERS ============
+
+/// App Version aus pubspec.yaml (Single Source of Truth)
+final appVersionProvider = FutureProvider<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return info.version;
+});
 
 // ============ AUTH PROVIDERS ============
 

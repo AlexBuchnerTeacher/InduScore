@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
 import '../providers/app_providers.dart';
-import '../version.dart';
 
 class RBSDrawer extends ConsumerWidget {
   const RBSDrawer({super.key});
@@ -120,11 +119,20 @@ class RBSDrawer extends ConsumerWidget {
             ),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Version $appVersion',
-                style: RBSTypography.bodySmall.copyWith(
-                  color: RBSColors.textOnLight.withValues(alpha: 0.5),
-                ),
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final versionAsync = ref.watch(appVersionProvider);
+                  return Text(
+                    'Version ${versionAsync.when(
+                      data: (v) => v,
+                      loading: () => '...',
+                      error: (e, _) => '?',
+                    )}',
+                    style: RBSTypography.bodySmall.copyWith(
+                      color: RBSColors.textOnLight.withValues(alpha: 0.5),
+                    ),
+                  );
+                },
               ),
             ),
           ),
