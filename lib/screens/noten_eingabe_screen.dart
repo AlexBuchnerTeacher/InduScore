@@ -5,7 +5,6 @@ import '../models/leistungsnachweis.dart';
 import '../models/student.dart';
 import '../providers/app_providers.dart';
 import '../core/theme/rbs_theme.dart';
-import '../core/widgets/rbs_components.dart';
 
 class NotenEingabeScreen extends ConsumerStatefulWidget {
   final String leistungsnachweisId;
@@ -21,8 +20,7 @@ class NotenEingabeScreen extends ConsumerStatefulWidget {
 
 class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
   final Map<String, _NotenEingabe> _noten = {};
-  bool _isLoading = false;
-  bool _hasChanges = false;
+  final Set<String> _savingStudents = {}; // Schüler, die gerade gespeichert werden
   Leistungsnachweis? _leistungsnachweis;
 
   @override
@@ -35,17 +33,6 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
         title: _leistungsnachweis != null
             ? Text('Noten: ${_leistungsnachweis!.bezeichnung}')
             : const Text('Noteneingabe'),
-        actions: [
-          if (_hasChanges)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: RBSButton(
-                label: 'Speichern',
-                icon: Icons.save,
-                onPressed: _isLoading ? null : _saveNoten,
-              ),
-            ),
-        ],
       ),
       body: leistungsnachweisAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -280,8 +267,8 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
                 onChanged: (value) {
                   setState(() {
                     _noten[student.id] = eingabe.copyWith(note: value);
-                    _hasChanges = true;
                   });
+                  _saveGradeForStudent(student.id);
                 },
               ),
             ),
@@ -311,8 +298,8 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
               onSelectionChanged: (Set<Tendenz> selected) {
                 setState(() {
                   _noten[student.id] = eingabe.copyWith(tendenz: selected.first);
-                  _hasChanges = true;
                 });
+                _saveGradeForStudent(student.id);
               },
               style: ButtonStyle(
                 visualDensity: VisualDensity.compact,
@@ -338,7 +325,8 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
                 _noten[student.id] = eingabe.copyWith(
                   kommentar: value.isEmpty ? null : value,
                 );
-                _hasChanges = true;
+                // Debounce für Kommentar - speichert nach kurzer Pause
+                _saveGradeForStudentDebounced(student.id);
               },
             ),
           ),
@@ -464,69 +452,72 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
-  Future<void> _saveNoten() async {
-    setState(() => _isLoading = true);
+  // Debounce-Timer für Kommentar-Eingabe
+  final Map<String, Future<void>> _debounceTimers = {};
+
+  /// Speichert Note für einen einzelnen Schüler sofort
+  Future<void> _saveGradeForStudent(String studentId) async {
+    final eingabe = _noten[studentId];
+    if (eingabe == null) return;
+
+    // Wenn schon am Speichern, abbrechen
+    if (_savingStudents.contains(studentId)) return;
+
+    setState(() => _savingStudents.add(studentId));
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
 
-      for (final entry in _noten.entries) {
-        final studentId = entry.key;
-        final eingabe = entry.value;
+      if (eingabe.note != null) {
+        final grade = Grade(
+          id: eingabe.existingGradeId ?? '',
+          studentId: studentId,
+          leistungsnachweisId: widget.leistungsnachweisId,
+          note: eingabe.note!,
+          tendenz: eingabe.tendenz,
+          kommentar: eingabe.kommentar,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
 
-        // Nur speichern wenn Note vorhanden
-        if (eingabe.note != null) {
-          final grade = Grade(
-            id: eingabe.existingGradeId ?? '',
-            studentId: studentId,
-            leistungsnachweisId: widget.leistungsnachweisId,
-            note: eingabe.note!,
-            tendenz: eingabe.tendenz,
-            kommentar: eingabe.kommentar,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-
-          if (eingabe.existingGradeId != null) {
-            await firestoreService.updateGrade(grade);
-          } else {
-            final newId = await firestoreService.createGrade(grade);
-            _noten[studentId] = eingabe.copyWith(existingGradeId: newId);
-          }
-        } else if (eingabe.existingGradeId != null) {
-          // Note wurde gelöscht - Grade löschen
-          await firestoreService.deleteGrade(eingabe.existingGradeId!);
-          _noten[studentId] = eingabe.copyWith(existingGradeId: null);
+        if (eingabe.existingGradeId != null) {
+          await firestoreService.updateGrade(grade);
+        } else {
+          final newId = await firestoreService.createGrade(grade);
+          _noten[studentId] = eingabe.copyWith(existingGradeId: newId);
         }
+      } else if (eingabe.existingGradeId != null) {
+        // Note wurde gelöscht - Grade löschen
+        await firestoreService.deleteGrade(eingabe.existingGradeId!);
+        _noten[studentId] = eingabe.copyWith(existingGradeId: null);
       }
 
       // Refresh grades
       ref.invalidate(gradesByLeistungsnachweisProvider(widget.leistungsnachweisId));
-
-      setState(() {
-        _hasChanges = false;
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Noten erfolgreich gespeichert'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
     } catch (e) {
-      setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Fehler beim Speichern: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() => _savingStudents.remove(studentId));
+      }
     }
+  }
+
+  /// Speichert Note mit Verzögerung (für Kommentar-Eingabe)
+  void _saveGradeForStudentDebounced(String studentId) {
+    // Warte 500ms nach letzter Eingabe, dann speichern
+    _debounceTimers[studentId] = Future.delayed(
+      const Duration(milliseconds: 500),
+      () => _saveGradeForStudent(studentId),
+    );
   }
 }
 
