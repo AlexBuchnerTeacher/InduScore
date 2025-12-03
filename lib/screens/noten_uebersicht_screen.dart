@@ -35,6 +35,11 @@ class NotenUebersichtScreen extends ConsumerStatefulWidget {
 class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
   final Map<String, _NotenEingabe> _noten = {};
   final Set<String> _savingGrades = {};
+  
+  // Filter State
+  String? _selectedSubjectId;
+  String? _selectedKlasseId;
+  LeistungsnachweisTyp? _selectedTyp;
 
   @override
   Widget build(BuildContext context) {
@@ -98,11 +103,16 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     if (widget.fachId != null) {
       filteredLN = filteredLN.where((ln) => ln.subjectId == widget.fachId).toList();
     }
-
-    if (filteredLN.isEmpty) {
-      return const Center(
-        child: Text('Keine Leistungsnachweise gefunden'),
-      );
+    
+    // Zusätzliche Filter anwenden
+    if (_selectedSubjectId != null) {
+      filteredLN = filteredLN.where((ln) => ln.subjectId == _selectedSubjectId).toList();
+    }
+    if (_selectedKlasseId != null) {
+      filteredLN = filteredLN.where((ln) => ln.klasseId == _selectedKlasseId).toList();
+    }
+    if (_selectedTyp != null) {
+      filteredLN = filteredLN.where((ln) => ln.typ == _selectedTyp).toList();
     }
 
     // Sortiere nach Datum
@@ -134,6 +144,140 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
 
     // Initialisiere Noten-Map
     _initializeNoten(students, filteredLN, grades);
+
+    return Column(
+      children: [
+        // Filter-Chips
+        _buildFilterChips(leistungsnachweise, subjects, klassen),
+        
+        // Content
+        Expanded(
+          child: _buildFilteredContent(students, filteredLN, subjects, klassen, grades),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterChips(
+    List<Leistungsnachweis> leistungsnachweise,
+    List<Subject> subjects,
+    List<Klasse> klassen,
+  ) {
+    // Sammle verfügbare Filter-Optionen
+    final availableSubjectIds = leistungsnachweise.map((ln) => ln.subjectId).toSet();
+    final availableKlasseIds = leistungsnachweise.map((ln) => ln.klasseId).toSet();
+    final availableTypen = leistungsnachweise.map((ln) => ln.typ).toSet();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(RBSSpacing.sm),
+      decoration: BoxDecoration(
+        color: RBSColors.paper,
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            // Typ-Filter
+            ...LeistungsnachweisTyp.values
+                .where((t) => availableTypen.contains(t))
+                .map((typ) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(typ.label),
+                        selected: _selectedTyp == typ,
+                        selectedColor: RBSColors.dynamicRed.withValues(alpha: 0.2),
+                        checkmarkColor: RBSColors.dynamicRed,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedTyp = selected ? typ : null;
+                          });
+                        },
+                      ),
+                    )),
+            
+            // Trennstrich
+            if (availableTypen.isNotEmpty && (widget.klasseId != null && availableSubjectIds.length > 1))
+              Container(
+                height: 24,
+                width: 1,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                color: Colors.grey[400],
+              ),
+            
+            // Fach-Filter (nur wenn Klassen-Ansicht)
+            if (widget.klasseId != null)
+              ...subjects
+                  .where((s) => availableSubjectIds.contains(s.id))
+                  .map((subject) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(subject.shortName ?? subject.name),
+                          selected: _selectedSubjectId == subject.id,
+                          selectedColor: RBSColors.courtGreen.withValues(alpha: 0.2),
+                          checkmarkColor: RBSColors.courtGreen,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedSubjectId = selected ? subject.id : null;
+                            });
+                          },
+                        ),
+                      )),
+            
+            // Klassen-Filter (nur wenn Fach-Ansicht)
+            if (widget.fachId != null)
+              ...klassen
+                  .where((k) => availableKlasseIds.contains(k.id))
+                  .map((klasse) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(klasse.name),
+                          selected: _selectedKlasseId == klasse.id,
+                          selectedColor: RBSColors.dynamicRed.withValues(alpha: 0.2),
+                          checkmarkColor: RBSColors.dynamicRed,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedKlasseId = selected ? klasse.id : null;
+                            });
+                          },
+                        ),
+                      )),
+            
+            // Reset-Button wenn Filter aktiv
+            if (_selectedTyp != null || _selectedSubjectId != null || _selectedKlasseId != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: ActionChip(
+                  avatar: const Icon(Icons.clear, size: 16),
+                  label: const Text('Alle'),
+                  onPressed: () {
+                    setState(() {
+                      _selectedTyp = null;
+                      _selectedSubjectId = null;
+                      _selectedKlasseId = null;
+                    });
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilteredContent(
+    List<Student> students,
+    List<Leistungsnachweis> filteredLN,
+    List<Subject> subjects,
+    List<Klasse> klassen,
+    List<Grade> grades,
+  ) {
+    if (filteredLN.isEmpty) {
+      return const Center(
+        child: Text('Keine Leistungsnachweise gefunden'),
+      );
+    }
 
     // Gruppiere nach Fach wenn Klasse-Ansicht, nach Klasse wenn Fach-Ansicht
     if (widget.klasseId != null) {
@@ -428,70 +572,83 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       );
     }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columnSpacing: 12,
-        headingRowHeight: 60,
-        dataRowMinHeight: 48,
-        dataRowMaxHeight: 48,
-        columns: [
-          const DataColumn(
-            label: SizedBox(
-              width: 150,
-              child: Text('Schüler', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ),
-          ...leistungsnachweise.map((ln) => DataColumn(
-            label: SizedBox(
-              width: 100,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    ln.bezeichnung,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    '${ln.typ.label} ${ln.gewichtung}x',
-                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ),
-          )),
-        ],
-        rows: students.map((student) => DataRow(
-          cells: [
-            DataCell(
-              SizedBox(
-                width: 150,
-                child: Text(
-                  student.displayName,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            ...leistungsnachweise.map((ln) {
-              final key = '${student.id}_${ln.id}';
-              final eingabe = _noten[key];
-              if (eingabe == null) return const DataCell(Text('-'));
+    // Berechne Mindestbreite für horizontales Scrollen
+    final tableWidth = 160.0 + (leistungsnachweise.length * 120.0);
 
-              return DataCell(
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildCompactNoteDropdown(key, eingabe, student.id, ln.id),
-                    const SizedBox(width: 4),
-                    _buildCompactTendenzButtons(key, eingabe, student.id, ln.id),
-                  ],
+    return Scrollbar(
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: tableWidth),
+          child: DataTable(
+            columnSpacing: 8,
+            headingRowHeight: 64,
+            dataRowMinHeight: 52,
+            dataRowMaxHeight: 52,
+            columns: [
+              const DataColumn(
+                label: SizedBox(
+                  width: 140,
+                  child: Text('Schüler', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
-              );
-            }),
-          ],
-        )).toList(),
+              ),
+              ...leistungsnachweise.map((ln) => DataColumn(
+                label: SizedBox(
+                  width: 110,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ln.bezeichnung,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
+                      Text(
+                        '${ln.typ.label} ${ln.gewichtung}x',
+                        style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+            ],
+            rows: students.map((student) => DataRow(
+              cells: [
+                DataCell(
+                  SizedBox(
+                    width: 140,
+                    child: Text(
+                      student.displayName,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                ...leistungsnachweise.map((ln) {
+                  final key = '${student.id}_${ln.id}';
+                  final eingabe = _noten[key];
+                  if (eingabe == null) return const DataCell(Text('-'));
+
+                  return DataCell(
+                    SizedBox(
+                      width: 110,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildCompactNoteDropdown(key, eingabe, student.id, ln.id),
+                          const SizedBox(width: 4),
+                          _buildCompactTendenzButtons(key, eingabe, student.id, ln.id),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            )).toList(),
+          ),
+        ),
       ),
     );
   }
