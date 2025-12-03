@@ -6,6 +6,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.6.0] - 2025-12-03
+
+### Added
+- **Vereinfachte Noteneingabe** (Feldfeedback-Refactoring)
+  - Tendenz statt Punkte: +/·/- Buttons für Notentendenzen (z.B. 2+, 2, 2-)
+  - Auto-Save: Noten werden sofort bei Eingabe gespeichert (kein Save-Button)
+  - Änderungs-Tracking: Kürzel des letzten Bearbeiters in jeder Note (z.B. "bu")
+  - Gewichtung als separates Feld: 1.0 (Standard), 1.5 (Praktisch), 2.0 (Schulaufgabe)
+
+- **Zentrale Notenübersicht** (`NotenUebersichtScreen`)
+  - Klick auf Klasse → alle Noten dieser Klasse
+  - Klick auf Fach → alle Noten dieses Fachs
+  - Klick auf Schüler → alle Noten dieses Schülers
+  - Gruppiert nach Leistungsnachweisen mit Durchschnittsberechnung
+  - Direkte Navigation zur Noteneingabe
+
+- **Neue Leistungsnachweis-Typen**
+  - Wochentest (Gewichtung 1.0)
+  - Praktisch (Gewichtung 1.5)
+  - Mündlich (Gewichtung 1.0)
+  - Mitarbeit (Gewichtung 1.0)
+
+### Changed
+- **Grade Model refactored**
+  - `punkte` entfernt (nicht mehr benötigt)
+  - `tendenz` hinzugefügt (plus/minus/keine)
+  - `updatedBy` hinzugefügt (Kürzel des letzten Bearbeiters)
+- **Leistungsnachweis Model refactored**
+  - `maxPunkte` entfernt
+  - `gewichtung` als eigenes Feld (1.0, 1.5, 2.0)
+  - Typen angepasst: Wochentest, Praktisch, Mündlich, Mitarbeit
+- **UI-Verbesserungen**
+  - "Noten eingeben" Button prominent (FilledButton statt IconButton)
+  - Tendenz-Buttons als einfache Toggle-Buttons (statt SegmentedButton)
+  - Back-Navigation in NotenEingabeScreen
+
+### Fixed
+- SegmentedButton Overflow bei Tendenzen → Simple Toggle Buttons
+- Unicode-Symbol (○) nicht darstellbar → Bullet Point (·)
+- Routen-Priorität: Spezifische Routen vor generischer `/noten/:id`
+
+---
+
 ## [0.5.0] - 2025-12-02
 
 ### Added
@@ -215,15 +258,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release Notes Template
 
-### v0.2.0 - Domain Layer (Geplant: 30.11.2025)
-- Berufsschul-spezifische Domain-Modelle
-- Repositories mit Clean Architecture
-- Firestore Collections & Indizes
-- Feature-Module-Struktur
+### v0.6.0 - Vereinfachte Noteneingabe (03.12.2025) ✅
+- Auto-Save für Noten (keine Speicher-Buttons mehr)
+- Tendenzen (+/·/-) statt Punkteingabe
+- Zentrale Notenübersicht aus Klassen/Fächer/Schüler-Screens
+- Änderungs-Tracking (Kürzel des Bearbeiters)
+- Neue Leistungsnachweis-Typen: Wochentest, Praktisch, Mündlich, Mitarbeit
 
 ### v1.0.0 - MVP (Geplant: 20.12.2025)
-- Vollständige Notenverwaltung
-- Klassen- und Schülerverwaltung
-- PDF-Export
-- Nachschreiber-Management
+- Automatische Zeugnisnoten-Berechnung
+- Nachschreiber-Management mit Zeitgruppen
+- PDF-Export für Notenlisten & Zeugnisse
 - Settings-Bereich

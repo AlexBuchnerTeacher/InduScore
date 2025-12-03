@@ -208,7 +208,7 @@ class _LeistungsnachweiseScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${ln.typ.name} • ${dateFormat.format(ln.datum)}',
+              '${ln.typ.label} • ${ln.gewichtung}x • ${dateFormat.format(ln.datum)}',
               style: RBSTypography.bodySmall,
             ),
             Row(
@@ -239,13 +239,19 @@ class _LeistungsnachweiseScreenState
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Noten eingeben Button
-            IconButton(
-              icon: const Icon(Icons.edit_note),
+            // Noten eingeben Button - prominent
+            FilledButton.icon(
               onPressed: () => context.go('/noten/${ln.id}'),
-              tooltip: 'Noten eingeben',
-              color: RBSColors.dynamicRed,
+              icon: const Icon(Icons.edit_note, size: 18),
+              label: const Text('Noten'),
+              style: FilledButton.styleFrom(
+                backgroundColor: RBSColors.dynamicRed,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                visualDensity: VisualDensity.compact,
+              ),
             ),
+            const SizedBox(width: 4),
             IconButton(
               icon: const Icon(Icons.edit_outlined),
               onPressed: () =>
@@ -279,35 +285,27 @@ class _LeistungsnachweiseScreenState
 
   Color _getTypColor(LeistungsnachweisTyp typ) {
     switch (typ) {
-      case LeistungsnachweisTyp.schulaufgabe:
+      case LeistungsnachweisTyp.wochentest:
         return RBSColors.dynamicRed;
-      case LeistungsnachweisTyp.stegreifaufgabe:
-        return RBSColors.growingElder;
-      case LeistungsnachweisTyp.muendlich:
-        return RBSColors.courtGreen;
       case LeistungsnachweisTyp.praktisch:
         return const Color(0xFF2E7BB5);
-      case LeistungsnachweisTyp.projekt:
-        return const Color(0xFF9C27B0);
-      case LeistungsnachweisTyp.sonstiges:
-        return RBSColors.textOnLight.withValues(alpha: 0.5);
+      case LeistungsnachweisTyp.muendlich:
+        return RBSColors.courtGreen;
+      case LeistungsnachweisTyp.mitarbeit:
+        return RBSColors.growingElder;
     }
   }
 
   IconData _getTypIcon(LeistungsnachweisTyp typ) {
     switch (typ) {
-      case LeistungsnachweisTyp.schulaufgabe:
-        return Icons.description;
-      case LeistungsnachweisTyp.stegreifaufgabe:
-        return Icons.flash_on;
-      case LeistungsnachweisTyp.muendlich:
-        return Icons.record_voice_over;
+      case LeistungsnachweisTyp.wochentest:
+        return Icons.assignment;
       case LeistungsnachweisTyp.praktisch:
         return Icons.build;
-      case LeistungsnachweisTyp.projekt:
-        return Icons.folder_special;
-      case LeistungsnachweisTyp.sonstiges:
-        return Icons.more_horiz;
+      case LeistungsnachweisTyp.muendlich:
+        return Icons.record_voice_over;
+      case LeistungsnachweisTyp.mitarbeit:
+        return Icons.person;
     }
   }
 
@@ -319,9 +317,6 @@ class _LeistungsnachweiseScreenState
     final bezeichnungController = TextEditingController(
       text: leistungsnachweis?.bezeichnung ?? '',
     );
-    final maxPunkteController = TextEditingController(
-      text: leistungsnachweis?.maxPunkte.toString() ?? '100',
-    );
     final beschreibungController = TextEditingController(
       text: leistungsnachweis?.beschreibung ?? '',
     );
@@ -330,7 +325,8 @@ class _LeistungsnachweiseScreenState
     String? selectedKlasseId = leistungsnachweis?.klasseId;
     String? selectedSubjectId = leistungsnachweis?.subjectId;
     LeistungsnachweisTyp selectedTyp =
-        leistungsnachweis?.typ ?? LeistungsnachweisTyp.stegreifaufgabe;
+        leistungsnachweis?.typ ?? LeistungsnachweisTyp.wochentest;
+    double selectedGewichtung = leistungsnachweis?.gewichtung ?? 1.0;
     DateTime selectedDatum = leistungsnachweis?.datum ?? DateTime.now();
 
     showDialog(
@@ -427,15 +423,7 @@ class _LeistungsnachweiseScreenState
                                   Icon(_getTypIcon(t),
                                       color: _getTypColor(t), size: 18),
                                   const SizedBox(width: RBSSpacing.sm),
-                                  Text(t.name),
-                                  const SizedBox(width: RBSSpacing.sm),
-                                  Text(
-                                    '(Gewichtung ${t.gewichtung}x)',
-                                    style: RBSTypography.bodySmall.copyWith(
-                                      color: RBSColors.textOnLight
-                                          .withValues(alpha: 0.6),
-                                    ),
-                                  ),
+                                  Text(t.label),
                                 ],
                               ),
                             ),
@@ -444,6 +432,27 @@ class _LeistungsnachweiseScreenState
                       onChanged: (value) {
                         if (value != null) {
                           setDialogState(() => selectedTyp = value);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: RBSSpacing.md),
+
+                    // Gewichtung auswählen
+                    Text('Gewichtung *', style: RBSTypography.label),
+                    const SizedBox(height: RBSSpacing.xs),
+                    DropdownButtonFormField<double>(
+                      initialValue: selectedGewichtung,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 1.0, child: Text('1x (einfach)')),
+                        DropdownMenuItem(value: 1.5, child: Text('1,5x')),
+                        DropdownMenuItem(value: 2.0, child: Text('2x (doppelt)')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setDialogState(() => selectedGewichtung = value);
                         }
                       },
                     ),
@@ -486,15 +495,6 @@ class _LeistungsnachweiseScreenState
                     ),
                     const SizedBox(height: RBSSpacing.md),
 
-                    // Max Punkte
-                    RBSInput(
-                      label: 'Maximale Punktzahl',
-                      hint: '100',
-                      controller: maxPunkteController,
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: RBSSpacing.md),
-
                     // Beschreibung
                     RBSInput(
                       label: 'Beschreibung (optional)',
@@ -522,8 +522,6 @@ class _LeistungsnachweiseScreenState
                   try {
                     final firestoreService = ref.read(firestoreServiceProvider);
                     final now = DateTime.now();
-                    final maxPunkte =
-                        double.tryParse(maxPunkteController.text) ?? 100.0;
 
                     final newLn = Leistungsnachweis(
                       id: leistungsnachweis?.id ?? '',
@@ -532,7 +530,7 @@ class _LeistungsnachweiseScreenState
                       typ: selectedTyp,
                       bezeichnung: bezeichnungController.text.trim(),
                       datum: selectedDatum,
-                      maxPunkte: maxPunkte,
+                      gewichtung: selectedGewichtung,
                       beschreibung: beschreibungController.text.trim().isEmpty
                           ? null
                           : beschreibungController.text.trim(),

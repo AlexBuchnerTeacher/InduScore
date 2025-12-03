@@ -1,27 +1,42 @@
 import 'leistungsnachweis.dart';
+import 'grade.dart';
 
 /// Zeugnisnote - Berechnung der Endnote aus gewichteten Leistungsnachweisen
 class Zeugnisnote {
-  /// Berechnet gewichteten Durchschnitt aus Leistungsnachweisen
+  /// Berechnet gewichteten Durchschnitt aus Noten mit ihren Gewichtungen
   /// Gibt null zurück wenn keine Noten vorhanden
   static double? berechneSchnitt(
-    Map<LeistungsnachweisTyp, List<double>> notenByTyp,
+    List<({int note, double gewichtung})> notenMitGewichtung,
   ) {
-    if (notenByTyp.isEmpty) return null;
+    if (notenMitGewichtung.isEmpty) return null;
 
     double summeGewichtet = 0;
     double summeGewichtung = 0;
 
-    notenByTyp.forEach((typ, noten) {
-      if (noten.isNotEmpty) {
-        final durchschnitt = noten.reduce((a, b) => a + b) / noten.length;
-        summeGewichtet += durchschnitt * typ.gewichtung;
-        summeGewichtung += typ.gewichtung;
-      }
-    });
+    for (final eintrag in notenMitGewichtung) {
+      summeGewichtet += eintrag.note * eintrag.gewichtung;
+      summeGewichtung += eintrag.gewichtung;
+    }
 
     if (summeGewichtung == 0) return null;
     return summeGewichtet / summeGewichtung;
+  }
+  
+  /// Berechnet Schnitt aus Grades und ihren zugehörigen Leistungsnachweisen
+  static double? berechneSchnittAusGrades(
+    List<Grade> grades,
+    Map<String, Leistungsnachweis> leistungsnachweiseById,
+  ) {
+    final notenMitGewichtung = <({int note, double gewichtung})>[];
+    
+    for (final grade in grades) {
+      final ln = leistungsnachweiseById[grade.leistungsnachweisId];
+      if (ln != null) {
+        notenMitGewichtung.add((note: grade.note, gewichtung: ln.gewichtung));
+      }
+    }
+    
+    return berechneSchnitt(notenMitGewichtung);
   }
 
   /// Rundet Notendurchschnitt nach Berufsschul-Regel:
@@ -38,11 +53,21 @@ class Zeugnisnote {
     }
   }
 
-  /// Berechnet Zeugnisnote (gerundet) aus Leistungsnachweisen
+  /// Berechnet Zeugnisnote (gerundet) aus Noten mit Gewichtungen
   static int? berechneZeugnisnote(
-    Map<LeistungsnachweisTyp, List<double>> notenByTyp,
+    List<({int note, double gewichtung})> notenMitGewichtung,
   ) {
-    final schnitt = berechneSchnitt(notenByTyp);
+    final schnitt = berechneSchnitt(notenMitGewichtung);
+    if (schnitt == null) return null;
+    return rundeNote(schnitt);
+  }
+  
+  /// Berechnet Zeugnisnote aus Grades und Leistungsnachweisen
+  static int? berechneZeugnisnoteAusGrades(
+    List<Grade> grades,
+    Map<String, Leistungsnachweis> leistungsnachweiseById,
+  ) {
+    final schnitt = berechneSchnittAusGrades(grades, leistungsnachweiseById);
     if (schnitt == null) return null;
     return rundeNote(schnitt);
   }

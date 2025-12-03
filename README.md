@@ -4,13 +4,18 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
 
-## Features (v0.5.0)
-- **Leistungsnachweise**: Schulaufgaben, Stegreifaufgaben, mündliche Noten verwalten
+## Features (v0.6.0)
+- **NEU: Notenübersicht aus allen Kontexten**: Klick auf Klasse/Fach/Schüler zeigt alle Noten
+- **NEU: Auto-Save**: Noten werden sofort gespeichert (kein Save-Button nötig)
+- **NEU: Tendenzen statt Punkte**: Vereinfachte Noteneingabe mit +/·/- Tendenz
+- **NEU: Gewichtung**: Wochentest (1.0), Praktisch (1.5), Mündlich (1.0), Mitarbeit (1.0)
+- **NEU: Änderungs-Tracking**: Kürzel des letzten Bearbeiters in jeder Note
+- **Leistungsnachweise**: Wochentest, Praktisch, Mündlich, Mitarbeit
 - **Excel-Style Noteneingabe**: Schnelle Eingabe für ganze Klasse mit Statistiken
 - **Schülerverwaltung**: DSGVO-konforme Pseudonymisierung, Filter nach Klasse
 - **Fächerverwaltung**: CRUD, Beruf-Zuordnung, Farbcodierung, Wochenstunden, Credits
@@ -18,7 +23,6 @@ Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, 
 - **RBS Styleguide 1.2**: Dynamic Red, Roboto Condensed
 - **Firebase Integration**: Firestore & Authentication
 - **Responsive Design**: Optimiert für Desktop & Mobile
-- **IHK Bayern Notenschlüssel**: 92%+=1, 81%+=2, 67%+=3, 50%+=4, 30%+=5
 - **Berufsschul-spezifisch**: IE, EAT, EBT, EGS, Zeitgruppen, Schuljahre
 
 
@@ -64,7 +68,8 @@ https://alexbuchnerteacher.github.io/InduScore/
 │   │   ├── faecher_screen.dart        # Fächerverwaltung
 │   │   ├── schueler_screen.dart       # Schülerverwaltung
 │   │   ├── leistungsnachweise_screen.dart  # Leistungsnachweise
-│   │   └── noten_eingabe_screen.dart  # Excel-Style Noteneingabe
+│   │   ├── noten_eingabe_screen.dart  # Excel-Style Noteneingabe
+│   │   └── noten_uebersicht_screen.dart # Zentrale Notenübersicht
 │   ├── services/
 │   │   ├── auth_service.dart          # Authentifizierung
 │   │   └── firestore_service.dart     # Firestore CRUD

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../models/student.dart';
@@ -109,6 +110,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: RBSSpacing.sm),
       child: ListTile(
+        onTap: () => context.go('/noten/schueler/${student.id}'),
         leading: CircleAvatar(
           backgroundColor: RBSColors.dynamicRed,
           child: Text(

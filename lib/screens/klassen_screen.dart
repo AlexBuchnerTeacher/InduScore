@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:typed_data';
 import '../core/theme/rbs_theme.dart';
 import '../widgets/rbs_drawer.dart';
@@ -158,6 +159,7 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
   Widget _buildKlasseCard(BuildContext context, Klasse klasse) {
     return RBSCard(
       child: ListTile(
+        onTap: () => context.go('/noten/klasse/${klasse.id}'),
         leading: CircleAvatar(
           backgroundColor: _getBerufColor(klasse.beruf),
           child: Text(

@@ -13,6 +13,7 @@ import 'screens/faecher_screen.dart';
 import 'screens/schueler_screen.dart';
 import 'screens/leistungsnachweise_screen.dart';
 import 'screens/noten_eingabe_screen.dart';
+import 'screens/noten_uebersicht_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -89,6 +90,26 @@ final _router = GoRouter(
       path: '/leistungsnachweise',
       builder: (context, state) => const LeistungsnachweiseScreen(),
     ),
+    // Noten-Übersicht Routen (müssen vor /noten/:id stehen wegen Routing-Priorität)
+    GoRoute(
+      path: '/noten/klasse/:klasseId',
+      builder: (context, state) => NotenUebersichtScreen(
+        klasseId: state.pathParameters['klasseId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/noten/fach/:fachId',
+      builder: (context, state) => NotenUebersichtScreen(
+        fachId: state.pathParameters['fachId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/noten/schueler/:studentId',
+      builder: (context, state) => NotenUebersichtScreen(
+        studentId: state.pathParameters['studentId']!,
+      ),
+    ),
+    // Noten-Eingabe für einzelnen Leistungsnachweis
     GoRoute(
       path: '/noten/:leistungsnachweisId',
       builder: (context, state) => NotenEingabeScreen(
