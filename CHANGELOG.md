@@ -21,12 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Klick auf Schüler → alle Noten dieses Schülers
   - Gruppiert nach Leistungsnachweisen mit Durchschnittsberechnung
   - Direkte Navigation zur Noteneingabe
+  - Filter-Chips für Typ, Fach und Klasse
+  - Statistiken: Durchschnitt pro LN/Schüler, Notenverteilung
 
 - **Neue Leistungsnachweis-Typen**
   - Wochentest (Gewichtung 1.0)
   - Praktisch (Gewichtung 1.5)
   - Mündlich (Gewichtung 1.0)
   - Mitarbeit (Gewichtung 1.0)
+
+- **Dashboard für täglichen Workflow**
+  - Schuljahr-Badge im Header
+  - "Meine Klassen" horizontal scrollbar mit Direktzugriff zur Notenübersicht
+  - "Aktuelle Leistungsnachweise" mit den 5 neuesten
+  - Schnellaktionen als Chips (Klassen, Schüler, Fächer, LN)
 
 ### Changed
 - **Grade Model refactored**
