@@ -239,13 +239,19 @@ class _LeistungsnachweiseScreenState
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Noten eingeben Button
-            IconButton(
-              icon: const Icon(Icons.edit_note),
+            // Noten eingeben Button - prominent
+            FilledButton.icon(
               onPressed: () => context.go('/noten/${ln.id}'),
-              tooltip: 'Noten eingeben',
-              color: RBSColors.dynamicRed,
+              icon: const Icon(Icons.edit_note, size: 18),
+              label: const Text('Noten'),
+              style: FilledButton.styleFrom(
+                backgroundColor: RBSColors.dynamicRed,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                visualDensity: VisualDensity.compact,
+              ),
             ),
+            const SizedBox(width: 4),
             IconButton(
               icon: const Icon(Icons.edit_outlined),
               onPressed: () =>
@@ -279,39 +285,27 @@ class _LeistungsnachweiseScreenState
 
   Color _getTypColor(LeistungsnachweisTyp typ) {
     switch (typ) {
-      case LeistungsnachweisTyp.schulaufgabe:
+      case LeistungsnachweisTyp.wochentest:
         return RBSColors.dynamicRed;
-      case LeistungsnachweisTyp.kurzarbeit:
-        return const Color(0xFFE91E63);
-      case LeistungsnachweisTyp.stegreifaufgabe:
-        return RBSColors.growingElder;
-      case LeistungsnachweisTyp.muendlich:
-        return RBSColors.courtGreen;
       case LeistungsnachweisTyp.praktisch:
         return const Color(0xFF2E7BB5);
-      case LeistungsnachweisTyp.projekt:
-        return const Color(0xFF9C27B0);
-      case LeistungsnachweisTyp.sonstiges:
-        return RBSColors.textOnLight.withValues(alpha: 0.5);
+      case LeistungsnachweisTyp.muendlich:
+        return RBSColors.courtGreen;
+      case LeistungsnachweisTyp.mitarbeit:
+        return RBSColors.growingElder;
     }
   }
 
   IconData _getTypIcon(LeistungsnachweisTyp typ) {
     switch (typ) {
-      case LeistungsnachweisTyp.schulaufgabe:
-        return Icons.description;
-      case LeistungsnachweisTyp.kurzarbeit:
+      case LeistungsnachweisTyp.wochentest:
         return Icons.assignment;
-      case LeistungsnachweisTyp.stegreifaufgabe:
-        return Icons.flash_on;
-      case LeistungsnachweisTyp.muendlich:
-        return Icons.record_voice_over;
       case LeistungsnachweisTyp.praktisch:
         return Icons.build;
-      case LeistungsnachweisTyp.projekt:
-        return Icons.folder_special;
-      case LeistungsnachweisTyp.sonstiges:
-        return Icons.more_horiz;
+      case LeistungsnachweisTyp.muendlich:
+        return Icons.record_voice_over;
+      case LeistungsnachweisTyp.mitarbeit:
+        return Icons.person;
     }
   }
 
@@ -331,7 +325,7 @@ class _LeistungsnachweiseScreenState
     String? selectedKlasseId = leistungsnachweis?.klasseId;
     String? selectedSubjectId = leistungsnachweis?.subjectId;
     LeistungsnachweisTyp selectedTyp =
-        leistungsnachweis?.typ ?? LeistungsnachweisTyp.stegreifaufgabe;
+        leistungsnachweis?.typ ?? LeistungsnachweisTyp.wochentest;
     double selectedGewichtung = leistungsnachweis?.gewichtung ?? 1.0;
     DateTime selectedDatum = leistungsnachweis?.datum ?? DateTime.now();
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../models/grade.dart';
 import '../models/leistungsnachweis.dart';
 import '../models/student.dart';
@@ -30,6 +31,11 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/leistungsnachweise'),
+          tooltip: 'Zurück',
+        ),
         title: _leistungsnachweis != null
             ? Text('Noten: ${_leistungsnachweis!.bezeichnung}')
             : const Text('Noteneingabe'),
@@ -80,9 +86,21 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
           tendenz: existingGrade?.tendenz ?? Tendenz.keine,
           kommentar: existingGrade?.kommentar,
           existingGradeId: existingGrade?.id,
+          updatedBy: existingGrade?.updatedBy,
         );
       }
     }
+  }
+
+  /// Generiert Kürzel aus Email (z.B. "buchner@schule.de" -> "bu")
+  String _getUserKuerzel(String? email) {
+    if (email == null || email.isEmpty) return '??';
+    final namePart = email.split('@').first;
+    // Erste 2 Buchstaben des Login-Namens
+    if (namePart.length >= 2) {
+      return namePart.substring(0, 2).toLowerCase();
+    }
+    return namePart.toLowerCase();
   }
 
   Widget _buildNotenTabelle(List<Student> students) {
@@ -163,7 +181,7 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
                 ),
               ),
               SizedBox(
-                width: 100,
+                width: 90,
                 child: Text(
                   'Tendenz',
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -233,79 +251,77 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
             ),
           ),
 
-          // Note (1-6)
+          // Note (1-6) mit Kürzel in Ecke
           SizedBox(
             width: 80,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[400]!),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: DropdownButton<int?>(
-                value: eingabe.note,
-                isExpanded: true,
-                underline: const SizedBox(),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                items: [
-                  const DropdownMenuItem<int?>(
-                    value: null,
-                    child: Text('-'),
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[400]!),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  ...List.generate(6, (i) => i + 1).map(
-                    (note) => DropdownMenuItem<int>(
-                      value: note,
-                      child: Text(
-                        '$note',
-                        style: TextStyle(
-                          color: _getNoteColor(note),
-                          fontWeight: FontWeight.bold,
+                  child: DropdownButton<int?>(
+                    value: eingabe.note,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    items: [
+                      const DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text('-'),
+                      ),
+                      ...List.generate(6, (i) => i + 1).map(
+                        (note) => DropdownMenuItem<int>(
+                          value: note,
+                          child: Text(
+                            '$note',
+                            style: TextStyle(
+                              color: _getNoteColor(note),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _noten[student.id] = eingabe.copyWith(note: value);
+                      });
+                      _saveGradeForStudent(student.id);
+                    },
+                  ),
+                ),
+                // Kürzel in rechter oberer Ecke
+                if (eingabe.updatedBy != null)
+                  Positioned(
+                    right: 2,
+                    top: 1,
+                    child: Text(
+                      eingabe.updatedBy!,
+                      style: TextStyle(
+                        fontSize: 8,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _noten[student.id] = eingabe.copyWith(note: value);
-                  });
-                  _saveGradeForStudent(student.id);
-                },
-              ),
+              ],
             ),
           ),
 
           const SizedBox(width: 8),
 
-          // Tendenz (+, -, keine)
-          SizedBox(
-            width: 100,
-            child: SegmentedButton<Tendenz>(
-              segments: const [
-                ButtonSegment<Tendenz>(
-                  value: Tendenz.plus,
-                  label: Text('+'),
-                ),
-                ButtonSegment<Tendenz>(
-                  value: Tendenz.keine,
-                  label: Text('○'),
-                ),
-                ButtonSegment<Tendenz>(
-                  value: Tendenz.minus,
-                  label: Text('-'),
-                ),
-              ],
-              selected: {eingabe.tendenz},
-              onSelectionChanged: (Set<Tendenz> selected) {
-                setState(() {
-                  _noten[student.id] = eingabe.copyWith(tendenz: selected.first);
-                });
-                _saveGradeForStudent(student.id);
-              },
-              style: ButtonStyle(
-                visualDensity: VisualDensity.compact,
-                padding: WidgetStateProperty.all(EdgeInsets.zero),
-              ),
-            ),
+          // Tendenz (+, -, keine) - einfache Buttons
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTendenzButton(student.id, eingabe, Tendenz.plus, '+'),
+              const SizedBox(width: 2),
+              _buildTendenzButton(student.id, eingabe, Tendenz.keine, '·'),
+              const SizedBox(width: 2),
+              _buildTendenzButton(student.id, eingabe, Tendenz.minus, '-'),
+            ],
           ),
 
           const SizedBox(width: 16),
@@ -331,6 +347,36 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTendenzButton(String studentId, _NotenEingabe eingabe, Tendenz tendenz, String label) {
+    final isSelected = eingabe.tendenz == tendenz;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _noten[studentId] = eingabe.copyWith(tendenz: tendenz);
+        });
+        _saveGradeForStudent(studentId);
+      },
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: isSelected ? RBSColors.dynamicRed : Colors.grey[200],
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: isSelected ? Colors.white : Colors.black87,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -431,20 +477,14 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
 
   IconData _getTypIcon(LeistungsnachweisTyp typ) {
     switch (typ) {
-      case LeistungsnachweisTyp.schulaufgabe:
+      case LeistungsnachweisTyp.wochentest:
         return Icons.assignment;
-      case LeistungsnachweisTyp.kurzarbeit:
-        return Icons.assignment_outlined;
-      case LeistungsnachweisTyp.stegreifaufgabe:
-        return Icons.flash_on;
-      case LeistungsnachweisTyp.muendlich:
-        return Icons.record_voice_over;
       case LeistungsnachweisTyp.praktisch:
         return Icons.build;
-      case LeistungsnachweisTyp.projekt:
-        return Icons.folder_special;
-      case LeistungsnachweisTyp.sonstiges:
-        return Icons.more_horiz;
+      case LeistungsnachweisTyp.muendlich:
+        return Icons.record_voice_over;
+      case LeistungsnachweisTyp.mitarbeit:
+        return Icons.person;
     }
   }
 
@@ -467,6 +507,9 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
+      final user = ref.read(currentUserProvider);
+      // Kürzel aus Email generieren (z.B. "alex.buchner@schule.de" -> "AB")
+      final userKuerzel = _getUserKuerzel(user?.email);
 
       if (eingabe.note != null) {
         final grade = Grade(
@@ -476,6 +519,7 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
           note: eingabe.note!,
           tendenz: eingabe.tendenz,
           kommentar: eingabe.kommentar,
+          updatedBy: userKuerzel,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -526,12 +570,14 @@ class _NotenEingabe {
   final Tendenz tendenz;
   final String? kommentar;
   final String? existingGradeId;
+  final String? updatedBy;
 
   _NotenEingabe({
     this.note,
     this.tendenz = Tendenz.keine,
     this.kommentar,
     this.existingGradeId,
+    this.updatedBy,
   });
 
   _NotenEingabe copyWith({
@@ -539,12 +585,14 @@ class _NotenEingabe {
     Tendenz? tendenz,
     String? kommentar,
     String? existingGradeId,
+    String? updatedBy,
   }) {
     return _NotenEingabe(
       note: note ?? this.note,
       tendenz: tendenz ?? this.tendenz,
       kommentar: kommentar ?? this.kommentar,
       existingGradeId: existingGradeId ?? this.existingGradeId,
+      updatedBy: updatedBy ?? this.updatedBy,
     );
   }
 }

@@ -27,6 +27,7 @@ class Grade {
   final int note; // 1-6
   final Tendenz tendenz; // +, - oder keine (nur Info, keine Berechnung)
   final String? kommentar;
+  final String? updatedBy; // Kürzel des letzten Änderers (z.B. "AB")
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -37,6 +38,7 @@ class Grade {
     required this.note,
     this.tendenz = Tendenz.keine,
     this.kommentar,
+    this.updatedBy,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -53,6 +55,7 @@ class Grade {
       note: data['note'] as int,
       tendenz: Tendenz.fromString(data['tendenz'] as String?),
       kommentar: data['kommentar'] as String?,
+      updatedBy: data['updatedBy'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -65,6 +68,7 @@ class Grade {
       'note': note,
       'tendenz': tendenz == Tendenz.keine ? null : tendenz.symbol,
       'kommentar': kommentar,
+      'updatedBy': updatedBy,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -77,6 +81,7 @@ class Grade {
     int? note,
     Tendenz? tendenz,
     String? kommentar,
+    String? updatedBy,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -87,6 +92,7 @@ class Grade {
       note: note ?? this.note,
       tendenz: tendenz ?? this.tendenz,
       kommentar: kommentar ?? this.kommentar,
+      updatedBy: updatedBy ?? this.updatedBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

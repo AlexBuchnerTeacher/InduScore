@@ -2,13 +2,10 @@
 
 /// Art des Leistungsnachweises
 enum LeistungsnachweisTyp {
-  schulaufgabe('Schulaufgabe'),
-  kurzarbeit('Kurzarbeit'),
-  stegreifaufgabe('Stegreifaufgabe'),
-  muendlich('Mündliche Note'),
-  praktisch('Praktische Arbeit'),
-  projekt('Projekt'),
-  sonstiges('Sonstiges');
+  wochentest('Wochentest'),
+  praktisch('Praktisch'),
+  muendlich('Mündlich'),
+  mitarbeit('Mitarbeit');
 
   final String label;
 
@@ -17,7 +14,7 @@ enum LeistungsnachweisTyp {
   static LeistungsnachweisTyp fromString(String value) {
     return LeistungsnachweisTyp.values.firstWhere(
       (t) => t.name == value || t.label == value,
-      orElse: () => LeistungsnachweisTyp.sonstiges,
+      orElse: () => LeistungsnachweisTyp.wochentest,
     );
   }
 }
