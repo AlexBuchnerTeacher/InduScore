@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import '../core/theme/rbs_theme.dart';
-import '../core/widgets/rbs_components.dart';
 import '../models/grade.dart';
 import '../models/leistungsnachweis.dart';
 import '../models/student.dart';
 import '../providers/app_providers.dart';
+import '../core/theme/rbs_theme.dart';
+import '../core/widgets/rbs_components.dart';
 
-/// Excel-Style Noteneingabe für einen Leistungsnachweis
 class NotenEingabeScreen extends ConsumerStatefulWidget {
   final String leistungsnachweisId;
 
@@ -24,367 +20,266 @@ class NotenEingabeScreen extends ConsumerStatefulWidget {
 }
 
 class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
-  // Zustand für Noten-Eingaben: studentId -> (note, kommentar, punkte)
-  final Map<String, _NotenEingabe> _eingaben = {};
-  bool _isSaving = false;
+  final Map<String, _NotenEingabe> _noten = {};
+  bool _isLoading = false;
   bool _hasChanges = false;
+  Leistungsnachweis? _leistungsnachweis;
 
   @override
   Widget build(BuildContext context) {
-    final lnAsync = ref.watch(leistungsnachweisProvider(widget.leistungsnachweisId));
-
-    return lnAsync.when(
-      data: (ln) => _buildContent(context, ln),
-      loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Noteneingabe')),
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        appBar: AppBar(title: const Text('Noteneingabe')),
-        body: Center(child: Text('Fehler: $error')),
-      ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, Leistungsnachweis ln) {
-    final klasseAsync = ref.watch(klasseProvider(ln.klasseId));
-    final subjectAsync = ref.watch(subjectProvider(ln.subjectId));
-    final studentsAsync = ref.watch(studentsByKlasseProvider(ln.klasseId));
-    final gradesAsync = ref.watch(gradesByLeistungsnachweisProvider(ln.id));
+    final leistungsnachweisAsync = ref.watch(leistungsnachweisProvider(widget.leistungsnachweisId));
+    final gradesAsync = ref.watch(gradesByLeistungsnachweisProvider(widget.leistungsnachweisId));
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => _handleBack(context),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(ln.bezeichnung),
-            Row(
-              children: [
-                klasseAsync.when(
-                  data: (klasse) => Text(
-                    klasse.name,
-                    style: RBSTypography.bodySmall.copyWith(
-                      color: RBSColors.textOnLight.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (e, s) => const SizedBox.shrink(),
-                ),
-                const SizedBox(width: RBSSpacing.sm),
-                subjectAsync.when(
-                  data: (subject) => Text(
-                    '• ${subject.shortName ?? subject.name}',
-                    style: RBSTypography.bodySmall.copyWith(
-                      color: RBSColors.textOnLight.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (e, s) => const SizedBox.shrink(),
-                ),
-                const SizedBox(width: RBSSpacing.sm),
-                Text(
-                  '• ${DateFormat('dd.MM.yyyy').format(ln.datum)}',
-                  style: RBSTypography.bodySmall.copyWith(
-                    color: RBSColors.textOnLight.withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+        title: _leistungsnachweis != null
+            ? Text('Noten: ${_leistungsnachweis!.bezeichnung}')
+            : const Text('Noteneingabe'),
         actions: [
           if (_hasChanges)
-            TextButton.icon(
-              onPressed: _isSaving ? null : () => _saveGrades(ln),
-              icon: _isSaving
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.save),
-              label: const Text('Speichern'),
-              style: TextButton.styleFrom(
-                foregroundColor: RBSColors.dynamicRed,
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: RBSButton(
+                label: 'Speichern',
+                icon: Icons.save,
+                onPressed: _isLoading ? null : _saveNoten,
               ),
             ),
         ],
       ),
-      body: studentsAsync.when(
-        data: (students) {
-          if (students.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.people_outline,
-                    size: 64,
-                    color: RBSColors.textOnLight.withValues(alpha: 0.3),
-                  ),
-                  const SizedBox(height: RBSSpacing.md),
-                  Text(
-                    'Keine Schüler in dieser Klasse',
-                    style: RBSTypography.h4.copyWith(
-                      color: RBSColors.textOnLight.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return gradesAsync.when(
-            data: (existingGrades) {
-              // Initialisiere Eingaben mit bestehenden Noten
-              _initializeEingaben(students, existingGrades);
-
-              return Column(
-                children: [
-                  // Header mit Legende
-                  _buildLegend(ln),
-                  const Divider(height: 1),
-                  // Notenliste
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(RBSSpacing.md),
-                      itemCount: students.length,
-                      itemBuilder: (context, index) {
-                        final student = students[index];
-                        return _buildStudentRow(student, ln, index);
-                      },
-                    ),
-                  ),
-                  // Footer mit Statistik
-                  _buildStatisticsFooter(students),
-                ],
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Fehler: $error')),
-          );
-        },
+      body: leistungsnachweisAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Fehler: $error')),
+        data: (leistungsnachweis) {
+          _leistungsnachweis = leistungsnachweis;
+          final studentsAsync = ref.watch(studentsByKlasseProvider(leistungsnachweis.klasseId));
+
+          return studentsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Fehler: $error')),
+            data: (students) {
+              if (students.isEmpty) {
+                return const Center(
+                  child: Text('Keine Schüler in dieser Klasse'),
+                );
+              }
+
+              return gradesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text('Fehler: $error')),
+                data: (grades) {
+                  // Initialisiere Noten für alle Schüler
+                  _initializeNoten(students, grades);
+
+                  return _buildNotenTabelle(students);
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }
 
-  void _initializeEingaben(List<Student> students, List<Grade> existingGrades) {
+  void _initializeNoten(List<Student> students, List<Grade> grades) {
     for (final student in students) {
-      if (!_eingaben.containsKey(student.id)) {
-        final existingGrade = existingGrades
+      if (!_noten.containsKey(student.id)) {
+        final existingGrade = grades
             .where((g) => g.studentId == student.id)
             .firstOrNull;
 
-        _eingaben[student.id] = _NotenEingabe(
-          gradeId: existingGrade?.id,
+        _noten[student.id] = _NotenEingabe(
           note: existingGrade?.note,
-          punkte: existingGrade?.punkte,
+          tendenz: existingGrade?.tendenz ?? Tendenz.keine,
           kommentar: existingGrade?.kommentar,
+          existingGradeId: existingGrade?.id,
         );
       }
     }
   }
 
-  Widget _buildLegend(Leistungsnachweis ln) {
-    return Container(
-      padding: const EdgeInsets.all(RBSSpacing.md),
-      color: RBSColors.paper,
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text('Schüler', style: RBSTypography.label),
-          ),
-          SizedBox(
-            width: 80,
-            child: Text(
-              'Note',
-              style: RBSTypography.label,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          if (ln.maxPunkte > 0)
-            SizedBox(
-              width: 100,
-              child: Text(
-                'Punkte (/${ln.maxPunkte.toInt()})',
-                style: RBSTypography.label,
-                textAlign: TextAlign.center,
+  Widget _buildNotenTabelle(List<Student> students) {
+    // Sortiere Schüler nach displayName
+    final sortedStudents = List<Student>.from(students)
+      ..sort((a, b) => a.displayName.compareTo(b.displayName));
+
+    return Column(
+      children: [
+        // Header mit Leistungsnachweis-Info
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          color: RBSColors.dynamicRed.withValues(alpha: 0.1),
+          child: Row(
+            children: [
+              Icon(
+                _getTypIcon(_leistungsnachweis!.typ),
+                color: RBSColors.dynamicRed,
               ),
-            ),
-          SizedBox(
-            width: 180,
-            child: Text('Kommentar', style: RBSTypography.label),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _leistungsnachweis!.bezeichnung,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      '${_leistungsnachweis!.typ.label} • Gewichtung: ${_leistungsnachweis!.gewichtung}x • ${_formatDate(_leistungsnachweis!.datum)}',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 48), // Platz für Tooltip-Icon
-        ],
-      ),
+        ),
+
+        // Tabellen-Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            border: Border(
+              bottom: BorderSide(color: Colors.grey[300]!),
+            ),
+          ),
+          child: const Row(
+            children: [
+              SizedBox(
+                width: 40,
+                child: Text(
+                  'Nr.',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  'Schüler/in',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(
+                width: 80,
+                child: Text(
+                  'Note',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                child: Text(
+                  'Tendenz',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 16),
+                  child: Text(
+                    'Kommentar',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Schüler-Liste
+        Expanded(
+          child: ListView.builder(
+            itemCount: sortedStudents.length,
+            itemBuilder: (context, index) {
+              final student = sortedStudents[index];
+              return _buildStudentRow(student, index + 1);
+            },
+          ),
+        ),
+
+        // Footer mit Statistik
+        _buildStatistikFooter(),
+      ],
     );
   }
 
-  Widget _buildStudentRow(Student student, Leistungsnachweis ln, int index) {
-    final eingabe = _eingaben[student.id] ?? _NotenEingabe();
-    final noteController = TextEditingController(
-      text: eingabe.note?.toString() ?? '',
-    );
-    final punkteController = TextEditingController(
-      text: eingabe.punkte?.toString() ?? '',
-    );
-    final kommentarController = TextEditingController(
-      text: eingabe.kommentar ?? '',
-    );
-
-    // Alternate row colors
-    final bgColor = index.isEven
-        ? RBSColors.white
-        : RBSColors.paper.withValues(alpha: 0.5);
+  Widget _buildStudentRow(Student student, int nummer) {
+    final eingabe = _noten[student.id]!;
+    final isEven = nummer % 2 == 0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: RBSSpacing.md,
-        vertical: RBSSpacing.sm,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: isEven ? Colors.grey[50] : Colors.white,
         border: Border(
-          bottom: BorderSide(
-            color: RBSColors.textOnLight.withValues(alpha: 0.1),
-          ),
+          bottom: BorderSide(color: Colors.grey[200]!),
         ),
       ),
       child: Row(
         children: [
-          // Schüler-Pseudonym
-          Expanded(
-            flex: 2,
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: RBSColors.dynamicRed.withValues(alpha: 0.1),
-                  child: Text(
-                    student.pseudonym.substring(0, 2),
-                    style: RBSTypography.bodySmall.copyWith(
-                      color: RBSColors.dynamicRed,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: RBSSpacing.sm),
-                Text(student.pseudonym, style: RBSTypography.bodyMedium),
-              ],
+          // Nummer
+          SizedBox(
+            width: 40,
+            child: Text(
+              '$nummer.',
+              style: const TextStyle(color: Colors.grey),
             ),
           ),
 
-          // Note Eingabe (1-6)
+          // Name
+          Expanded(
+            flex: 3,
+            child: Text(
+              student.displayName,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+
+          // Note (1-6)
           SizedBox(
             width: 80,
-            child: TextField(
-              controller: noteController,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(1),
-                _NoteRangeFormatter(),
-              ],
-              decoration: InputDecoration(
-                hintText: '-',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(RBSSpacing.xs),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: RBSSpacing.sm,
-                  vertical: RBSSpacing.xs,
-                ),
-                filled: true,
-                fillColor: _getNoteColor(eingabe.note),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[400]!),
+                borderRadius: BorderRadius.circular(4),
               ),
-              onChanged: (value) {
-                final note = int.tryParse(value);
-                setState(() {
-                  _eingaben[student.id] = eingabe.copyWith(
-                    note: note,
-                    clearNote: note == null,
-                  );
-                  _hasChanges = true;
-                });
-              },
-            ),
-          ),
-
-          // Punkte Eingabe (optional)
-          if (ln.maxPunkte > 0)
-            SizedBox(
-              width: 100,
-              child: Padding(
-                padding: const EdgeInsets.only(left: RBSSpacing.sm),
-                child: TextField(
-                  controller: punkteController,
-                  textAlign: TextAlign.center,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    hintText: '-',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(RBSSpacing.xs),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: RBSSpacing.sm,
-                      vertical: RBSSpacing.xs,
+              child: DropdownButton<int?>(
+                value: eingabe.note,
+                isExpanded: true,
+                underline: const SizedBox(),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                items: [
+                  const DropdownMenuItem<int?>(
+                    value: null,
+                    child: Text('-'),
+                  ),
+                  ...List.generate(6, (i) => i + 1).map(
+                    (note) => DropdownMenuItem<int>(
+                      value: note,
+                      child: Text(
+                        '$note',
+                        style: TextStyle(
+                          color: _getNoteColor(note),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                  onChanged: (value) {
-                    final punkte = double.tryParse(value);
-                    // Auto-Berechnung der Note aus Punkten
-                    int? autoNote;
-                    if (punkte != null && ln.maxPunkte > 0) {
-                      autoNote = IHKNotenschluessel.punkteZuNote(
-                        punkte,
-                        ln.maxPunkte,
-                      );
-                    }
-                    setState(() {
-                      _eingaben[student.id] = eingabe.copyWith(
-                        punkte: punkte,
-                        note: autoNote ?? eingabe.note,
-                        clearPunkte: punkte == null,
-                      );
-                      _hasChanges = true;
-                    });
-                  },
-                ),
-              ),
-            ),
-
-          // Kommentar Eingabe
-          SizedBox(
-            width: 180,
-            child: Padding(
-              padding: const EdgeInsets.only(left: RBSSpacing.sm),
-              child: TextField(
-                controller: kommentarController,
-                decoration: InputDecoration(
-                  hintText: 'Kommentar...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(RBSSpacing.xs),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: RBSSpacing.sm,
-                    vertical: RBSSpacing.xs,
-                  ),
-                ),
+                ],
                 onChanged: (value) {
                   setState(() {
-                    _eingaben[student.id] = eingabe.copyWith(
-                      kommentar: value.isEmpty ? null : value,
-                      clearKommentar: value.isEmpty,
-                    );
+                    _noten[student.id] = eingabe.copyWith(note: value);
                     _hasChanges = true;
                   });
                 },
@@ -392,200 +287,242 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
             ),
           ),
 
-          // Tooltip-Icon falls Kommentar vorhanden
+          const SizedBox(width: 8),
+
+          // Tendenz (+, -, keine)
           SizedBox(
-            width: 48,
-            child: eingabe.kommentar != null && eingabe.kommentar!.isNotEmpty
-                ? Tooltip(
-                    message: eingabe.kommentar!,
-                    child: Icon(
-                      Icons.comment,
-                      color: RBSColors.courtGreen,
-                      size: 20,
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatisticsFooter(List<Student> students) {
-    final notenMitWert = _eingaben.values
-        .where((e) => e.note != null)
-        .map((e) => e.note!)
-        .toList();
-
-    final anzahlMitNote = notenMitWert.length;
-    final anzahlOhneNote = students.length - anzahlMitNote;
-    final durchschnitt = notenMitWert.isEmpty
-        ? 0.0
-        : notenMitWert.reduce((a, b) => a + b) / notenMitWert.length;
-
-    // Notenverteilung
-    final verteilung = <int, int>{};
-    for (final note in notenMitWert) {
-      verteilung[note] = (verteilung[note] ?? 0) + 1;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(RBSSpacing.md),
-      color: RBSColors.paper,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Statistik links
-          Row(
-            children: [
-              _StatChip(
-                label: 'Eingetragen',
-                value: '$anzahlMitNote/${students.length}',
-                color: RBSColors.courtGreen,
-              ),
-              const SizedBox(width: RBSSpacing.sm),
-              if (anzahlOhneNote > 0)
-                _StatChip(
-                  label: 'Offen',
-                  value: '$anzahlOhneNote',
-                  color: RBSColors.dynamicRed,
+            width: 100,
+            child: SegmentedButton<Tendenz>(
+              segments: const [
+                ButtonSegment<Tendenz>(
+                  value: Tendenz.plus,
+                  label: Text('+'),
                 ),
-              const SizedBox(width: RBSSpacing.md),
-              if (anzahlMitNote > 0)
-                _StatChip(
-                  label: 'Ø',
-                  value: durchschnitt.toStringAsFixed(2),
-                  color: _getAverageColor(durchschnitt),
+                ButtonSegment<Tendenz>(
+                  value: Tendenz.keine,
+                  label: Text('○'),
                 ),
-            ],
-          ),
-
-          // Notenverteilung rechts
-          if (verteilung.isNotEmpty)
-            Row(
-              children: [
-                for (int i = 1; i <= 6; i++)
-                  if (verteilung[i] != null && verteilung[i]! > 0)
-                    Padding(
-                      padding: const EdgeInsets.only(left: RBSSpacing.xs),
-                      child: Chip(
-                        label: Text('${verteilung[i]}x$i'),
-                        backgroundColor: _getNoteColor(i),
-                        labelStyle: RBSTypography.bodySmall,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                      ),
-                    ),
+                ButtonSegment<Tendenz>(
+                  value: Tendenz.minus,
+                  label: Text('-'),
+                ),
               ],
+              selected: {eingabe.tendenz},
+              onSelectionChanged: (Set<Tendenz> selected) {
+                setState(() {
+                  _noten[student.id] = eingabe.copyWith(tendenz: selected.first);
+                  _hasChanges = true;
+                });
+              },
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                padding: WidgetStateProperty.all(EdgeInsets.zero),
+              ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Color _getNoteColor(int? note) {
-    if (note == null) return RBSColors.white;
-    switch (note) {
-      case 1:
-        return const Color(0xFF4CAF50).withValues(alpha: 0.2); // Grün
-      case 2:
-        return const Color(0xFF8BC34A).withValues(alpha: 0.2); // Hellgrün
-      case 3:
-        return const Color(0xFFFFEB3B).withValues(alpha: 0.2); // Gelb
-      case 4:
-        return const Color(0xFFFF9800).withValues(alpha: 0.2); // Orange
-      case 5:
-        return const Color(0xFFFF5722).withValues(alpha: 0.2); // Dunkelorange
-      case 6:
-        return const Color(0xFFF44336).withValues(alpha: 0.2); // Rot
-      default:
-        return RBSColors.white;
-    }
-  }
-
-  Color _getAverageColor(double avg) {
-    if (avg <= 2.0) return RBSColors.courtGreen;
-    if (avg <= 3.5) return const Color(0xFFFF9800);
-    return RBSColors.dynamicRed;
-  }
-
-  void _handleBack(BuildContext context) {
-    if (_hasChanges) {
-      showDialog(
-        context: context,
-        builder: (context) => RBSDialog(
-          title: 'Änderungen verwerfen?',
-          content: const Text(
-            'Sie haben ungespeicherte Änderungen. Möchten Sie diese verwerfen?',
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Abbrechen'),
-            ),
-            RBSButton(
-              label: 'Verwerfen',
-              onPressed: () {
-                Navigator.pop(context); // Dialog schließen
-                context.go('/leistungsnachweise');
+
+          const SizedBox(width: 16),
+
+          // Kommentar
+          Expanded(
+            flex: 2,
+            child: TextFormField(
+              initialValue: eingabe.kommentar ?? '',
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                border: OutlineInputBorder(),
+                hintText: 'Optional...',
+              ),
+              onChanged: (value) {
+                _noten[student.id] = eingabe.copyWith(
+                  kommentar: value.isEmpty ? null : value,
+                );
+                _hasChanges = true;
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatistikFooter() {
+    final notenMitWert = _noten.values.where((n) => n.note != null).toList();
+    if (notenMitWert.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        color: Colors.grey[100],
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Noch keine Noten eingetragen'),
           ],
         ),
       );
-    } else {
-      context.go('/leistungsnachweise');
+    }
+
+    final durchschnitt = notenMitWert.map((n) => n.note!).reduce((a, b) => a + b) /
+        notenMitWert.length;
+
+    // Zähle Noten-Verteilung
+    final verteilung = <int, int>{};
+    for (final n in notenMitWert) {
+      verteilung[n.note!] = (verteilung[n.note!] ?? 0) + 1;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.grey[100],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(
+            'Eingetragen',
+            '${notenMitWert.length}/${_noten.length}',
+            Icons.edit_note,
+          ),
+          _buildStatItem(
+            'Durchschnitt',
+            durchschnitt.toStringAsFixed(2),
+            Icons.analytics,
+            color: _getNoteColor(durchschnitt.round()),
+          ),
+          ...List.generate(6, (i) => i + 1).map(
+            (note) => _buildStatItem(
+              'Note $note',
+              '${verteilung[note] ?? 0}',
+              null,
+              color: _getNoteColor(note),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, IconData? icon, {Color? color}) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) Icon(icon, size: 16, color: color ?? Colors.grey),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+
+  Color _getNoteColor(int note) {
+    switch (note) {
+      case 1:
+        return Colors.green[700]!;
+      case 2:
+        return Colors.green;
+      case 3:
+        return Colors.orange;
+      case 4:
+        return Colors.orange[700]!;
+      case 5:
+        return Colors.red;
+      case 6:
+        return Colors.red[900]!;
+      default:
+        return Colors.grey;
     }
   }
 
-  Future<void> _saveGrades(Leistungsnachweis ln) async {
-    setState(() => _isSaving = true);
+  IconData _getTypIcon(LeistungsnachweisTyp typ) {
+    switch (typ) {
+      case LeistungsnachweisTyp.schulaufgabe:
+        return Icons.assignment;
+      case LeistungsnachweisTyp.kurzarbeit:
+        return Icons.assignment_outlined;
+      case LeistungsnachweisTyp.stegreifaufgabe:
+        return Icons.flash_on;
+      case LeistungsnachweisTyp.muendlich:
+        return Icons.record_voice_over;
+      case LeistungsnachweisTyp.praktisch:
+        return Icons.build;
+      case LeistungsnachweisTyp.projekt:
+        return Icons.folder_special;
+      case LeistungsnachweisTyp.sonstiges:
+        return Icons.more_horiz;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+  }
+
+  Future<void> _saveNoten() async {
+    setState(() => _isLoading = true);
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
-      final now = DateTime.now();
 
-      final gradesToSave = <Grade>[];
-      for (final entry in _eingaben.entries) {
+      for (final entry in _noten.entries) {
         final studentId = entry.key;
         final eingabe = entry.value;
 
+        // Nur speichern wenn Note vorhanden
         if (eingabe.note != null) {
-          gradesToSave.add(Grade(
-            id: eingabe.gradeId ?? '',
+          final grade = Grade(
+            id: eingabe.existingGradeId ?? '',
             studentId: studentId,
-            leistungsnachweisId: ln.id,
+            leistungsnachweisId: widget.leistungsnachweisId,
             note: eingabe.note!,
-            punkte: eingabe.punkte,
+            tendenz: eingabe.tendenz,
             kommentar: eingabe.kommentar,
-            createdAt: eingabe.gradeId != null ? now : now, // Wird nicht geändert bei Update
-            updatedAt: now,
-          ));
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+
+          if (eingabe.existingGradeId != null) {
+            await firestoreService.updateGrade(grade);
+          } else {
+            final newId = await firestoreService.createGrade(grade);
+            _noten[studentId] = eingabe.copyWith(existingGradeId: newId);
+          }
+        } else if (eingabe.existingGradeId != null) {
+          // Note wurde gelöscht - Grade löschen
+          await firestoreService.deleteGrade(eingabe.existingGradeId!);
+          _noten[studentId] = eingabe.copyWith(existingGradeId: null);
         }
       }
 
-      await firestoreService.saveGrades(gradesToSave);
+      // Refresh grades
+      ref.invalidate(gradesByLeistungsnachweisProvider(widget.leistungsnachweisId));
 
       setState(() {
         _hasChanges = false;
-        _isSaving = false;
+        _isLoading = false;
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${gradesToSave.length} Noten gespeichert'),
-            backgroundColor: RBSColors.courtGreen,
+          const SnackBar(
+            content: Text('Noten erfolgreich gespeichert'),
+            backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      setState(() => _isSaving = false);
+      setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Fehler beim Speichern: $e'),
-            backgroundColor: RBSColors.dynamicRed,
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -593,95 +530,30 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
   }
 }
 
-/// Eingabe-Daten pro Schüler
 class _NotenEingabe {
-  final String? gradeId;
   final int? note;
-  final double? punkte;
+  final Tendenz tendenz;
   final String? kommentar;
+  final String? existingGradeId;
 
   _NotenEingabe({
-    this.gradeId,
     this.note,
-    this.punkte,
+    this.tendenz = Tendenz.keine,
     this.kommentar,
+    this.existingGradeId,
   });
 
   _NotenEingabe copyWith({
-    String? gradeId,
     int? note,
-    double? punkte,
+    Tendenz? tendenz,
     String? kommentar,
-    bool clearNote = false,
-    bool clearPunkte = false,
-    bool clearKommentar = false,
+    String? existingGradeId,
   }) {
     return _NotenEingabe(
-      gradeId: gradeId ?? this.gradeId,
-      note: clearNote ? null : (note ?? this.note),
-      punkte: clearPunkte ? null : (punkte ?? this.punkte),
-      kommentar: clearKommentar ? null : (kommentar ?? this.kommentar),
-    );
-  }
-}
-
-/// Formatter für Noten 1-6
-class _NoteRangeFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) return newValue;
-    final value = int.tryParse(newValue.text);
-    if (value == null || value < 1 || value > 6) {
-      return oldValue;
-    }
-    return newValue;
-  }
-}
-
-/// Statistik-Chip Widget
-class _StatChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _StatChip({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: RBSSpacing.sm,
-        vertical: RBSSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(RBSSpacing.xs),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: RBSTypography.bodySmall.copyWith(color: color),
-          ),
-          const SizedBox(width: RBSSpacing.xs),
-          Text(
-            value,
-            style: RBSTypography.bodyMedium.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+      note: note ?? this.note,
+      tendenz: tendenz ?? this.tendenz,
+      kommentar: kommentar ?? this.kommentar,
+      existingGradeId: existingGradeId ?? this.existingGradeId,
     );
   }
 }

@@ -1,16 +1,32 @@
 ﻿import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Tendenz einer Note (optional, nur Info, keine Berechnung)
+enum Tendenz {
+  plus('+'),
+  minus('-'),
+  keine('');
+
+  final String symbol;
+  const Tendenz(this.symbol);
+
+  static Tendenz fromString(String? value) {
+    if (value == '+') return Tendenz.plus;
+    if (value == '-') return Tendenz.minus;
+    return Tendenz.keine;
+  }
+}
+
 /// Note zu einem Leistungsnachweis
 /// 
 /// Eine Note gehört immer zu einem Schüler und einem Leistungsnachweis.
-/// Die Gewichtung wird vom Leistungsnachweis-Typ abgeleitet.
+/// Die Gewichtung wird vom Leistungsnachweis abgeleitet.
 class Grade {
   final String id;
   final String studentId;
-  final String leistungsnachweisId; // Zuordnung zum Leistungsnachweis
-  final double? punkte; // Erreichte Punkte (optional, für IHK-Schlüssel)
-  final int note; // 1-6 (kann direkt eingegeben oder aus Punkten berechnet werden)
-  final String? kommentar; // Tooltip-Kommentar für die Note
+  final String leistungsnachweisId;
+  final int note; // 1-6
+  final Tendenz tendenz; // +, - oder keine (nur Info, keine Berechnung)
+  final String? kommentar;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -18,12 +34,15 @@ class Grade {
     required this.id,
     required this.studentId,
     required this.leistungsnachweisId,
-    this.punkte,
     required this.note,
+    this.tendenz = Tendenz.keine,
     this.kommentar,
     required this.createdAt,
     required this.updatedAt,
   });
+
+  /// Formatierte Note mit Tendenz (z.B. "2+", "3-", "1")
+  String get noteFormatiert => '$note${tendenz.symbol}';
 
   factory Grade.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -31,8 +50,8 @@ class Grade {
       id: doc.id,
       studentId: data['studentId'] as String,
       leistungsnachweisId: data['leistungsnachweisId'] as String,
-      punkte: (data['punkte'] as num?)?.toDouble(),
       note: data['note'] as int,
+      tendenz: Tendenz.fromString(data['tendenz'] as String?),
       kommentar: data['kommentar'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
@@ -43,8 +62,8 @@ class Grade {
     return {
       'studentId': studentId,
       'leistungsnachweisId': leistungsnachweisId,
-      'punkte': punkte,
       'note': note,
+      'tendenz': tendenz == Tendenz.keine ? null : tendenz.symbol,
       'kommentar': kommentar,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
@@ -55,8 +74,8 @@ class Grade {
     String? id,
     String? studentId,
     String? leistungsnachweisId,
-    double? punkte,
     int? note,
+    Tendenz? tendenz,
     String? kommentar,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -65,8 +84,8 @@ class Grade {
       id: id ?? this.id,
       studentId: studentId ?? this.studentId,
       leistungsnachweisId: leistungsnachweisId ?? this.leistungsnachweisId,
-      punkte: punkte ?? this.punkte,
       note: note ?? this.note,
+      tendenz: tendenz ?? this.tendenz,
       kommentar: kommentar ?? this.kommentar,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

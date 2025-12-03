@@ -2,27 +2,27 @@
 
 /// Art des Leistungsnachweises
 enum LeistungsnachweisTyp {
-  schulaufgabe('Schulaufgabe', 2.0), // Gewichtung 2:1
-  stegreifaufgabe('Stegreifaufgabe', 1.0),
-  muendlich('MÃ¼ndliche Note', 1.0),
-  praktisch('Praktische Arbeit', 1.5),
-  projekt('Projekt', 2.0),
-  sonstiges('Sonstiges', 1.0);
+  schulaufgabe('Schulaufgabe'),
+  kurzarbeit('Kurzarbeit'),
+  stegreifaufgabe('Stegreifaufgabe'),
+  muendlich('Mündliche Note'),
+  praktisch('Praktische Arbeit'),
+  projekt('Projekt'),
+  sonstiges('Sonstiges');
 
-  final String name;
-  final double gewichtung;
+  final String label;
 
-  const LeistungsnachweisTyp(this.name, this.gewichtung);
+  const LeistungsnachweisTyp(this.label);
 
-  static LeistungsnachweisTyp fromString(String name) {
+  static LeistungsnachweisTyp fromString(String value) {
     return LeistungsnachweisTyp.values.firstWhere(
-      (t) => t.name == name,
+      (t) => t.name == value || t.label == value,
       orElse: () => LeistungsnachweisTyp.sonstiges,
     );
   }
 }
 
-/// Leistungsnachweis (PrÃ¼fung, Test, mÃ¼ndliche Note, etc.)
+/// Leistungsnachweis (Prüfung, Test, mündliche Note, etc.)
 class Leistungsnachweis {
   final String id;
   final String subjectId; // Fach
@@ -30,7 +30,7 @@ class Leistungsnachweis {
   final LeistungsnachweisTyp typ;
   final String bezeichnung; // z.B. "1. Schulaufgabe"
   final DateTime datum;
-  final double maxPunkte; // Maximale Punktzahl (z.B. 100)
+  final double gewichtung; // 1, 1.5 oder 2
   final String? beschreibung;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -42,7 +42,7 @@ class Leistungsnachweis {
     required this.typ,
     required this.bezeichnung,
     required this.datum,
-    required this.maxPunkte,
+    required this.gewichtung,
     this.beschreibung,
     required this.createdAt,
     required this.updatedAt,
@@ -58,7 +58,7 @@ class Leistungsnachweis {
       typ: LeistungsnachweisTyp.fromString(data['typ'] as String),
       bezeichnung: data['bezeichnung'] as String,
       datum: (data['datum'] as Timestamp).toDate(),
-      maxPunkte: (data['maxPunkte'] as num).toDouble(),
+      gewichtung: (data['gewichtung'] as num?)?.toDouble() ?? 1.0,
       beschreibung: data['beschreibung'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
@@ -72,7 +72,7 @@ class Leistungsnachweis {
       'typ': typ.name,
       'bezeichnung': bezeichnung,
       'datum': Timestamp.fromDate(datum),
-      'maxPunkte': maxPunkte,
+      'gewichtung': gewichtung,
       'beschreibung': beschreibung,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
@@ -86,7 +86,7 @@ class Leistungsnachweis {
     LeistungsnachweisTyp? typ,
     String? bezeichnung,
     DateTime? datum,
-    double? maxPunkte,
+    double? gewichtung,
     String? beschreibung,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -98,7 +98,7 @@ class Leistungsnachweis {
       typ: typ ?? this.typ,
       bezeichnung: bezeichnung ?? this.bezeichnung,
       datum: datum ?? this.datum,
-      maxPunkte: maxPunkte ?? this.maxPunkte,
+      gewichtung: gewichtung ?? this.gewichtung,
       beschreibung: beschreibung ?? this.beschreibung,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
