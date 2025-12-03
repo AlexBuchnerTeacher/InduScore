@@ -453,11 +453,29 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     for (final ln in leistungsnachweise) {
       lnBySubject.putIfAbsent(ln.subjectId, () => []).add(ln);
     }
+    
+    // Berechne Gesamt-Statistik
+    double gesamtSumme = 0;
+    double gesamtGewichtung = 0;
+    int gesamtAnzahl = 0;
+    
+    for (final ln in leistungsnachweise) {
+      final key = '${student.id}_${ln.id}';
+      final eingabe = _noten[key];
+      if (eingabe?.note != null) {
+        final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+        gesamtSumme += noteValue * ln.gewichtung;
+        gesamtGewichtung += ln.gewichtung;
+        gesamtAnzahl++;
+      }
+    }
+    
+    final gesamtDurchschnitt = gesamtGewichtung > 0 ? gesamtSumme / gesamtGewichtung : null;
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Schüler-Info Header
+        // Schüler-Info Header mit Gesamt-Durchschnitt
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -473,13 +491,50 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  student.displayName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        student.displayName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      Text(
+                        '$gesamtAnzahl von ${leistungsnachweise.length} Noten',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
                   ),
                 ),
+                // Gesamt-Durchschnitt
+                if (gesamtDurchschnitt != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _getNoteColor(gesamtDurchschnitt.round()).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: _getNoteColor(gesamtDurchschnitt.round()), width: 2),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          '⌀ ${gesamtDurchschnitt.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: _getNoteColor(gesamtDurchschnitt.round()),
+                          ),
+                        ),
+                        Text(
+                          'Gesamt',
+                          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
@@ -500,6 +555,24 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     Subject? subject,
     List<Leistungsnachweis> leistungsnachweise,
   ) {
+    // Berechne Durchschnitt für dieses Fach
+    double summe = 0;
+    double gewichtungsSumme = 0;
+    int anzahl = 0;
+    
+    for (final ln in leistungsnachweise) {
+      final key = '${student.id}_${ln.id}';
+      final eingabe = _noten[key];
+      if (eingabe?.note != null) {
+        final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+        summe += noteValue * ln.gewichtung;
+        gewichtungsSumme += ln.gewichtung;
+        anzahl++;
+      }
+    }
+    
+    final durchschnitt = gewichtungsSumme > 0 ? summe / gewichtungsSumme : null;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -512,13 +585,51 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
               color: RBSColors.courtGreen.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             ),
-            child: Text(
-              subject?.name ?? 'Unbekanntes Fach',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    subject?.name ?? 'Unbekanntes Fach',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                // Durchschnitt Badge
+                if (durchschnitt != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getNoteColor(durchschnitt.round()).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _getNoteColor(durchschnitt.round())),
+                    ),
+                    child: Text(
+                      '⌀ ${durchschnitt.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: _getNoteColor(durchschnitt.round()),
+                      ),
+                    ),
+                  ),
+                if (durchschnitt == null)
+                  Text(
+                    '$anzahl/${leistungsnachweise.length}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+              ],
             ),
           ),
           // Einzelne Leistungsnachweise
           ...leistungsnachweise.map((ln) => _buildStudentLNRow(student, ln)),
+          // Footer mit Anzahl
+          if (anzahl > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Text(
+                '$anzahl von ${leistungsnachweise.length} Noten eingetragen',
+                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              ),
+            ),
         ],
       ),
     );
@@ -575,82 +686,295 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     // Berechne Mindestbreite für horizontales Scrollen
     final tableWidth = 160.0 + (leistungsnachweise.length * 120.0);
 
+    // Berechne Statistiken pro LN
+    final lnStats = <String, _LNStatistik>{};
+    for (final ln in leistungsnachweise) {
+      final noten = <double>[];
+      int count = 0;
+      final verteilung = <int, int>{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+      
+      for (final student in students) {
+        final key = '${student.id}_${ln.id}';
+        final eingabe = _noten[key];
+        if (eingabe?.note != null) {
+          final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+          noten.add(noteValue);
+          count++;
+          verteilung[eingabe.note!] = (verteilung[eingabe.note!] ?? 0) + 1;
+        }
+      }
+      
+      final durchschnitt = noten.isEmpty ? null : noten.reduce((a, b) => a + b) / noten.length;
+      lnStats[ln.id] = _LNStatistik(
+        durchschnitt: durchschnitt,
+        anzahl: count,
+        gesamt: students.length,
+        verteilung: verteilung,
+      );
+    }
+    
+    // Berechne Schüler-Durchschnitte
+    final studentStats = <String, double?>{};
+    for (final student in students) {
+      final noten = <double>[];
+      double gewichtungsSumme = 0;
+      
+      for (final ln in leistungsnachweise) {
+        final key = '${student.id}_${ln.id}';
+        final eingabe = _noten[key];
+        if (eingabe?.note != null) {
+          final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+          noten.add(noteValue * ln.gewichtung);
+          gewichtungsSumme += ln.gewichtung;
+        }
+      }
+      
+      studentStats[student.id] = gewichtungsSumme > 0 
+          ? noten.reduce((a, b) => a + b) / gewichtungsSumme 
+          : null;
+    }
+
     return Scrollbar(
       thumbVisibility: true,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: ConstrainedBox(
           constraints: BoxConstraints(minWidth: tableWidth),
-          child: DataTable(
-            columnSpacing: 8,
-            headingRowHeight: 64,
-            dataRowMinHeight: 52,
-            dataRowMaxHeight: 52,
-            columns: [
-              const DataColumn(
-                label: SizedBox(
-                  width: 140,
-                  child: Text('Schüler', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-              ...leistungsnachweise.map((ln) => DataColumn(
-                label: SizedBox(
-                  width: 110,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ln.bezeichnung,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                      Text(
-                        '${ln.typ.label} ${ln.gewichtung}x',
-                        style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
-            ],
-            rows: students.map((student) => DataRow(
-              cells: [
-                DataCell(
-                  SizedBox(
-                    width: 140,
-                    child: Text(
-                      student.displayName,
-                      overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Haupt-Tabelle
+              DataTable(
+                columnSpacing: 8,
+                headingRowHeight: 64,
+                dataRowMinHeight: 52,
+                dataRowMaxHeight: 52,
+                columns: [
+                  const DataColumn(
+                    label: SizedBox(
+                      width: 140,
+                      child: Text('Schüler', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
-                ),
-                ...leistungsnachweise.map((ln) {
-                  final key = '${student.id}_${ln.id}';
-                  final eingabe = _noten[key];
-                  if (eingabe == null) return const DataCell(Text('-'));
-
-                  return DataCell(
-                    SizedBox(
+                  ...leistungsnachweise.map((ln) => DataColumn(
+                    label: SizedBox(
                       width: 110,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildCompactNoteDropdown(key, eingabe, student.id, ln.id),
-                          const SizedBox(width: 4),
-                          _buildCompactTendenzButtons(key, eingabe, student.id, ln.id),
+                          Text(
+                            ln.bezeichnung,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                          Text(
+                            '${ln.typ.label} ${ln.gewichtung}x',
+                            style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                          ),
                         ],
                       ),
                     ),
-                  );
-                }),
-              ],
-            )).toList(),
+                  )),
+                  // Spalte für Schüler-Durchschnitt
+                  const DataColumn(
+                    label: SizedBox(
+                      width: 70,
+                      child: Text('⌀', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ),
+                ],
+                rows: students.map((student) => DataRow(
+                  cells: [
+                    DataCell(
+                      SizedBox(
+                        width: 140,
+                        child: Text(
+                          student.displayName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    ...leistungsnachweise.map((ln) {
+                      final key = '${student.id}_${ln.id}';
+                      final eingabe = _noten[key];
+                      if (eingabe == null) return const DataCell(Text('-'));
+
+                      return DataCell(
+                        SizedBox(
+                          width: 110,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildCompactNoteDropdown(key, eingabe, student.id, ln.id),
+                              const SizedBox(width: 4),
+                              _buildCompactTendenzButtons(key, eingabe, student.id, ln.id),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                    // Schüler-Durchschnitt
+                    DataCell(
+                      SizedBox(
+                        width: 70,
+                        child: studentStats[student.id] != null
+                            ? Text(
+                                studentStats[student.id]!.toStringAsFixed(1),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: _getNoteColor(studentStats[student.id]!.round()),
+                                ),
+                              )
+                            : const Text('-', style: TextStyle(color: Colors.grey)),
+                      ),
+                    ),
+                  ],
+                )).toList(),
+              ),
+              
+              // Statistik-Footer
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: RBSColors.paper,
+                  border: Border(top: BorderSide(color: Colors.grey[300]!)),
+                ),
+                child: Row(
+                  children: [
+                    // Schüler-Spalte Label
+                    SizedBox(
+                      width: 140,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('⌀ Durchschnitt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text('Eingetragen', style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Stats pro LN
+                    ...leistungsnachweise.map((ln) {
+                      final stats = lnStats[ln.id];
+                      return SizedBox(
+                        width: 118,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              stats?.durchschnitt != null 
+                                  ? stats!.durchschnitt!.toStringAsFixed(2)
+                                  : '-',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: stats?.durchschnitt != null 
+                                    ? _getNoteColor(stats!.durchschnitt!.round())
+                                    : Colors.grey,
+                              ),
+                            ),
+                            Text(
+                              '${stats?.anzahl ?? 0}/${stats?.gesamt ?? 0}',
+                              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    // Gesamt-Durchschnitt
+                    SizedBox(
+                      width: 70,
+                      child: _buildGesamtDurchschnitt(studentStats),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Notenverteilung
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  border: Border(top: BorderSide(color: Colors.grey[200]!)),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(
+                      width: 140,
+                      child: Text('Verteilung', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+                    ),
+                    const SizedBox(width: 8),
+                    ...leistungsnachweise.map((ln) {
+                      final stats = lnStats[ln.id];
+                      return SizedBox(
+                        width: 118,
+                        child: _buildVerteilungChips(stats?.verteilung ?? {}),
+                      );
+                    }),
+                    const SizedBox(width: 70), // Platzhalter für Durchschnitt-Spalte
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildGesamtDurchschnitt(Map<String, double?> studentStats) {
+    final validStats = studentStats.values.whereType<double>().toList();
+    if (validStats.isEmpty) {
+      return const Text('-', style: TextStyle(color: Colors.grey));
+    }
+    final gesamt = validStats.reduce((a, b) => a + b) / validStats.length;
+    return Text(
+      gesamt.toStringAsFixed(2),
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+        color: _getNoteColor(gesamt.round()),
+      ),
+    );
+  }
+
+  Widget _buildVerteilungChips(Map<int, int> verteilung) {
+    return Wrap(
+      spacing: 2,
+      runSpacing: 2,
+      children: [1, 2, 3, 4, 5, 6].where((n) => (verteilung[n] ?? 0) > 0).map((note) {
+        final count = verteilung[note] ?? 0;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          decoration: BoxDecoration(
+            color: _getNoteColor(note).withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: _getNoteColor(note).withValues(alpha: 0.3)),
+          ),
+          child: Text(
+            '$note:$count',
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: _getNoteColor(note),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  double _getNoteWithTendenz(int note, Tendenz tendenz) {
+    switch (tendenz) {
+      case Tendenz.plus:
+        return note - 0.3; // 2+ = 1.7
+      case Tendenz.minus:
+        return note + 0.3; // 2- = 2.3
+      case Tendenz.keine:
+        return note.toDouble();
+    }
   }
 
   Widget _buildNoteDropdown(String key, _NotenEingabe eingabe, String studentId, String lnId) {
@@ -915,6 +1239,21 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
+}
+
+/// Statistik für einen Leistungsnachweis
+class _LNStatistik {
+  final double? durchschnitt;
+  final int anzahl;
+  final int gesamt;
+  final Map<int, int> verteilung;
+
+  _LNStatistik({
+    this.durchschnitt,
+    required this.anzahl,
+    required this.gesamt,
+    required this.verteilung,
+  });
 }
 
 class _NotenEingabe {
