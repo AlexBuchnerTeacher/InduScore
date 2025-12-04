@@ -44,14 +44,14 @@ class RBSButton extends StatelessWidget {
   }
 }
 
-/// RBS Tag - Outline, Dynamic Red (Cover) oder funktional (Content)
-/// Höhe = doppelte Versalhöhe
-/// Verwendung: Status, Filter, Kategorien
+/// RBS Tag - Filled, rund, modern
+/// Verwendung: Status, Kategorien, Labels
 class RBSTag extends StatelessWidget {
   final String label;
   final Color? color;
   final VoidCallback? onTap;
   final bool selected;
+  final IconData? icon;
 
   const RBSTag({
     super.key,
@@ -59,28 +59,48 @@ class RBSTag extends StatelessWidget {
     this.color,
     this.onTap,
     this.selected = false,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     final tagColor = color ?? RBSColors.dynamicRed;
+    final isLight = selected || onTap == null;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RBSBorderRadius.small),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: RBSSpacing.sm,
-          vertical: RBSSpacing.xs,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: isLight ? tagColor : tagColor.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  size: 14,
+                  color: isLight ? Colors.white : tagColor,
+                ),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                label,
+                style: RBSTypography.tag.copyWith(
+                  color: isLight ? Colors.white : tagColor,
+                ),
+              ),
+            ],
+          ),
         ),
-        decoration: BoxDecoration(
-          color: selected
-              ? tagColor.withValues(alpha: 0.1)
-              : Colors.transparent,
-          border: Border.all(color: tagColor, width: 2),
-          borderRadius: BorderRadius.circular(RBSBorderRadius.small),
-        ),
-        child: Text(label, style: RBSTypography.tag.copyWith(color: tagColor)),
       ),
     );
   }
@@ -210,15 +230,126 @@ class RBSInput extends StatelessWidget {
   }
 }
 
-/// RBS Filter Chip - Ähnlich wie Tag, für Filter-Aktionen
+/// RBS Filter Chip - Rund, filled bei Selection, modern
 /// Verwendung: Filter-Leisten, Multi-Select
 class RBSFilterChip extends StatelessWidget {
   final String label;
   final bool selected;
   final ValueChanged<bool>? onSelected;
   final Color? color;
+  final IconData? icon;
 
   const RBSFilterChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    this.onSelected,
+    this.color,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chipColor = color ?? RBSColors.dynamicRed;
+
+    return FilterChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              size: 16,
+              color: selected ? Colors.white : chipColor,
+            ),
+            const SizedBox(width: 4),
+          ],
+          Text(label),
+        ],
+      ),
+      selected: selected,
+      onSelected: onSelected,
+      showCheckmark: false,
+      backgroundColor: chipColor.withValues(alpha: 0.1),
+      selectedColor: chipColor,
+      side: BorderSide.none,
+      labelStyle: RBSTypography.tag.copyWith(
+        color: selected ? Colors.white : chipColor,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 8,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+  }
+}
+
+/// RBS Action Chip - Rund, für Aktionen
+/// Verwendung: Quick Actions, Toggles
+class RBSActionChip extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final Color? color;
+  final IconData? icon;
+  final bool filled;
+
+  const RBSActionChip({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.color,
+    this.icon,
+    this.filled = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chipColor = color ?? RBSColors.dynamicRed;
+
+    return ActionChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              size: 16,
+              color: filled ? Colors.white : chipColor,
+            ),
+            const SizedBox(width: 4),
+          ],
+          Text(label),
+        ],
+      ),
+      onPressed: onPressed,
+      backgroundColor: filled ? chipColor : chipColor.withValues(alpha: 0.1),
+      side: BorderSide.none,
+      labelStyle: RBSTypography.tag.copyWith(
+        color: filled ? Colors.white : chipColor,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 8,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+  }
+}
+
+/// RBS Choice Chip - Rund, für Single-Select
+/// Verwendung: Radio-artige Auswahl
+class RBSChoiceChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final ValueChanged<bool>? onSelected;
+  final Color? color;
+
+  const RBSChoiceChip({
     super.key,
     required this.label,
     required this.selected,
@@ -230,20 +361,23 @@ class RBSFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final chipColor = color ?? RBSColors.dynamicRed;
 
-    return FilterChip(
+    return ChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: onSelected,
-      backgroundColor: Colors.transparent,
-      selectedColor: chipColor.withValues(alpha: 0.1),
-      side: BorderSide(color: chipColor, width: 2),
-      labelStyle: RBSTypography.tag.copyWith(color: chipColor),
+      showCheckmark: false,
+      backgroundColor: chipColor.withValues(alpha: 0.1),
+      selectedColor: chipColor,
+      side: BorderSide.none,
+      labelStyle: RBSTypography.tag.copyWith(
+        color: selected ? Colors.white : chipColor,
+      ),
       padding: const EdgeInsets.symmetric(
-        horizontal: RBSSpacing.sm,
-        vertical: RBSSpacing.xs,
+        horizontal: 12,
+        vertical: 8,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+        borderRadius: BorderRadius.circular(20),
       ),
     );
   }

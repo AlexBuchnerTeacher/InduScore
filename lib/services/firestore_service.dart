@@ -5,6 +5,22 @@ import '../models/subject.dart';
 import '../models/klasse.dart';
 import '../models/leistungsnachweis.dart';
 
+/// Ergebnis eines Schüler-Merge-Vorgangs
+class MergeResult {
+  final List<Student> matched;   // Existierende Schüler die gematcht wurden
+  final List<Student> added;     // Neue Schüler die hinzugefügt wurden
+  final List<Student> unmatched; // Existierende Schüler ohne Match (evtl. ausgetreten)
+
+  MergeResult({
+    required this.matched,
+    required this.added,
+    required this.unmatched,
+  });
+  
+  bool get hasUnmatched => unmatched.isNotEmpty;
+  bool get hasAdded => added.isNotEmpty;
+}
+
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
@@ -56,7 +72,7 @@ class FirestoreService {
     await batch.commit();
   }
 
-  /// Schüler nach Klasse abrufen
+  /// Schüler nach Klasse abrufen (alphabetisch sortiert)
   Stream<List<Student>> getStudentsByKlasse(String klasseId) {
     return _students
         .where('klasseId', isEqualTo: klasseId)
@@ -65,17 +81,9 @@ class FirestoreService {
           final students = snapshot.docs
               .map((doc) => Student.fromFirestore(doc))
               .toList();
-          students.sort((a, b) => a.pseudonym.compareTo(b.pseudonym));
+          students.sort((a, b) => a.sortKey.compareTo(b.sortKey));
           return students;
         });
-  }
-
-  /// Nächstes verfügbares Pseudonym für eine Klasse
-  Future<String> getNextPseudonym(String klasseId) async {
-    final snapshot = await _students
-        .where('klasseId', isEqualTo: klasseId)
-        .get();
-    return Student.generatePseudonym(snapshot.docs.length);
   }
 
   // ============ SUBJECTS ============
@@ -331,6 +339,40 @@ class FirestoreService {
 
   // ============ IMPORT (KLASSE + STUDENTS) ============
 
+  /// Prüft ob eine Klasse mit gleichem Namen und Schuljahr bereits existiert
+  Future<Klasse?> findExistingKlasse({
+    required String berufCode,
+    required int jahrgangsstufe,
+    required int zeitgruppeNummer,
+    required int laufendeNummer,
+    required String schuljahr,
+  }) async {
+    final snapshot = await _klassen
+        .where('beruf', isEqualTo: berufCode)
+        .where('jahrgangsstufe', isEqualTo: jahrgangsstufe)
+        .where('zeitgruppe', isEqualTo: zeitgruppeNummer)
+        .where('laufendeNummer', isEqualTo: laufendeNummer)
+        .where('schuljahr', isEqualTo: schuljahr)
+        .limit(1)
+        .get();
+    
+    if (snapshot.docs.isEmpty) return null;
+    return Klasse.fromFirestore(snapshot.docs.first);
+  }
+
+  /// Lädt alle Schüler einer Klasse als Liste (nicht Stream)
+  Future<List<Student>> getStudentsByKlasseOnce(String klasseId) async {
+    final snapshot = await _students
+        .where('klasseId', isEqualTo: klasseId)
+        .get();
+    final students = snapshot.docs
+        .map((doc) => Student.fromFirestore(doc))
+        .toList();
+    students.sort((a, b) => a.sortKey.compareTo(b.sortKey));
+    return students;
+  }
+
+  /// Importiert eine neue Klasse mit Schülern (ohne Merge)
   Future<String> importKlasseMitSchuelern({
     required Klasse klasse,
     required List<Student> schueler,
@@ -361,6 +403,91 @@ class FirestoreService {
 
     await batch.commit();
     return klasseId;
+  }
+
+  /// Merged neue Schüler in eine existierende Klasse
+  /// - Bestehende Schüler (nach Name gematcht) bleiben unverändert
+  /// - Neue Schüler werden hinzugefügt
+  /// - Rückgabe: Liste der nicht gematchten existierenden Schüler (zum Markieren als ausgetreten)
+  Future<MergeResult> mergeStudentsIntoKlasse({
+    required String klasseId,
+    required List<Student> neueSchueler,
+    required List<Student> existierendeSchueler,
+    required Map<String, String> manuellesMatching, // neuerName -> existingId
+  }) async {
+    final matched = <Student>[];
+    final added = <Student>[];
+    final unmatched = <Student>[]; // Existierende ohne Match
+
+    // Set für schnelles Lookup
+    final matchedExistingIds = <String>{};
+    
+    final batch = _db.batch();
+
+    for (final neuer in neueSchueler) {
+      final neuerKey = '${neuer.firstName.toLowerCase()} ${neuer.lastName.toLowerCase()}';
+      
+      // 1. Manuelles Matching prüfen
+      if (manuellesMatching.containsKey(neuerKey)) {
+        final existingId = manuellesMatching[neuerKey]!;
+        matchedExistingIds.add(existingId);
+        matched.add(neuer);
+        continue;
+      }
+      
+      // 2. Automatisches Matching nach Name
+      final existing = existierendeSchueler.firstWhere(
+        (e) => e.firstName.toLowerCase() == neuer.firstName.toLowerCase() &&
+               e.lastName.toLowerCase() == neuer.lastName.toLowerCase(),
+        orElse: () => Student(
+          id: '', firstName: '', lastName: '', klasseId: '', 
+          eintrittsDatum: DateTime.now(), createdAt: DateTime.now(),
+        ),
+      );
+      
+      if (existing.id.isNotEmpty) {
+        matchedExistingIds.add(existing.id);
+        matched.add(neuer);
+      } else {
+        // Neuer Schüler - hinzufügen
+        final studentId = _students.doc().id;
+        batch.set(
+          _students.doc(studentId),
+          neuer.copyWith(id: studentId, klasseId: klasseId).toFirestore(),
+        );
+        added.add(neuer);
+      }
+    }
+
+    // Nicht gematchte existierende Schüler finden
+    for (final existing in existierendeSchueler) {
+      if (!matchedExistingIds.contains(existing.id)) {
+        unmatched.add(existing);
+      }
+    }
+
+    await batch.commit();
+
+    return MergeResult(
+      matched: matched,
+      added: added,
+      unmatched: unmatched,
+    );
+  }
+
+  /// Markiert mehrere Schüler als ausgetreten
+  Future<void> markStudentsAsAusgetreten(
+    List<String> studentIds, 
+    DateTime austrittsDatum,
+  ) async {
+    final batch = _db.batch();
+    for (final id in studentIds) {
+      batch.update(_students.doc(id), {
+        'status': StudentStatus.ausgetreten.name,
+        'austrittsDatum': Timestamp.fromDate(austrittsDatum),
+      });
+    }
+    await batch.commit();
   }
 
   // ============ STATISTICS ============

@@ -40,6 +40,12 @@ class ImportedStudent {
 }
 
 /// Service zum Parsen von Klassenlisten-PDFs.
+/// 
+/// Unterstützt verschiedene OCR-Formate der Klassenlisten:
+/// - Namen auf einer Zeile: "Nachname, Vorname DD.MM.YYYY"
+/// - Namen auf separaten Zeilen: "Nachname, Vorname" gefolgt von "DD.MM.YYYY"
+/// - Mit führenden Nummern: "10. Nachname, Vorname"
+/// - Klassenname in Überschrift: "Klassenliste ... EAT331"
 class PdfImportService {
   Future<ClassImportPreview> parseClassList(Uint8List bytes) async {
     final document = PdfDocument(inputBytes: bytes);
@@ -65,12 +71,12 @@ class PdfImportService {
     // Für OCR: Leerzeichen aus Text entfernen für Klassenname-Suche
     final normalizedText = text.replaceAll(RegExp(r'\s+'), '');
 
-    // Klassenname suchen - auch mit OCR-Leerzeichen (z.B. "E A T 3 3 1")
-    // Suche im normalisierten Text (ohne Leerzeichen)
+    // Klassenname suchen - verschiedene Varianten:
+    // 1. Im normalisierten Text (für OCR mit Leerzeichen: "E A T 3 3 1")
+    // 2. In Zeilen wie "Klassenliste mit Notenspalten EAT331"
     final klasseRegex = RegExp(r'(IE|EAT|EBT|EGS)(\d)(\d)(\d)');
     final klasseMatch = klasseRegex.firstMatch(normalizedText);
     
-    // Klassenname ist optional - kann später manuell eingegeben werden
     String? rawClassName;
     ParsedKlassenname? parsedName;
     if (klasseMatch != null) {
@@ -78,84 +84,84 @@ class PdfImportService {
           '${klasseMatch.group(1)}${klasseMatch.group(2)}${klasseMatch.group(3)}${klasseMatch.group(4)}';
       parsedName = ParsedKlassenname.parse(rawClassName);
     }
-
-    // Klassenleiter suchen - verschiedene Schreibweisen und Formate
+    
+    // Klassenleiter suchen - verschiedene Formate
+    // Format 1: "Klassenleitung: Vorname Nachname" → Vollständiger Name
+    // Format 2: "Klassenleiter: XXX" → Kürzel (2-4 Großbuchstaben)
+    // Der Nutzer kann das Kürzel im Dialog manuell anpassen
     String? klassenleiterCode;
     for (final line in lines) {
       final lowerLine = line.toLowerCase();
-      if (lowerLine.contains('klassenleiter') || 
-          lowerLine.contains('klassenleitung') ||
-          lowerLine.contains('kll') ||
-          lowerLine.contains('kl:')) {
-        // Suche nach 2-4 Großbuchstaben (Lehrerkürzel)
-        final leiterMatch = RegExp(r'\b([A-ZÄÖÜ]{2,4})\b').firstMatch(line);
-        if (leiterMatch != null) {
-          klassenleiterCode = leiterMatch.group(1);
-          break;
+      if (lowerLine.contains('klassenleitung') || lowerLine.contains('klassenleiter')) {
+        // Extrahiere den Namen nach dem Doppelpunkt
+        final colonIndex = line.indexOf(':');
+        if (colonIndex != -1 && colonIndex < line.length - 1) {
+          final leiterName = line.substring(colonIndex + 1).trim();
+          // Suche zuerst nach Kürzel (2-4 Großbuchstaben allein stehend)
+          final kuerzelMatch = RegExp(r'^([A-ZÄÖÜ]{2,4})$').firstMatch(leiterName);
+          if (kuerzelMatch != null) {
+            // Es ist bereits ein Kürzel
+            klassenleiterCode = kuerzelMatch.group(1);
+          } else if (leiterName.isNotEmpty) {
+            // Es ist ein voller Name - diesen übernehmen
+            // Der Nutzer kann im Dialog das Kürzel selbst eintragen
+            klassenleiterCode = leiterName;
+          }
         }
+        break;
       }
     }
 
-    // Schüler extrahieren - flexiblerer Ansatz
+    // Schüler extrahieren - robuster Multi-Format Parser
     final students = <ImportedStudent>[];
     final invalid = <String>[];
     
-    // Regex für Zeilen die übersprungen werden sollen
-    final skipRegex = RegExp(
-      r'(IE|EAT|EBT|EGS)|klassenleiter|klassenleitung|notenliste|schüler|name|vorname|nachname|nr\.?|lfd|datum|\d{2}\.\d{2}\.\d{4}',
-      caseSensitive: false,
-    );
+    // Pattern für Zeilen die komplett übersprungen werden sollen
+    final skipPatterns = [
+      'klassenleiter', 'klassenleitung', 'notenliste', 'klassenliste',
+      'berufsschule', 'städt.', 'schuljahr', 'stand:', 'seite',
+      'schülerzahl', 'davon', 'männl', 'weibl', 
+      'schriftlich', 'mündlich', 'gesamt',  // Notenspalten-Header
+    ];
     
-    for (final line in lines) {
-      // Kurze Zeilen oder Überschriften überspringen
-      if (line.length < 4 || skipRegex.hasMatch(line)) {
-        continue;
-      }
+    // Zeilen die nur "Name" oder ähnliche Header sind
+    final headerPatterns = RegExp(r'^(name|vorname|nachname|nr\.?|lfd\.?)$', caseSensitive: false);
+    
+    // Datum-Pattern (DD.MM.YYYY)
+    final datePattern = RegExp(r'^\d{2}\.\d{2}\.\d{4}$');
+    
+    // Reine Nummer-Zeile (z.B. "10." "11." "12.")
+    final pureNumberPattern = RegExp(r'^\d+\.?$');
+    
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
       
-      // Zeilen mit hauptsächlich Zahlen überspringen
-      final digitCount = line.replaceAll(RegExp(r'[^0-9]'), '').length;
-      if (digitCount > line.length / 3) {
-        continue;
-      }
+      // Kurze Zeilen überspringen
+      if (line.length < 3) continue;
       
-      // Namen extrahieren - verschiedene Formate
-      // Format 1: "Nachname Vorname" oder "Nachname, Vorname"
-      // Format 2: "1. Nachname Vorname" (mit Nummer)
-      // Format 3: "Nachname    Vorname" (mit Tabs/Spaces)
+      // Header/Meta-Zeilen überspringen
+      final lowerLine = line.toLowerCase();
+      if (skipPatterns.any((p) => lowerLine.contains(p))) continue;
+      if (headerPatterns.hasMatch(line)) continue;
       
-      // Entferne führende Nummern
-      var cleanLine = line.replaceFirst(RegExp(r'^\d+[\.\)\s]+'), '').trim();
+      // Reine Datumszeilen überspringen (gehören zum vorherigen Namen)
+      if (datePattern.hasMatch(line)) continue;
       
-      // Ersetze Komma durch Leerzeichen
-      cleanLine = cleanLine.replaceAll(',', ' ');
+      // Reine Nummern überspringen (z.B. "10." "11.")
+      if (pureNumberPattern.hasMatch(line)) continue;
       
-      // Splitte nach Whitespace
-      final parts = cleanLine.split(RegExp(r'\s+')).where((p) => p.isNotEmpty && p.length > 1).toList();
+      // Zeilen die nur aus Zahlen/Sonderzeichen bestehen überspringen
+      final letterCount = line.replaceAll(RegExp(r'[^a-zA-ZäöüÄÖÜßéèêëàáâ]'), '').length;
+      if (letterCount < 3) continue;
       
-      if (parts.length >= 2) {
-        final firstName = parts[0];
-        final lastName = parts.length > 1 ? parts[1] : '';
-        
-        // Prüfe ob beide Teile wie Namen aussehen (Buchstaben, evtl. Bindestrich)
-        final namePattern = RegExp(r'^[A-Za-zÄÖÜäöüßéèêëàáâãåæç\-]+$');
-        if (namePattern.hasMatch(firstName) && namePattern.hasMatch(lastName)) {
-          students.add(
-            ImportedStudent(
-              lastName: firstName,  // Erste Spalte = Nachname
-              firstName: lastName,  // Zweite Spalte = Vorname
-            ),
-          );
-          continue;
-        }
-      }
-      
-      // Nicht erkannte Zeilen speichern (für Debug)
-      if (cleanLine.isNotEmpty && cleanLine.length < 50) {
-        invalid.add(cleanLine);
+      // Versuche Namen zu extrahieren
+      final student = _parseStudentLine(line);
+      if (student != null) {
+        students.add(student);
+      } else if (line.length < 60 && letterCount >= 4) {
+        invalid.add(line);
       }
     }
-
-    // Schüler können leer sein - wird dann manuell eingegeben
 
     return ClassImportPreview(
       rawClassName: rawClassName,
@@ -165,5 +171,61 @@ class PdfImportService {
       invalidLines: invalid,
       extractedText: text,
     );
+  }
+  
+  /// Versucht aus einer Zeile einen Schülernamen zu extrahieren.
+  /// 
+  /// Unterstützte Formate:
+  /// - "Nachname, Vorname"
+  /// - "Nachname, Vorname DD.MM.YYYY"
+  /// - "10. Nachname, Vorname"
+  /// - "Nachname Vorname" (ohne Komma)
+  ImportedStudent? _parseStudentLine(String line) {
+    // Entferne führende Nummer (z.B. "10." oder "1)" oder "16. ")
+    var cleanLine = line.replaceFirst(RegExp(r'^\d+[\.\)\s]+'), '').trim();
+    
+    // Entferne Geburtsdatum (DD.MM.YYYY) - kann am Ende oder irgendwo stehen
+    cleanLine = cleanLine.replaceAll(RegExp(r'\d{2}\.\d{2}\.\d{4}'), '').trim();
+    
+    // Entferne trailing Pipes oder Sonderzeichen
+    cleanLine = cleanLine.replaceAll(RegExp(r'[\|]+'), '').trim();
+    
+    // Entferne mehrfache Leerzeichen
+    cleanLine = cleanLine.replaceAll(RegExp(r'\s+'), ' ').trim();
+    
+    if (cleanLine.isEmpty || cleanLine.length < 3) return null;
+    
+    // Format: "Nachname, Vorname" (mit Komma) - bevorzugt
+    if (cleanLine.contains(',')) {
+      final commaIndex = cleanLine.indexOf(',');
+      final lastName = cleanLine.substring(0, commaIndex).trim();
+      final firstName = cleanLine.substring(commaIndex + 1).trim();
+      
+      if (_isValidName(lastName) && _isValidName(firstName)) {
+        return ImportedStudent(lastName: lastName, firstName: firstName);
+      }
+    }
+    
+    // Format: "Nachname Vorname" (ohne Komma, durch Leerzeichen getrennt)
+    final parts = cleanLine.split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.length >= 2) {
+      // Erster Teil = Nachname, Rest = Vorname(n)
+      final lastName = parts[0];
+      final firstName = parts.sublist(1).join(' ');
+      
+      if (_isValidName(lastName) && _isValidName(firstName)) {
+        return ImportedStudent(lastName: lastName, firstName: firstName);
+      }
+    }
+    
+    return null;
+  }
+  
+  /// Prüft ob ein String wie ein gültiger Name aussieht.
+  bool _isValidName(String name) {
+    if (name.isEmpty || name.length < 2) return false;
+    // Name sollte hauptsächlich aus Buchstaben bestehen (inkl. Umlaute, Bindestriche, Apostrophe)
+    final validChars = RegExp(r"^[A-Za-zÄÖÜäöüßéèêëàáâãåæçñíìîïóòôõøúùûýÿ\-\'\s]+$");
+    return validChars.hasMatch(name);
   }
 }

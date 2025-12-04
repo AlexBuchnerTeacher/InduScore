@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.7.0] - 2025-12-04
+
+### Changed
+- **Student Model komplett überarbeitet** (Breaking Change)
+  - `pseudonym` entfernt - echte Namen werden jetzt verwendet
+  - `firstName` und `lastName` sind jetzt Pflichtfelder
+  - `eintrittsDatum` (Pflicht) für Klasseneintritt
+  - `austrittsDatum` (optional) für Klassenaustritt
+  - `StudentStatus` enum: aktiv/ausgetreten
+  - `sortKey` für alphabetische Sortierung nach Nachname
+
+- **PDF-Import mit Merge-Strategie**
+  - Duplikate werden erkannt statt neue Klassen anzulegen
+  - Schüler werden per Vorname+Nachname automatisch gematcht
+  - Manuelles Matching per Dropdown bei Namensänderungen
+  - Option: "Nur neue hinzufügen" oder "Übernehmen & Austritte markieren"
+  - Nicht mehr in PDF vorhandene Schüler → Status "ausgetreten"
+
+- **Schueler-Screen für neues Model**
+  - Separate Eingabefelder für Vorname und Nachname
+  - Eintrittsdatum-Picker bei Neuanlage
+  - Toggle für ausgetretene Schüler anzeigen/verbergen
+  - Austritts-Dialog mit Datumswahl
+  - Reaktivieren-Option für ausgetretene Schüler
+
+- **Modernisiertes Chip-Design**
+  - RBSTag: Rund (StadiumBorder), gefüllt statt Outline
+  - RBSFilterChip: Pill-Form, gefüllte Farbe wenn selected
+
+### Fixed
+- PDF-Parser robuster für verschiedene Formate (OCR-Toleranz, Zeilennummern)
+
+
 ## [0.6.0] - 2025-12-03
 
 ### Added
