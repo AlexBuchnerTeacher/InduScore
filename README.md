@@ -17,19 +17,27 @@ Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, 
 - **NEU: Änderungs-Tracking**: Kürzel des letzten Bearbeiters in jeder Note
 - **Leistungsnachweise**: Wochentest, Praktisch, Mündlich, Mitarbeit
 - **Excel-Style Noteneingabe**: Schnelle Eingabe für ganze Klasse mit Statistiken
-- **Schülerverwaltung**: DSGVO-konforme Pseudonymisierung, Filter nach Klasse
+- **Schülerverwaltung**: Filter nach Klasse
 - **Fächerverwaltung**: CRUD, Beruf-Zuordnung, Farbcodierung, Wochenstunden, Credits
 - **Klassenverwaltung**: Einfache Verwaltung von Klassen mit Format "EAT321"
+- **PDF-Import**: Klassenlisten aus PDF importieren (auch OCR)
 - **RBS Styleguide 1.2**: Dynamic Red, Roboto Condensed
 - **Firebase Integration**: Firestore & Authentication
 - **Responsive Design**: Optimiert für Desktop & Mobile
 - **Berufsschul-spezifisch**: IE, EAT, EBT, EGS, Zeitgruppen, Schuljahre
 
 
-### Kommende Features (v1.0.0)
-- Automatische Zeugnisnoten-Berechnung (gewichteter Schnitt)
-- Nachschreiber-Management mit Zeitgruppen
-- PDF-Export für Notenlisten & Zeugnisse
+## Roadmap
+
+### v0.7.0 - Datenschutz & Sicherheit
+- [ ] Ende-zu-Ende Verschlüsselung für Schülernamen
+- [ ] Verschlüsselung mit Lehrer-Passwort (AES-256)
+- [ ] Recovery-Key System
+
+### v1.0.0 - Vollversion
+- [ ] Automatische Zeugnisnoten-Berechnung (gewichteter Schnitt)
+- [ ] Nachschreiber-Management mit Zeitgruppen
+- [ ] PDF-Export für Notenlisten & Zeugnisse
 # Release v0.3.0
 
 Die Version v0.3.0 ist als Web-App über GitHub Pages verfügbar:
@@ -57,7 +65,7 @@ https://alexbuchnerteacher.github.io/InduScore/
 │   │   ├── klasse.dart                # Klassen-Model
 │   │   ├── leistungsnachweis.dart     # Leistungsnachweise & IHK-Notenschlüssel
 │   │   ├── zeugnisnote.dart           # Zeugnisnoten-Berechnung
-│   │   ├── student.dart               # Schüler-Model (DSGVO-Pseudonymisierung)
+│   │   ├── student.dart               # Schüler-Model
 │   │   ├── subject.dart               # Fächer-Model
 │   │   └── grade.dart                 # Noten-Model (Note, Punkte, Kommentar)
 │   ├── providers/app_providers.dart   # Riverpod State Provider

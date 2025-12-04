@@ -84,7 +84,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Schülerverwaltung** (#9)
   - Neuer SchuelerScreen mit CRUD-Funktionalität
   - Filter nach Klasse
-  - DSGVO-konforme Pseudonymisierung (nur Pseudonyme in Firestore)
   - Student Model mit `pseudonym`, `klasseId`
   - `studentsByKlasseProvider` für gefilterte Abfragen
   - Navigation im Drawer aktiviert

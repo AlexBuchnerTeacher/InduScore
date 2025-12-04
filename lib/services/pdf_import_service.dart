@@ -57,16 +57,17 @@ class PdfImportService {
         .where((e) => e.isNotEmpty)
         .toList();
 
-    // Klassenname suchen
-    final klasseRegex = RegExp(r'(IE|EAT|EBT|EGS)\\s*(\\d)(\\d)(\\d)');
-    final klasseLine = lines.firstWhere(
-      (l) => klasseRegex.hasMatch(l),
-      orElse: () => '',
-    );
-    if (klasseLine.isEmpty) {
+    // Für OCR: Leerzeichen aus Text entfernen für Klassenname-Suche
+    final normalizedText = text.replaceAll(RegExp(r'\s+'), '');
+
+    // Klassenname suchen - auch mit OCR-Leerzeichen (z.B. "E A T 3 3 1")
+    // Suche im normalisierten Text (ohne Leerzeichen)
+    final klasseRegex = RegExp(r'(IE|EAT|EBT|EGS)(\d)(\d)(\d)');
+    final klasseMatch = klasseRegex.firstMatch(normalizedText);
+    
+    if (klasseMatch == null) {
       throw Exception('Kein Klassenname im erwarteten Format gefunden (z.B. EAT321).');
     }
-    final klasseMatch = klasseRegex.firstMatch(klasseLine)!;
     final rawClassName =
         '${klasseMatch.group(1)}${klasseMatch.group(2)}${klasseMatch.group(3)}${klasseMatch.group(4)}';
     final parsedName = ParsedKlassenname.parse(rawClassName);
@@ -84,25 +85,41 @@ class PdfImportService {
       }
     }
 
-    // Schüler extrahieren: Zeilen mit zwei Namens-Bestandteilen (inkl. Umlaute/Bindestriche)
-    final nameRegex = RegExp(r'^([A-Za-zÄÖÜäöüß\\-]+)\\s+([A-Za-zÄÖÜäöüß\\-]+)$');
+    // Schüler extrahieren: Zeilen mit Namens-Bestandteilen (inkl. Umlaute/Bindestriche)
     final students = <ImportedStudent>[];
     final invalid = <String>[];
+    
+    // Regex für Klassenname (um diese Zeilen zu überspringen)
+    final skipKlasseRegex = RegExp(r'(IE|EAT|EBT|EGS)\s*\d\s*\d\s*\d', caseSensitive: false);
+    
     for (final line in lines) {
       // Überschriften überspringen
-      if (klasseRegex.hasMatch(line) || line.toLowerCase().contains('klassenleiter')) {
+      if (skipKlasseRegex.hasMatch(line) || 
+          line.toLowerCase().contains('klassenleiter') ||
+          line.toLowerCase().contains('notenliste') ||
+          line.toLowerCase().contains('schüler')) {
         continue;
       }
-      final match = nameRegex.firstMatch(line);
-      if (match != null) {
-        students.add(
-          ImportedStudent(
-            firstName: match.group(1)!,
-            lastName: match.group(2)!,
-          ),
-        );
-      } else if (line.split(' ').length <= 4 && line.runes.every((c) => c > 31)) {
-        // nur kurze Zeilen als potenziell fehlerhaft aufnehmen
+      
+      // Namen extrahieren - versuche verschiedene Formate
+      final parts = line.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+      if (parts.length >= 2) {
+        // Prüfe ob es wie ein Name aussieht (keine Zahlen, nicht zu kurz)
+        final potentialName = parts.take(2).join(' ');
+        if (RegExp(r'^[A-Za-zÄÖÜäöüß\-]+\s+[A-Za-zÄÖÜäöüß\-]+$').hasMatch(potentialName) &&
+            parts[0].length > 1 && parts[1].length > 1) {
+          students.add(
+            ImportedStudent(
+              lastName: parts[0],  // Nachname zuerst (typisches Listenformat)
+              firstName: parts[1],
+            ),
+          );
+          continue;
+        }
+      }
+      
+      // Kurze Zeilen als potenziell fehlerhaft aufnehmen
+      if (line.split(' ').length <= 4 && line.runes.every((c) => c > 31)) {
         invalid.add(line);
       }
     }

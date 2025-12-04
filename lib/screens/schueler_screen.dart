@@ -10,7 +10,6 @@ import '../widgets/rbs_drawer.dart';
 
 /// Schülerverwaltung Screen
 /// - Listet alle Schüler mit Filter nach Klasse
-/// - DSGVO-konforme Pseudonymisierung
 /// - CRUD Funktionalität
 class SchuelerScreen extends ConsumerStatefulWidget {
   const SchuelerScreen({super.key});
@@ -217,33 +216,10 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             TextField(
               controller: pseudonymController,
               decoration: const InputDecoration(
-                labelText: 'Pseudonym',
-                hintText: 'z.B. S001',
-                helperText: 'DSGVO-konform, kein echter Name',
+                labelText: 'Name/Kürzel',
+                hintText: 'z.B. S001 oder Max M.',
               ),
               autofocus: true,
-            ),
-            const SizedBox(height: RBSSpacing.md),
-            Container(
-              padding: const EdgeInsets.all(RBSSpacing.sm),
-              decoration: BoxDecoration(
-                color: RBSColors.offwhite,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.grey[600], size: 20),
-                  const SizedBox(width: RBSSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      'Echte Namen werden nicht gespeichert (DSGVO)',
-                      style: RBSTypography.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
