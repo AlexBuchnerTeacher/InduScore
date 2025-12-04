@@ -6,19 +6,24 @@ import '../models/klasse.dart';
 
 /// Ergebnis eines PDF-Imports.
 class ClassImportPreview {
-  final String rawClassName;
+  final String? rawClassName;  // null wenn nicht erkannt
   final String? klassenleiterCode;
-  final ParsedKlassenname parsedName;
+  final ParsedKlassenname? parsedName;  // null wenn nicht erkannt
   final List<ImportedStudent> students;
   final List<String> invalidLines;
+  final String extractedText;  // Rohtext für Debug/manuelle Eingabe
 
   ClassImportPreview({
-    required this.rawClassName,
-    required this.parsedName,
+    this.rawClassName,
+    this.parsedName,
     required this.students,
     this.klassenleiterCode,
     this.invalidLines = const [],
+    this.extractedText = '',
   });
+  
+  /// Ob der Klassenname manuell eingegeben werden muss
+  bool get needsManualClassName => rawClassName == null;
 }
 
 /// Schülerdatensatz aus dem Import.
@@ -65,12 +70,14 @@ class PdfImportService {
     final klasseRegex = RegExp(r'(IE|EAT|EBT|EGS)(\d)(\d)(\d)');
     final klasseMatch = klasseRegex.firstMatch(normalizedText);
     
-    if (klasseMatch == null) {
-      throw Exception('Kein Klassenname im erwarteten Format gefunden (z.B. EAT321).');
+    // Klassenname ist optional - kann später manuell eingegeben werden
+    String? rawClassName;
+    ParsedKlassenname? parsedName;
+    if (klasseMatch != null) {
+      rawClassName =
+          '${klasseMatch.group(1)}${klasseMatch.group(2)}${klasseMatch.group(3)}${klasseMatch.group(4)}';
+      parsedName = ParsedKlassenname.parse(rawClassName);
     }
-    final rawClassName =
-        '${klasseMatch.group(1)}${klasseMatch.group(2)}${klasseMatch.group(3)}${klasseMatch.group(4)}';
-    final parsedName = ParsedKlassenname.parse(rawClassName);
 
     // Klassenleiter (heuristisch): erste Zeile mit 2-4 Großbuchstaben nach "Klassenleiter"
     String? klassenleiterCode;
@@ -124,9 +131,7 @@ class PdfImportService {
       }
     }
 
-    if (students.isEmpty) {
-      throw Exception('Keine Schüler-Einträge erkannt. Bitte PDF-Format prüfen.');
-    }
+    // Schüler können leer sein - wird dann manuell eingegeben
 
     return ClassImportPreview(
       rawClassName: rawClassName,
@@ -134,6 +139,7 @@ class PdfImportService {
       parsedName: parsedName,
       students: students,
       invalidLines: invalid,
+      extractedText: text,
     );
   }
 }

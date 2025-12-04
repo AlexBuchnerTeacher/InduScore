@@ -501,57 +501,140 @@ class _ImportPreviewDialog extends ConsumerStatefulWidget {
 
 class _ImportPreviewDialogState extends ConsumerState<_ImportPreviewDialog> {
   bool _isSaving = false;
+  late TextEditingController _klassenameController;
+  late TextEditingController _klassenleiterController;
+  String? _klassenameError;
+
+  @override
+  void initState() {
+    super.initState();
+    _klassenameController = TextEditingController(
+      text: widget.preview.rawClassName ?? '',
+    );
+    _klassenleiterController = TextEditingController(
+      text: widget.preview.klassenleiterCode ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _klassenameController.dispose();
+    _klassenleiterController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final preview = widget.preview;
     final students = preview.students;
+    final needsManualInput = preview.needsManualClassName;
 
     return AlertDialog(
-      title: const Text('Klasseliste importieren'),
+      title: const Text('Klassenliste importieren'),
       content: SizedBox(
         width: 520,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Klasse: ${preview.rawClassName} (${widget.schuljahr})',
-              style: RBSTypography.h4,
-            ),
-            if (preview.klassenleiterCode != null)
-              Padding(
-                padding: const EdgeInsets.only(top: RBSSpacing.xs),
-                child: Text(
-                  'Klassenleiter: ${preview.klassenleiterCode}',
-                  style: RBSTypography.bodyMedium,
+            // Klassenname - editierbar wenn nicht erkannt
+            if (needsManualInput) ...[
+              Container(
+                padding: const EdgeInsets.all(RBSSpacing.sm),
+                decoration: BoxDecoration(
+                  color: RBSColors.warning.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: RBSColors.warning),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_amber, color: RBSColors.warning),
+                    const SizedBox(width: RBSSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Klassenname nicht erkannt. Bitte manuell eingeben:',
+                        style: RBSTypography.bodyMedium,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            const SizedBox(height: RBSSpacing.md),
-            Text('Gefundene Schueler (${students.length}):', style: RBSTypography.bodyMedium),
-            const SizedBox(height: RBSSpacing.xs),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                itemCount: students.length,
-                itemBuilder: (context, index) {
-                  final s = students[index];
-                  return ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.person_outline),
-                    title: Text('${s.firstName} ${s.lastName}'),
-                  );
-                },
+              const SizedBox(height: RBSSpacing.sm),
+            ],
+            TextField(
+              controller: _klassenameController,
+              decoration: InputDecoration(
+                labelText: 'Klassenname',
+                hintText: 'z.B. EAT331',
+                errorText: _klassenameError,
+                prefixIcon: const Icon(Icons.class_),
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() => _klassenameError = null),
+            ),
+            const SizedBox(height: RBSSpacing.sm),
+            TextField(
+              controller: _klassenleiterController,
+              decoration: const InputDecoration(
+                labelText: 'Klassenleiter (optional)',
+                hintText: 'z.B. BUC',
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: RBSSpacing.md),
+            Text(
+              'Gefundene Schüler (${students.length}):',
+              style: RBSTypography.bodyMedium,
+            ),
+            const SizedBox(height: RBSSpacing.xs),
+            if (students.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(RBSSpacing.md),
+                decoration: BoxDecoration(
+                  color: RBSColors.offwhite,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Keine Schüler erkannt. Sie können nach dem Import manuell hinzugefügt werden.',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              )
+            else
+              SizedBox(
+                height: 180,
+                child: ListView.builder(
+                  itemCount: students.length,
+                  itemBuilder: (context, index) {
+                    final s = students[index];
+                    return ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.person_outline),
+                      title: Text('${s.lastName}, ${s.firstName}'),
+                    );
+                  },
+                ),
+              ),
             if (preview.invalidLines.isNotEmpty) ...[
               const SizedBox(height: RBSSpacing.sm),
-              Text('Nicht erkannte Zeilen:', style: RBSTypography.bodyMedium),
-              ...preview.invalidLines.map(
-                (l) => Text(
-                  '• $l',
-                  style: RBSTypography.bodySmall.copyWith(color: RBSColors.error),
+              ExpansionTile(
+                title: Text(
+                  'Nicht erkannte Zeilen (${preview.invalidLines.length})',
+                  style: RBSTypography.bodySmall,
                 ),
+                children: preview.invalidLines
+                    .map((l) => Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: RBSSpacing.md,
+                            vertical: 2,
+                          ),
+                          child: Text(
+                            l,
+                            style: RBSTypography.bodySmall
+                                .copyWith(color: Colors.grey),
+                          ),
+                        ))
+                    .toList(),
               ),
             ],
           ],
@@ -582,11 +665,27 @@ class _ImportPreviewDialogState extends ConsumerState<_ImportPreviewDialog> {
 
   
 Future<void> _importNow() async {
+    // Validiere Klassennamen
+    final klassenname = _klassenameController.text.trim().toUpperCase();
+    if (klassenname.isEmpty) {
+      setState(() => _klassenameError = 'Klassenname erforderlich');
+      return;
+    }
+    
+    // Versuche Klassenname zu parsen
+    ParsedKlassenname parsed;
+    try {
+      parsed = ParsedKlassenname.parse(klassenname);
+    } catch (e) {
+      setState(() => _klassenameError = 'Ungültiges Format (z.B. EAT331)');
+      return;
+    }
+
     final preview = widget.preview;
     try {
       setState(() => _isSaving = true);
       final firestoreService = ref.read(firestoreServiceProvider);
-      final parsed = preview.parsedName;
+      
       final klasse = Klasse(
         id: '',
         beruf: parsed.beruf,
@@ -622,7 +721,7 @@ Future<void> _importNow() async {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Klasse ${klasse.name} mit ${students.length} Schuelern importiert.'),
+          content: Text('Klasse ${klasse.name} mit ${students.length} Schülern importiert.'),
           backgroundColor: RBSColors.courtGreen,
         ),
       );
@@ -639,8 +738,6 @@ Future<void> _importNow() async {
     }
   }
 }
-
-
 
 
 
