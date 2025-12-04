@@ -79,55 +79,79 @@ class PdfImportService {
       parsedName = ParsedKlassenname.parse(rawClassName);
     }
 
-    // Klassenleiter (heuristisch): erste Zeile mit 2-4 Großbuchstaben nach "Klassenleiter"
+    // Klassenleiter suchen - verschiedene Schreibweisen und Formate
     String? klassenleiterCode;
-    final leiterLine = lines.firstWhere(
-      (l) => l.toLowerCase().contains('klassenleiter'),
-      orElse: () => '',
-    );
-    if (leiterLine.isNotEmpty) {
-      final leiterMatch = RegExp(r'([A-ZÄÖÜ]{2,4})').firstMatch(leiterLine);
-      if (leiterMatch != null) {
-        klassenleiterCode = leiterMatch.group(1);
+    for (final line in lines) {
+      final lowerLine = line.toLowerCase();
+      if (lowerLine.contains('klassenleiter') || 
+          lowerLine.contains('klassenleitung') ||
+          lowerLine.contains('kll') ||
+          lowerLine.contains('kl:')) {
+        // Suche nach 2-4 Großbuchstaben (Lehrerkürzel)
+        final leiterMatch = RegExp(r'\b([A-ZÄÖÜ]{2,4})\b').firstMatch(line);
+        if (leiterMatch != null) {
+          klassenleiterCode = leiterMatch.group(1);
+          break;
+        }
       }
     }
 
-    // Schüler extrahieren: Zeilen mit Namens-Bestandteilen (inkl. Umlaute/Bindestriche)
+    // Schüler extrahieren - flexiblerer Ansatz
     final students = <ImportedStudent>[];
     final invalid = <String>[];
     
-    // Regex für Klassenname (um diese Zeilen zu überspringen)
-    final skipKlasseRegex = RegExp(r'(IE|EAT|EBT|EGS)\s*\d\s*\d\s*\d', caseSensitive: false);
+    // Regex für Zeilen die übersprungen werden sollen
+    final skipRegex = RegExp(
+      r'(IE|EAT|EBT|EGS)|klassenleiter|klassenleitung|notenliste|schüler|name|vorname|nachname|nr\.?|lfd|datum|\d{2}\.\d{2}\.\d{4}',
+      caseSensitive: false,
+    );
     
     for (final line in lines) {
-      // Überschriften überspringen
-      if (skipKlasseRegex.hasMatch(line) || 
-          line.toLowerCase().contains('klassenleiter') ||
-          line.toLowerCase().contains('notenliste') ||
-          line.toLowerCase().contains('schüler')) {
+      // Kurze Zeilen oder Überschriften überspringen
+      if (line.length < 4 || skipRegex.hasMatch(line)) {
         continue;
       }
       
-      // Namen extrahieren - versuche verschiedene Formate
-      final parts = line.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+      // Zeilen mit hauptsächlich Zahlen überspringen
+      final digitCount = line.replaceAll(RegExp(r'[^0-9]'), '').length;
+      if (digitCount > line.length / 3) {
+        continue;
+      }
+      
+      // Namen extrahieren - verschiedene Formate
+      // Format 1: "Nachname Vorname" oder "Nachname, Vorname"
+      // Format 2: "1. Nachname Vorname" (mit Nummer)
+      // Format 3: "Nachname    Vorname" (mit Tabs/Spaces)
+      
+      // Entferne führende Nummern
+      var cleanLine = line.replaceFirst(RegExp(r'^\d+[\.\)\s]+'), '').trim();
+      
+      // Ersetze Komma durch Leerzeichen
+      cleanLine = cleanLine.replaceAll(',', ' ');
+      
+      // Splitte nach Whitespace
+      final parts = cleanLine.split(RegExp(r'\s+')).where((p) => p.isNotEmpty && p.length > 1).toList();
+      
       if (parts.length >= 2) {
-        // Prüfe ob es wie ein Name aussieht (keine Zahlen, nicht zu kurz)
-        final potentialName = parts.take(2).join(' ');
-        if (RegExp(r'^[A-Za-zÄÖÜäöüß\-]+\s+[A-Za-zÄÖÜäöüß\-]+$').hasMatch(potentialName) &&
-            parts[0].length > 1 && parts[1].length > 1) {
+        final firstName = parts[0];
+        final lastName = parts.length > 1 ? parts[1] : '';
+        
+        // Prüfe ob beide Teile wie Namen aussehen (Buchstaben, evtl. Bindestrich)
+        final namePattern = RegExp(r'^[A-Za-zÄÖÜäöüßéèêëàáâãåæç\-]+$');
+        if (namePattern.hasMatch(firstName) && namePattern.hasMatch(lastName)) {
           students.add(
             ImportedStudent(
-              lastName: parts[0],  // Nachname zuerst (typisches Listenformat)
-              firstName: parts[1],
+              lastName: firstName,  // Erste Spalte = Nachname
+              firstName: lastName,  // Zweite Spalte = Vorname
             ),
           );
           continue;
         }
       }
       
-      // Kurze Zeilen als potenziell fehlerhaft aufnehmen
-      if (line.split(' ').length <= 4 && line.runes.every((c) => c > 31)) {
-        invalid.add(line);
+      // Nicht erkannte Zeilen speichern (für Debug)
+      if (cleanLine.isNotEmpty && cleanLine.length < 50) {
+        invalid.add(cleanLine);
       }
     }
 

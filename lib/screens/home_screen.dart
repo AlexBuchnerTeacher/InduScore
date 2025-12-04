@@ -330,10 +330,30 @@ class HomeScreen extends ConsumerWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    return ActionChip(
-      avatar: Icon(icon, size: 18),
-      label: Text(label),
-      onPressed: onTap,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: RBSSpacing.md,
+          vertical: RBSSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(color: RBSColors.dynamicRed, width: 2),
+          borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: RBSColors.dynamicRed),
+            const SizedBox(width: RBSSpacing.xs),
+            Text(
+              label,
+              style: RBSTypography.tag.copyWith(color: RBSColors.dynamicRed),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

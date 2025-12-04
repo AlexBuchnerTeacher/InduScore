@@ -8,6 +8,7 @@ import '../models/klasse.dart';
 import '../models/subject.dart';
 import '../providers/app_providers.dart';
 import '../core/theme/rbs_theme.dart';
+import '../core/widgets/rbs_components.dart';
 import '../widgets/rbs_drawer.dart';
 
 /// Zentrale Notenübersicht mit flexiblen Filtern
@@ -184,11 +185,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                 .where((t) => availableTypen.contains(t))
                 .map((typ) => Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(typ.label),
+                      child: RBSFilterChip(
+                        label: typ.label,
                         selected: _selectedTyp == typ,
-                        selectedColor: RBSColors.dynamicRed.withValues(alpha: 0.2),
-                        checkmarkColor: RBSColors.dynamicRed,
+                        color: RBSColors.dynamicRed,
                         onSelected: (selected) {
                           setState(() {
                             _selectedTyp = selected ? typ : null;
@@ -212,11 +212,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   .where((s) => availableSubjectIds.contains(s.id))
                   .map((subject) => Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(subject.shortName ?? subject.name),
+                        child: RBSFilterChip(
+                          label: subject.shortName ?? subject.name,
                           selected: _selectedSubjectId == subject.id,
-                          selectedColor: RBSColors.courtGreen.withValues(alpha: 0.2),
-                          checkmarkColor: RBSColors.courtGreen,
+                          color: RBSColors.courtGreen,
                           onSelected: (selected) {
                             setState(() {
                               _selectedSubjectId = selected ? subject.id : null;
@@ -231,11 +230,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   .where((k) => availableKlasseIds.contains(k.id))
                   .map((klasse) => Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(klasse.name),
+                        child: RBSFilterChip(
+                          label: klasse.name,
                           selected: _selectedKlasseId == klasse.id,
-                          selectedColor: RBSColors.dynamicRed.withValues(alpha: 0.2),
-                          checkmarkColor: RBSColors.dynamicRed,
+                          color: RBSColors.dynamicRed,
                           onSelected: (selected) {
                             setState(() {
                               _selectedKlasseId = selected ? klasse.id : null;
@@ -248,16 +246,33 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
             if (_selectedTyp != null || _selectedSubjectId != null || _selectedKlasseId != null)
               Padding(
                 padding: const EdgeInsets.only(left: 8),
-                child: ActionChip(
-                  avatar: const Icon(Icons.clear, size: 16),
-                  label: const Text('Alle'),
-                  onPressed: () {
+                child: InkWell(
+                  onTap: () {
                     setState(() {
                       _selectedTyp = null;
                       _selectedSubjectId = null;
                       _selectedKlasseId = null;
                     });
                   },
+                  borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: RBSSpacing.sm,
+                      vertical: RBSSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey, width: 1),
+                      borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.clear, size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text('Alle', style: TextStyle(color: Colors.grey[600])),
+                      ],
+                    ),
+                  ),
                 ),
               ),
           ],

@@ -33,21 +33,31 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
       appBar: AppBar(
         title: const Text('Klassenverwaltung'),
         actions: [
+          // Import Button - deutlich sichtbar
+          Padding(
+            padding: const EdgeInsets.only(right: RBSSpacing.sm),
+            child: _isImporting
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : TextButton.icon(
+                    onPressed: _handlePdfImport,
+                    icon: const Icon(Icons.upload_file, color: Colors.white),
+                    label: const Text(
+                      'PDF Import',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _showKlasseDialog(context),
             tooltip: 'Neue Klasse',
-          ),
-          IconButton(
-            icon: _isImporting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.upload_file),
-            onPressed: _isImporting ? null : _handlePdfImport,
-            tooltip: 'Klasseliste importieren (PDF)',
           ),
         ],
       ),
@@ -533,111 +543,114 @@ class _ImportPreviewDialogState extends ConsumerState<_ImportPreviewDialog> {
       title: const Text('Klassenliste importieren'),
       content: SizedBox(
         width: 520,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Klassenname - editierbar wenn nicht erkannt
-            if (needsManualInput) ...[
-              Container(
-                padding: const EdgeInsets.all(RBSSpacing.sm),
-                decoration: BoxDecoration(
-                  color: RBSColors.warning.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: RBSColors.warning),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.warning_amber, color: RBSColors.warning),
-                    const SizedBox(width: RBSSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        'Klassenname nicht erkannt. Bitte manuell eingeben:',
-                        style: RBSTypography.bodyMedium,
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Klassenname - editierbar wenn nicht erkannt
+              if (needsManualInput) ...[
+                Container(
+                  padding: const EdgeInsets.all(RBSSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: RBSColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: RBSColors.warning),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber, color: RBSColors.warning),
+                      const SizedBox(width: RBSSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          'Klassenname nicht erkannt. Bitte manuell eingeben:',
+                          style: RBSTypography.bodyMedium,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(height: RBSSpacing.sm),
+              ],
+              TextField(
+                controller: _klassenameController,
+                decoration: InputDecoration(
+                  labelText: 'Klassenname',
+                  hintText: 'z.B. EAT331',
+                  errorText: _klassenameError,
+                  prefixIcon: const Icon(Icons.class_),
+                  border: const OutlineInputBorder(),
+                ),
+                onChanged: (_) => setState(() => _klassenameError = null),
               ),
               const SizedBox(height: RBSSpacing.sm),
-            ],
-            TextField(
-              controller: _klassenameController,
-              decoration: InputDecoration(
-                labelText: 'Klassenname',
-                hintText: 'z.B. EAT331',
-                errorText: _klassenameError,
-                prefixIcon: const Icon(Icons.class_),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (_) => setState(() => _klassenameError = null),
-            ),
-            const SizedBox(height: RBSSpacing.sm),
-            TextField(
-              controller: _klassenleiterController,
-              decoration: const InputDecoration(
-                labelText: 'Klassenleiter (optional)',
-                hintText: 'z.B. BUC',
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: RBSSpacing.md),
-            Text(
-              'Gefundene Schüler (${students.length}):',
-              style: RBSTypography.bodyMedium,
-            ),
-            const SizedBox(height: RBSSpacing.xs),
-            if (students.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(RBSSpacing.md),
-                decoration: BoxDecoration(
-                  color: RBSColors.offwhite,
-                  borderRadius: BorderRadius.circular(8),
+              TextField(
+                controller: _klassenleiterController,
+                decoration: const InputDecoration(
+                  labelText: 'Klassenleiter (optional)',
+                  hintText: 'z.B. BUC',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(),
                 ),
-                child: const Text(
-                  'Keine Schüler erkannt. Sie können nach dem Import manuell hinzugefügt werden.',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              )
-            else
-              SizedBox(
-                height: 180,
-                child: ListView.builder(
-                  itemCount: students.length,
-                  itemBuilder: (context, index) {
-                    final s = students[index];
-                    return ListTile(
+              ),
+              const SizedBox(height: RBSSpacing.md),
+              Text(
+                'Gefundene Schüler (${students.length}):',
+                style: RBSTypography.bodyMedium,
+              ),
+              const SizedBox(height: RBSSpacing.xs),
+              if (students.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(RBSSpacing.md),
+                  decoration: BoxDecoration(
+                    color: RBSColors.offwhite,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Keine Schüler erkannt. Sie können nach dem Import manuell hinzugefügt werden.',
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                )
+              else
+                ...students.take(20).map((s) => ListTile(
                       dense: true,
-                      leading: const Icon(Icons.person_outline),
+                      visualDensity: VisualDensity.compact,
+                      leading: const Icon(Icons.person_outline, size: 20),
                       title: Text('${s.lastName}, ${s.firstName}'),
-                    );
-                  },
+                    )),
+              if (students.length > 20)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text(
+                    '... und ${students.length - 20} weitere',
+                    style: RBSTypography.bodySmall.copyWith(fontStyle: FontStyle.italic),
+                  ),
                 ),
-              ),
-            if (preview.invalidLines.isNotEmpty) ...[
-              const SizedBox(height: RBSSpacing.sm),
-              ExpansionTile(
-                title: Text(
-                  'Nicht erkannte Zeilen (${preview.invalidLines.length})',
-                  style: RBSTypography.bodySmall,
+              if (preview.invalidLines.isNotEmpty) ...[
+                const SizedBox(height: RBSSpacing.sm),
+                ExpansionTile(
+                  title: Text(
+                    'Nicht erkannte Zeilen (${preview.invalidLines.length})',
+                    style: RBSTypography.bodySmall,
+                  ),
+                  children: preview.invalidLines.take(10)
+                      .map((l) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: RBSSpacing.md,
+                              vertical: 2,
+                            ),
+                            child: Text(
+                              l,
+                              style: RBSTypography.bodySmall
+                                  .copyWith(color: Colors.grey),
+                            ),
+                          ))
+                      .toList(),
                 ),
-                children: preview.invalidLines
-                    .map((l) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: RBSSpacing.md,
-                            vertical: 2,
-                          ),
-                          child: Text(
-                            l,
-                            style: RBSTypography.bodySmall
-                                .copyWith(color: Colors.grey),
-                          ),
-                        ))
-                    .toList(),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       actions: [
