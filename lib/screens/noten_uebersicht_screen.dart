@@ -140,8 +140,8 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       }
     }
 
-    // Sortiere Schüler
-    students.sort((a, b) => a.displayName.compareTo(b.displayName));
+    // Sortiere Schüler nach Nachname
+    students.sort((a, b) => a.sortKey.compareTo(b.sortKey));
 
     // Initialisiere Noten-Map
     _initializeNoten(students, filteredLN, grades);

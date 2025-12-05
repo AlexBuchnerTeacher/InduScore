@@ -4,20 +4,25 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
 
-## Features (v0.6.0)
-- **NEU: Notenübersicht aus allen Kontexten**: Klick auf Klasse/Fach/Schüler zeigt alle Noten
-- **NEU: Auto-Save**: Noten werden sofort gespeichert (kein Save-Button nötig)
-- **NEU: Tendenzen statt Punkte**: Vereinfachte Noteneingabe mit +/·/- Tendenz
-- **NEU: Gewichtung**: Wochentest (1.0), Praktisch (1.5), Mündlich (1.0), Mitarbeit (1.0)
-- **NEU: Änderungs-Tracking**: Kürzel des letzten Bearbeiters in jeder Note
+## Features (v0.7.0)
+- **NEU: Schüler-Model überarbeitet**: Echte Namen (Vor-/Nachname), Status (aktiv/ausgetreten), Ein-/Austrittsdatum
+- **NEU: PDF-Import mit Merge**: Duplikate erkennen, Schüler matchen, Austritte markieren
+- **NEU: Responsive Leistungsnachweise**: PopupMenu auf Mobilgeräten, ganze Card klickbar
+- **NEU: Sortierung nach Nachname**: Alphabetisch in allen Listen
+- **NEU: Modernes Icon-Design**: App-Icon mit Schatten-Effekt
+- **Notenübersicht aus allen Kontexten**: Klick auf Klasse/Fach/Schüler zeigt alle Noten
+- **Auto-Save**: Noten werden sofort gespeichert (kein Save-Button nötig)
+- **Tendenzen statt Punkte**: Vereinfachte Noteneingabe mit +/·/- Tendenz
+- **Gewichtung**: Wochentest (1.0), Praktisch (1.5), Mündlich (1.0), Mitarbeit (1.0)
+- **Änderungs-Tracking**: Kürzel des letzten Bearbeiters in jeder Note
 - **Leistungsnachweise**: Wochentest, Praktisch, Mündlich, Mitarbeit
 - **Excel-Style Noteneingabe**: Schnelle Eingabe für ganze Klasse mit Statistiken
-- **Schülerverwaltung**: Filter nach Klasse
+- **Schülerverwaltung**: Filter nach Klasse, Aktiv/Ausgetreten Toggle
 - **Fächerverwaltung**: CRUD, Beruf-Zuordnung, Farbcodierung, Wochenstunden, Credits
 - **Klassenverwaltung**: Einfache Verwaltung von Klassen mit Format "EAT321"
 - **PDF-Import**: Klassenlisten aus PDF importieren (auch OCR)
@@ -29,18 +34,19 @@ Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, 
 
 ## Roadmap
 
-### v0.7.0 - Datenschutz & Sicherheit
+### v0.8.0 - Zeugnisnoten & Export
+- [ ] Zeugnisnoten-Screen mit gewichtetem Durchschnitt
+- [ ] PDF-Export für Notenlisten
+- [ ] Nachschreiber-Management mit Zeitgruppen
+
+### v1.0.0 - Datenschutz & Sicherheit
 - [ ] Ende-zu-Ende Verschlüsselung für Schülernamen
 - [ ] Verschlüsselung mit Lehrer-Passwort (AES-256)
 - [ ] Recovery-Key System
 
-### v1.0.0 - Vollversion
-- [ ] Automatische Zeugnisnoten-Berechnung (gewichteter Schnitt)
-- [ ] Nachschreiber-Management mit Zeitgruppen
-- [ ] PDF-Export für Notenlisten & Zeugnisse
-# Release v0.3.0
+## Live-Version
 
-Die Version v0.3.0 ist als Web-App über GitHub Pages verfügbar:
+Die aktuelle Version ist als Web-App über GitHub Pages verfügbar:
 https://alexbuchnerteacher.github.io/InduScore/
 
 ## Tech Stack

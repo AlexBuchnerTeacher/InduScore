@@ -104,9 +104,9 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
   }
 
   Widget _buildNotenTabelle(List<Student> students) {
-    // Sortiere Schüler nach displayName
+    // Sortiere Schüler nach Nachname
     final sortedStudents = List<Student>.from(students)
-      ..sort((a, b) => a.displayName.compareTo(b.displayName));
+      ..sort((a, b) => a.sortKey.compareTo(b.sortKey));
 
     return Column(
       children: [
