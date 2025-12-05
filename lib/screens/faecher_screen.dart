@@ -527,7 +527,7 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
                   spacing: 8,
                   runSpacing: 8,
                   children: RBSColors.subjectColors.map((color) {
-                    final isSelected = _selectedColor?.value == color.value;
+                    final isSelected = _selectedColor?.toARGB32() == color.toARGB32();
                     return GestureDetector(
                       onTap: () {
                         setState(() {

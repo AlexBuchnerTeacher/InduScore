@@ -140,7 +140,7 @@ class HomeScreen extends ConsumerWidget {
 
                 return subjectsAsync.when(
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (e, s) => const SizedBox.shrink(),
                   data: (subjects) => Column(
                     children: recent.map((ln) => _buildLeistungsnachweisCard(
                       context,
@@ -454,7 +454,7 @@ class HomeScreen extends ConsumerWidget {
               value: klassenAsync.when(
                 data: (data) => '${(data as List).length}',
                 loading: () => '...',
-                error: (_, __) => '-',
+                error: (e, s) => '-',
               ),
               color: RBSColors.dynamicRed,
               onTap: () => context.go('/klassen'),
@@ -465,7 +465,7 @@ class HomeScreen extends ConsumerWidget {
               value: studentsAsync.when(
                 data: (data) => '${(data as List).where((s) => s.isAktiv).length}',
                 loading: () => '...',
-                error: (_, __) => '-',
+                error: (e, s) => '-',
               ),
               color: RBSColors.courtGreen,
               onTap: () => context.go('/schueler'),
@@ -476,7 +476,7 @@ class HomeScreen extends ConsumerWidget {
               value: subjectsAsync.when(
                 data: (data) => '${(data as List).length}',
                 loading: () => '...',
-                error: (_, __) => '-',
+                error: (e, s) => '-',
               ),
               color: RBSColors.growingElder,
               onTap: () => context.go('/faecher'),
@@ -487,7 +487,7 @@ class HomeScreen extends ConsumerWidget {
               value: gradesAsync.when(
                 data: (data) => '${(data as List).length}',
                 loading: () => '...',
-                error: (_, __) => '-',
+                error: (e, s) => '-',
               ),
               color: const Color(0xFF2E7BB5),
               onTap: () => context.go('/leistungsnachweise'),

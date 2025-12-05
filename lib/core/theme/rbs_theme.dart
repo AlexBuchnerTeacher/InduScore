@@ -67,7 +67,7 @@ class RBSColors {
   
   /// Konvertiert eine Color zu Hex-String
   static String toHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+    return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
   }
 }
 

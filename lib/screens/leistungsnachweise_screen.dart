@@ -386,7 +386,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.xs),
                     klassenAsync.when(
                       data: (klassen) => DropdownButtonFormField<String>(
-                        value: selectedKlasseId,
+                        initialValue: selectedKlasseId,
                         decoration: const InputDecoration(
                           hintText: 'Klasse wählen',
                           border: OutlineInputBorder(),
@@ -415,7 +415,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.xs),
                     subjectsAsync.when(
                       data: (subjects) => DropdownButtonFormField<String>(
-                        value: selectedSubjectId,
+                        initialValue: selectedSubjectId,
                         decoration: const InputDecoration(
                           hintText: 'Fach wählen',
                           border: OutlineInputBorder(),
@@ -444,7 +444,7 @@ class _LeistungsnachweiseScreenState
                     Text('Typ *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     DropdownButtonFormField<LeistungsnachweisTyp>(
-                      value: selectedTyp,
+                      initialValue: selectedTyp,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
@@ -475,7 +475,7 @@ class _LeistungsnachweiseScreenState
                     Text('Gewichtung *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     DropdownButtonFormField<double>(
-                      value: selectedGewichtung,
+                      initialValue: selectedGewichtung,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                       ),
