@@ -15,6 +15,7 @@ import 'screens/leistungsnachweise_screen.dart';
 import 'screens/noten_eingabe_screen.dart';
 import 'screens/noten_uebersicht_screen.dart';
 import 'screens/noi_export_screen.dart';
+import 'screens/csv_import_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -121,6 +122,11 @@ final _router = GoRouter(
     GoRoute(
       path: '/export',
       builder: (context, state) => const NoiExportScreen(),
+    ),
+    // CSV Import
+    GoRoute(
+      path: '/import',
+      builder: (context, state) => const CsvImportScreen(),
     ),
   ],
 );

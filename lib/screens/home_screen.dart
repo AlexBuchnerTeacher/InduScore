@@ -152,41 +152,6 @@ class HomeScreen extends ConsumerWidget {
                 );
               },
             ),
-            const SizedBox(height: RBSSpacing.lg),
-
-            // Schnellaktionen
-            const RBSHeadline(text: 'Schnellaktionen', level: RBSHeadlineLevel.h4),
-            const SizedBox(height: RBSSpacing.sm),
-            Wrap(
-              spacing: RBSSpacing.sm,
-              runSpacing: RBSSpacing.sm,
-              children: [
-                _buildActionChip(
-                  context,
-                  icon: Icons.school,
-                  label: 'Klassen',
-                  onTap: () => context.go('/klassen'),
-                ),
-                _buildActionChip(
-                  context,
-                  icon: Icons.person,
-                  label: 'Schüler',
-                  onTap: () => context.go('/schueler'),
-                ),
-                _buildActionChip(
-                  context,
-                  icon: Icons.book,
-                  label: 'Fächer',
-                  onTap: () => context.go('/faecher'),
-                ),
-                _buildActionChip(
-                  context,
-                  icon: Icons.assignment,
-                  label: 'Leistungsnachweise',
-                  onTap: () => context.go('/leistungsnachweise'),
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -356,39 +321,6 @@ class HomeScreen extends ConsumerWidget {
               Icon(Icons.arrow_forward, color: Colors.grey[400]),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionChip(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RBSBorderRadius.small),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: RBSSpacing.md,
-          vertical: RBSSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(color: RBSColors.dynamicRed, width: 2),
-          borderRadius: BorderRadius.circular(RBSBorderRadius.small),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: RBSColors.dynamicRed),
-            const SizedBox(width: RBSSpacing.xs),
-            Text(
-              label,
-              style: RBSTypography.tag.copyWith(color: RBSColors.dynamicRed),
-            ),
-          ],
         ),
       ),
     );

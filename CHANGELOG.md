@@ -6,6 +6,73 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.9.0] - 2025-12-05
+
+### Added
+- **CSV Import Service** (`CsvImportService`)
+  - Import von Schülerlisten aus CSV-Dateien (z.B. ASV-Export)
+  - Automatische Spaltenerkennung (Vorname, Nachname, Klasse, etc.)
+  - Unterstützung verschiedener Delimiter (Semikolon, Komma, Tab)
+  - Manuelles Spalten-Mapping über UI
+  - Vorschau vor Import
+
+- **CSV Import Screen** (`/import`)
+  - 3-Schritt-Wizard: Datei auswählen → Spalten zuordnen → Importieren
+  - Automatische Klassenerkennung aus CSV
+  - Import in bestehende oder neue Klassen
+  - Fortschrittsanzeige während Import
+
+- **PDF Export Service** (`PdfExportService`)
+  - Notenblatt pro Schüler (alle Fächer mit Einzelnoten, Schnitt, Zeugnisnote)
+  - Notenliste pro Fach (alle Schüler mit ihren Noten)
+  - Professionelles RBS-Design mit Header und Footer
+  - Automatischer Seitenumbruch bei langen Listen
+
+- **Erweiterter Export Screen** (`/export`)
+  - NOI Export (XML + CSV) für Zeugnisnoten
+  - PDF Export: Notenblatt pro Schüler
+  - PDF Export: Notenliste pro Fach
+  - Auswahl von Klasse, Schüler, Fach und Halbjahr
+
+- **Neuer Drawer-Eintrag** für CSV Import
+
+### Changed
+- Dashboard: Schnellaktionen am Ende entfernt (redundant, da Menü oben verfügbar)
+- Drawer: "NOI Export" → "Daten Export" (umfasst jetzt PDF + CSV + XML)
+
+### Fixed
+- Alle deprecated Flutter APIs aktualisiert (Radio, DropdownButtonFormField, etc.)
+- JS Interop für Web-Downloads korrigiert (web package statt dart:html)
+
+
+## [0.8.0] - 2025-12-05
+
+### Added
+- **NOI Export Service** (`NoiExportService`)
+  - Export von Zeugnisnoten im bayerischen NOI-Format (XML)
+  - CSV-Export als Alternative für manuelle Bearbeitung
+  - Unterstützung für beide Halbjahre
+  - Korrekte Berechnung nach Berufsschul-Rundungsregeln (0.6-Regel)
+
+- **NOI Export Screen** (`/export`)
+  - Auswahl von Klasse und Halbjahr
+  - Vorschau der zu exportierenden Zeugnisnoten
+  - Export als XML oder CSV
+  - Automatischer Download der generierten Dateien
+
+- **Dashboard Statistiken**
+  - Übersichtskarten mit Anzahl Klassen, Schüler, Fächer und Noten
+  - Visuelle Darstellung mit Icons und Farben
+
+- **Fächer-Farbauswahl**
+  - 10 vordefinierte RBS-Farben für Fächer
+  - Hex-Eingabe für benutzerdefinierte Farben
+  - Farbige Tags in Leistungsnachweisen
+
+### Changed
+- Schüler werden alphabetisch nach Nachname sortiert (`sortKey`)
+
+
 ## [0.7.0] - 2025-12-04
 
 ### Changed
