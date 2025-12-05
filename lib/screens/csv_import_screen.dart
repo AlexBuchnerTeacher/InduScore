@@ -540,32 +540,9 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
       input.type = 'file';
       input.accept = '.csv,.txt';
       
-      // Promise für Dateiauswahl
-      input.onchange = ((web.Event event) async {
-        final files = input.files;
-        if (files != null && files.length > 0) {
-          final file = files.item(0)!;
-          final reader = web.FileReader();
-          
-          reader.onload = ((web.Event e) {
-            final result = reader.result;
-            if (result != null) {
-              final bytes = _jsArrayBufferToUint8List(result);
-              _analyzeFile(bytes, file.name);
-            }
-          }).toJS;
-          
-          reader.onerror = ((web.Event e) {
-            setState(() {
-              _isLoading = false;
-              _importError = 'Fehler beim Lesen der Datei';
-            });
-          }).toJS;
-          
-          reader.readAsArrayBuffer(file);
-        } else {
-          setState(() => _isLoading = false);
-        }
+      // Event-Handler für Dateiauswahl (sync wrapper für async Logik)
+      input.onchange = ((web.Event event) {
+        _handleFileSelection(input);
       }).toJS;
       
       input.click();
@@ -574,6 +551,33 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
         _isLoading = false;
         _importError = 'Fehler: $e';
       });
+    }
+  }
+
+  void _handleFileSelection(web.HTMLInputElement input) {
+    final files = input.files;
+    if (files != null && files.length > 0) {
+      final file = files.item(0)!;
+      final reader = web.FileReader();
+      
+      reader.onload = ((web.Event e) {
+        final result = reader.result;
+        if (result != null) {
+          final bytes = _jsArrayBufferToUint8List(result);
+          _analyzeFile(bytes, file.name);
+        }
+      }).toJS;
+      
+      reader.onerror = ((web.Event e) {
+        setState(() {
+          _isLoading = false;
+          _importError = 'Fehler beim Lesen der Datei';
+        });
+      }).toJS;
+      
+      reader.readAsArrayBuffer(file);
+    } else {
+      setState(() => _isLoading = false);
     }
   }
 
