@@ -6,38 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.9.0] - 2025-12-05
+## [0.9.1] - 2025-12-05
 
 ### Added
-- **CSV Import Service** für Schülerlisten
-  - Automatische Spaltenerkennung (Vorname, Nachname, Klasse, etc.)
-  - Unterstützung für Semikolon-, Komma- und Tab-getrennte Dateien
-  - Manuelles Spalten-Mapping im UI
-  - Vorschau vor dem Import
-  - Integration mit bestehendem Klassen-System
-
-- **PDF Export Service** für Notenberichte
-  - Schüler-Notenblatt: Alle Fächer mit Einzelnoten und Durchschnitt
-  - Fach-Notenliste: Alle Schüler einer Klasse mit Noten
-  - Professionelles Layout im RBS-Design
-  - Automatische Seitenumbrüche
-
-- **Erweiterter Export-Screen**
-  - NOI-Export (XML/CSV) für Zeugnisnoten
-  - PDF-Export für Schüler und Fächer
-  - Übersichtliche Kartenauswahl für Export-Typ
-  - Klassen- und Fach-Filter
+- **Matrix-Ansicht für Klassen-Noten** (Notenübersicht)
+  - Schüler in Zeilen, Fächer in Spalten
+  - Durchschnitt pro Schüler pro Fach auf einen Blick
+  - Gesamt-Durchschnitt pro Schüler und Klasse
+  - Klick auf Fach öffnet Detail-Dialog mit allen LNs
+  - Farbcodierte Noten-Anzeige
+  - Horizontales Scrollen bei vielen Fächern
 
 ### Fixed
 - **Fächer-Filterung nach Beruf** (kritischer Bug)
   - Fächer werden jetzt korrekt nach Beruf der Klasse gefiltert
   - Leistungsnachweis-Dialog zeigt nur passende Fächer
   - Export-Screen filtert Fächer nach Klassenzugehörigkeit
-  - Schüler sehen nur Fächer ihres Berufs
+  - EAT-Schüler sehen keine EBT-Fächer mehr (und umgekehrt)
+
+
+## [0.9.0] - 2025-12-05
+
+### Added
+- **CSV Import** für Schülerlisten
+  - Automatische Spaltenerkennung (Vorname, Nachname, Klasse)
+  - Unterstützung für Semikolon-, Komma- und Tab-getrennte Dateien
+  - 3-Schritt-Wizard: Datei → Spalten → Import
+  - Vorschau vor dem Import
+
+- **PDF Export** für Notenberichte
+  - Schüler-Notenblatt: Alle Fächer mit Einzelnoten und Durchschnitt
+  - Fach-Notenliste: Alle Schüler einer Klasse mit Noten
+  - Professionelles Layout im RBS-Design
+
+- **Erweiterter Export-Screen** (`/export`)
+  - NOI-Export (XML/CSV) für Zeugnisnoten
+  - PDF-Export für Schüler und Fächer
+  - Übersichtliche Kartenauswahl für Export-Typ
 
 ### Changed
-- Drawer: "NOI Export" → "Daten Export" (umfasst jetzt mehr)
 - Neuer Menüpunkt "CSV Import" im Drawer
+- Drawer: "NOI Export" → "Daten Export"
 
 
 ## [0.8.0] - 2025-12-05
@@ -46,382 +55,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **NOI Export Service** für Zeugnisnoten
   - XML-Format für offizielle Notenverwaltungssysteme
   - CSV-Format für Excel-Kompatibilität
-  - Bayerisches Berufsschul-Format (Halbjahr, Fach, Note)
-
-- **NOI Export Screen**
-  - Klassen- und Halbjahr-Auswahl
-  - Format-Auswahl (XML/CSV)
-  - Sofortiger Download im Browser
-
-
-## [0.7.0] - 2025-12-04
-
-### Added
-- **CSV Import Service** (`CsvImportService`)
-  - Import von Schülerlisten aus CSV-Dateien (z.B. ASV-Export)
-  - Automatische Spaltenerkennung (Vorname, Nachname, Klasse, etc.)
-  - Unterstützung verschiedener Delimiter (Semikolon, Komma, Tab)
-  - Manuelles Spalten-Mapping über UI
-  - Vorschau vor Import
-
-- **CSV Import Screen** (`/import`)
-  - 3-Schritt-Wizard: Datei auswählen → Spalten zuordnen → Importieren
-  - Automatische Klassenerkennung aus CSV
-  - Import in bestehende oder neue Klassen
-  - Fortschrittsanzeige während Import
-
-- **PDF Export Service** (`PdfExportService`)
-  - Notenblatt pro Schüler (alle Fächer mit Einzelnoten, Schnitt, Zeugnisnote)
-  - Notenliste pro Fach (alle Schüler mit ihren Noten)
-  - Professionelles RBS-Design mit Header und Footer
-  - Automatischer Seitenumbruch bei langen Listen
-
-- **Erweiterter Export Screen** (`/export`)
-  - NOI Export (XML + CSV) für Zeugnisnoten
-  - PDF Export: Notenblatt pro Schüler
-  - PDF Export: Notenliste pro Fach
-  - Auswahl von Klasse, Schüler, Fach und Halbjahr
-
-- **Neuer Drawer-Eintrag** für CSV Import
-
-### Changed
-- Dashboard: Schnellaktionen am Ende entfernt (redundant, da Menü oben verfügbar)
-- Drawer: "NOI Export" → "Daten Export" (umfasst jetzt PDF + CSV + XML)
-
-### Fixed
-- Alle deprecated Flutter APIs aktualisiert (Radio, DropdownButtonFormField, etc.)
-- JS Interop für Web-Downloads korrigiert (web package statt dart:html)
-
-
-## [0.8.0] - 2025-12-05
-
-### Added
-- **NOI Export Service** (`NoiExportService`)
-  - Export von Zeugnisnoten im bayerischen NOI-Format (XML)
-  - CSV-Export als Alternative für manuelle Bearbeitung
-  - Unterstützung für beide Halbjahre
-  - Korrekte Berechnung nach Berufsschul-Rundungsregeln (0.6-Regel)
-
-- **NOI Export Screen** (`/export`)
-  - Auswahl von Klasse und Halbjahr
-  - Vorschau der zu exportierenden Zeugnisnoten
-  - Export als XML oder CSV
-  - Automatischer Download der generierten Dateien
+  - Bayerisches Berufsschul-Format
 
 - **Dashboard Statistiken**
-  - Übersichtskarten mit Anzahl Klassen, Schüler, Fächer und Noten
-  - Visuelle Darstellung mit Icons und Farben
+  - Übersichtskarten mit Anzahl Klassen, Schüler, Fächer, Noten
+  - Farbige Icons und Schnellzugriff
 
 - **Fächer-Farbauswahl**
-  - 10 vordefinierte RBS-Farben für Fächer
+  - 10 vordefinierte RBS-Farben
   - Hex-Eingabe für benutzerdefinierte Farben
   - Farbige Tags in Leistungsnachweisen
 
-### Changed
-- Schüler werden alphabetisch nach Nachname sortiert (`sortKey`)
-
 
 ## [0.7.0] - 2025-12-04
 
 ### Changed
-- **Student Model komplett überarbeitet** (Breaking Change)
-  - `pseudonym` entfernt - echte Namen werden jetzt verwendet
-  - `firstName` und `lastName` sind jetzt Pflichtfelder
-  - `eintrittsDatum` (Pflicht) für Klasseneintritt
-  - `austrittsDatum` (optional) für Klassenaustritt
-  - `StudentStatus` enum: aktiv/ausgetreten
-  - `sortKey` für alphabetische Sortierung nach Nachname
+- **Student Model überarbeitet** (Breaking Change)
+  - `pseudonym` entfernt - echte Namen
+  - `firstName` und `lastName` als Pflichtfelder
+  - `eintrittsDatum` und `austrittsDatum`
+  - `StudentStatus`: aktiv/ausgetreten
 
 - **PDF-Import mit Merge-Strategie**
-  - Duplikate werden erkannt statt neue Klassen anzulegen
-  - Schüler werden per Vorname+Nachname automatisch gematcht
-  - Manuelles Matching per Dropdown bei Namensänderungen
-  - Option: "Nur neue hinzufügen" oder "Übernehmen & Austritte markieren"
-  - Nicht mehr in PDF vorhandene Schüler → Status "ausgetreten"
-
-- **Schueler-Screen für neues Model**
-  - Separate Eingabefelder für Vorname und Nachname
-  - Eintrittsdatum-Picker bei Neuanlage
-  - Toggle für ausgetretene Schüler anzeigen/verbergen
-  - Austritts-Dialog mit Datumswahl
-  - Reaktivieren-Option für ausgetretene Schüler
+  - Duplikate werden erkannt
+  - Automatisches Matching per Vorname+Nachname
+  - Austritte automatisch markieren
 
 - **Modernisiertes Chip-Design**
-  - RBSTag: Rund (StadiumBorder), gefüllt statt Outline
-  - RBSFilterChip: Pill-Form, gefüllte Farbe wenn selected
+  - RBSTag: Rund, gefüllt
+  - RBSFilterChip: Pill-Form
 
 ### Fixed
-- PDF-Parser robuster für verschiedene Formate (OCR-Toleranz, Zeilennummern)
+- PDF-Parser robuster für OCR-Formate
+- Sortierung nach Nachname
 
 
 ## [0.6.0] - 2025-12-03
 
 ### Added
-- **Vereinfachte Noteneingabe** (Feldfeedback-Refactoring)
-  - Tendenz statt Punkte: +/·/- Buttons für Notentendenzen (z.B. 2+, 2, 2-)
-  - Auto-Save: Noten werden sofort bei Eingabe gespeichert (kein Save-Button)
-  - Änderungs-Tracking: Kürzel des letzten Bearbeiters in jeder Note (z.B. "bu")
-  - Gewichtung als separates Feld: 1.0 (Standard), 1.5 (Praktisch), 2.0 (Schulaufgabe)
+- **Vereinfachte Noteneingabe**
+  - Tendenz: +/·/- statt Punkte
+  - Auto-Save bei Eingabe
+  - Änderungs-Tracking (Kürzel)
 
-- **Zentrale Notenübersicht** (`NotenUebersichtScreen`)
-  - Klick auf Klasse → alle Noten dieser Klasse
-  - Klick auf Fach → alle Noten dieses Fachs
-  - Klick auf Schüler → alle Noten dieses Schülers
-  - Gruppiert nach Leistungsnachweisen mit Durchschnittsberechnung
-  - Direkte Navigation zur Noteneingabe
-  - Filter-Chips für Typ, Fach und Klasse
-  - Statistiken: Durchschnitt pro LN/Schüler, Notenverteilung
+- **Zentrale Notenübersicht**
+  - Klick auf Klasse/Fach/Schüler → Noten
+  - Filter-Chips und Statistiken
+  - Durchschnittsberechnung
 
-- **Neue Leistungsnachweis-Typen**
-  - Wochentest (Gewichtung 1.0)
-  - Praktisch (Gewichtung 1.5)
-  - Mündlich (Gewichtung 1.0)
-  - Mitarbeit (Gewichtung 1.0)
-
-- **Dashboard für täglichen Workflow**
-  - Schuljahr-Badge im Header
-  - "Meine Klassen" horizontal scrollbar mit Direktzugriff zur Notenübersicht
-  - "Aktuelle Leistungsnachweise" mit den 5 neuesten
-  - Schnellaktionen als Chips (Klassen, Schüler, Fächer, LN)
+- **Neue LN-Typen**
+  - Wochentest, Praktisch, Mündlich, Mitarbeit
+  - Individuelle Gewichtung (1.0, 1.5, 2.0)
 
 ### Changed
-- **Grade Model refactored**
-  - `punkte` entfernt (nicht mehr benötigt)
-  - `tendenz` hinzugefügt (plus/minus/keine)
-  - `updatedBy` hinzugefügt (Kürzel des letzten Bearbeiters)
-- **Leistungsnachweis Model refactored**
-  - `maxPunkte` entfernt
-  - `gewichtung` als eigenes Feld (1.0, 1.5, 2.0)
-  - Typen angepasst: Wochentest, Praktisch, Mündlich, Mitarbeit
-- **UI-Verbesserungen**
-  - "Noten eingeben" Button prominent (FilledButton statt IconButton)
-  - Tendenz-Buttons als einfache Toggle-Buttons (statt SegmentedButton)
-  - Back-Navigation in NotenEingabeScreen
+- Grade Model: `tendenz`, `updatedBy` statt `punkte`
+- Dashboard mit Schuljahr-Badge und Schnellzugriff
 
-### Fixed
-- SegmentedButton Overflow bei Tendenzen → Simple Toggle Buttons
-- Unicode-Symbol (○) nicht darstellbar → Bullet Point (·)
-- Routen-Priorität: Spezifische Routen vor generischer `/noten/:id`
-
----
 
 ## [0.5.0] - 2025-12-02
 
 ### Added
-- **Leistungsnachweise + schnelle Noteneingabe** (#10)
-  - LeistungsnachweiseScreen: CRUD für Schulaufgaben, Stegreifaufgaben, mündliche Noten
-  - NotenEingabeScreen: Excel-Style Notenliste für alle Schüler einer Klasse
-  - IHK Bayern Notenschlüssel (92-100%=1, 81-91%=2, 67-80%=3, 50-66%=4, 30-49%=5, <30%=6)
-  - Automatische Notenberechnung aus Punkten
-  - Kommentar-Feld zu jeder Note (Tooltip)
-  - Statistiken: Durchschnitt und Notenverteilung
-  - Grade Model refactored: note, punkte, kommentar, leistungsnachweisId
-  - Neue Provider: gradesByLeistungsnachweisProvider
-  - Navigation im Drawer unter "Leistungsnachweise"
+- **Leistungsnachweise + Noteneingabe**
+  - LeistungsnachweiseScreen mit CRUD
+  - NotenEingabeScreen: Excel-Style Liste
+  - IHK Bayern Notenschlüssel
+  - Automatische Notenberechnung
 
-### Fixed
-- **Firestore Index-Fehler**
-  - Queries mit where+orderBy auf clientseitige Sortierung umgestellt
-  - Betrifft: getStudentsByKlasse, getGradesByStudent, getLeistungsnachweiseByKlasse/Subject
-
----
 
 ## [0.4.0] - 2025-12-02
 
 ### Added
-- **Schülerverwaltung** (#9)
-  - Neuer SchuelerScreen mit CRUD-Funktionalität
+- **Schülerverwaltung**
+  - SchuelerScreen mit CRUD
   - Filter nach Klasse
-  - Student Model mit `pseudonym`, `klasseId`
-  - `studentsByKlasseProvider` für gefilterte Abfragen
-  - Navigation im Drawer aktiviert
+  - `studentsByKlasseProvider`
 
-### Fixed
-- **Design-Angleichung** (#25)
-  - Fächer-Screen Design wie Klassen-Screen
-  - Einheitliche AppBar, Filter-Chips, Add-Buttons
-- **CI-Pipeline**
-  - Veralteten Version-Check entfernt
-  - Single Source of Truth: nur pubspec.yaml
-- **Android Chrome Favicon**
-  - Verbesserte Icon-Unterstützung
 
----
-
-## [0.3.1] - 2025-12-02
-
-### Fixed
-- **Mobile Favicon** (#24)
-  - Relative Pfade für Favicons (kompatibel mit `<base href>`)
-  - Eigenes `apple-touch-icon.png` für iOS-Geräte
-  - UTF-8 Encoding-Fix in index.html
-- **go_router 17+ Kompatibilität**
-  - Custom `GoRouterRefreshStream` Klasse implementiert
-  - Ersetzt entfernte built-in Klasse für Auth-Refresh
-
----
-
-## [0.3.0] - 2025-11-21
+## [0.3.0] - 2025-12-01
 
 ### Added
-- **Fächerverwaltung** (#8)
-  - `FachTyp` Enum: Allgemeinbildend, Beruflich, Lernfeld
-  - Subject Model erweitert: typ, berufe, wochenstunden, credits
-  - FaecherScreen mit CRUD-Funktionalität
-  - Filter nach Beruf und Fachtyp
-  - Farbcodierung nach Beruf (IE=Red, EAT=Green, EBT=Elder, EGS=Blue)
-  - Detailanzeige: Wochenstunden, Credits, zugeordnete Berufe
-  - RBS Styleguide 1.2 Design durchgängig
+- **Fächerverwaltung**
+  - FaecherScreen mit CRUD
+  - Berufszuordnung (EAT, EBT, EGS, IE)
+  - Fachtypen: Allgemein, Beruflich, Lernfeld
 
-### Fixed
-- Umlaut- und Encoding-Probleme in Enum und UI
-- Farbränder für Beruf-Chips
-- Save-Dialog: Fehlerhandling, Dialog-Schließung, Firestore-Integration
 
-### Changed
-- Google Fonts (Roboto) für bessere Umlaut-Darstellung
-- Firestore-Regeln für Auth-User angepasst
-
-### Geplant für v1.0.0
-- Schülerverwaltung mit CSV-Import (#9)
-- Leistungsnachweise & Noteneingabe (#10)
-- Automatische Zeugnisnoten-Berechnung (#11)
-- Nachschreiber-Management (#12)
-- PDF-Export (#13)
-
-----
-
-## [0.2.0] - 2025-11-20
+## [0.2.0] - 2025-11-30
 
 ### Added
-- **Domain-Modelle für Berufsschule** (#6)
-  - `Beruf` Enum: IE, EAT, EBT, EGS mit vollständigen Namen
-  - `Schuljahr` Klasse: Auto-Erkennung aktuelles Jahr (Aug-Dez)
-  - `Zeitgruppe` Enum: 1, 2, 3 für Nachschreiber-Management
-  - `Klasse` Model: Format "EAT321" (Beruf + Jahrgangsstufe + Zeitgruppe + Lfd.Nr.)
-  - `Leistungsnachweis` Model: Typen mit Gewichtung (Schulaufgabe 2.0x, etc.)
-  - `IHKNotenschluessel`: 92%+=1, 81%+=2, 67%+=3, 50%+=4, 30%+=5, <30%=6
-  - `Zeugnisnote` Berechnung: Gewichteter Durchschnitt + Rundung (2.5→2, 2.6→3)
+- **Klassenverwaltung**
+  - KlassenScreen mit CRUD
+  - Beruf, Jahrgangsstufe, Zeitgruppe
+  - Schuljahr-Berechnung
 
-- **Klassenverwaltung** (#7)
-  - Full CRUD UI mit RBS-Design
-  - Listenansicht mit Beruf-farbcodierten Karten
-  - Filter nach Schuljahr und Beruf
-  - Vereinfachte Eingabe: "EAT321" wird automatisch geparst
-  - RegEx-Validierung für Klassenname-Format
-  - Löschen mit Bestätigung (inkl. Warnung vor Cascade-Delete)
-  - Empty-State mit "Erste Klasse erstellen" Button
 
-- **Navigation System** (#5 teilweise)
-  - RBS Drawer-Menü mit Dynamic Red Header
-  - Anzeige User-Email im Drawer
-  - Navigation: Dashboard, Klassen (aktiv), Schüler/Fächer/Noten (disabled)
-  - Logout-Funktion im Drawer
-  - Aktive Seite visuell hervorgehoben
-
-- **Firestore Services erweitert**
-  - Klassen CRUD: getKlassen(), createKlasse(), updateKlasse(), deleteKlasse()
-  - Leistungsnachweise CRUD: Full CRUD Operations
-  - Cascade Delete: Löschen einer Klasse entfernt alle Leistungsnachweise
-  - Filtered Queries: getKlassenBySchuljahrAndBeruf()
-
-- **Riverpod Providers erweitert**
-  - `klassenProvider`: Stream aller Klassen
-  - `currentSchuljahrProvider`: Auto-Erkennung aktuelles Schuljahr
-  - `leistungsnachweiseProvider`: Stream aller Leistungsnachweise
-  - Family Providers für filtered Data
-
-### Changed
-- HomeScreen: Logout in Drawer verschoben (vorher AppBar)
-- Login: Enter-Taste triggert Login-Funktion
-- Klassenname-Format: Von "EAT-11-1-2024/25" zu "EAT321"
-- Jahrgangsstufe: Von 10-13 zu 1-4 für bessere Lesbarkeit
-
-### Fixed
-- RenderFlex Overflow in HomeScreen (Card-Größe: 180→200px)
-- Deprecated `value` Parameter in DropdownButtonFormField → `initialValue`
-- Unused Imports bereinigt
-
----
-
-## [0.1.0] - 2025-11-20
+## [0.1.0] - 2025-11-29
 
 ### Added
-- **RBS Styleguide 1.2 Design System** (#18)
-  - Theme mit Dynamic Red (RGB 255/94/53), Roboto Condensed, Open Sans
-  - ColorScheme: Primary (Dynamic Red), Secondary (Growing Elder, Court Green)
-  - Google Fonts Integration für Webfonts
-  - Grid-basiertes Spacing (8dp-Basis)
-  
-- **RBS UI Components Library** (#18)
-  - `RBSButton` - Dynamic Red, Roboto Condensed Bold
-  - `RBSTag` - Outline-Style, doppelte Versalhöhe
-  - `RBSCard` - Weiche Schatten, großer Weißraum
-  - `RBSHeadline` - Roboto Condensed Bold, linksbündig
-  - `RBSInput` - Klar, weiß, Outline bei Fokus
-  - `RBSFilterChip` - Funktional für Filter
-  - `RBSDialog` - Viel Luft, klare Typografie
-  - `RBSSection` - Strukturblock für Content-Ebene
-  
-- **Login Screen (Cover-Ebene)** (#18)
-  - Dynamic Red Hintergrund (verpflichtend gemäß Styleguide)
-  - Keyvisual: 45° Pattern
-  - Tag "#induscore" rechts oben
-  - Headline + Subheadline (Roboto Condensed Bold, weiß)
-  - Weißer Login-Card mit RBS-konformen Inputs
-  - Responsive für Desktop & Mobile
-  - Validation & Error-Handling
-  
-- **Initial Data Models** (#4)
-  - `Student` - Firestore-Integration mit Pseudonymisierung
-  - `Subject` - Fächerverwaltung mit Farb-Codes
-  - `Grade` - Notenverwaltung mit Typen (Test, Oral, Homework, etc.)
-  - `GradeType` Enum - Klassifizierung von Leistungsnachweisen
-  
-- **Firebase Services** (#4)
-  - `AuthService` - Login, Register, Logout, Password-Reset
-  - `FirestoreService` - CRUD für Students, Subjects, Grades
-  - Deutsche Fehlermeldungen
-  - Cascade Delete (Student → Grades)
-  - Gewichtete Notenberechnung
-  
-- **Riverpod State Management** (#4)
-  - Provider für Auth, Firestore, Students, Subjects, Grades
-  - Stream-basierte Echtzeit-Updates
-  - Statistik-Provider (Durchschnitte)
-  
-- **Projekt-Setup** (#3)
-  - Flutter Web-Projekt mit Material Design 3
-  - go_router für Navigation
-  - Firebase Integration (Auth, Firestore)
-  - Git Repository initialisiert
-
-### Technical
-- Clean Architecture Struktur begonnen
-- Feature-first Ordnerstruktur (models, services, providers, screens, widgets)
-- Vollständige Styleguide-Konformität (keine Versalien, linksbündig, Laufweite 0)
-
-### Dependencies
-- `flutter_riverpod: ^3.0.3`
-- `firebase_core: ^4.2.1`
-- `firebase_auth: ^6.1.2`
-- `cloud_firestore: ^6.1.0`
-- `go_router: ^17.0.0`
-- `google_fonts: ^6.3.2`
-
----
-
-## Release Notes Template
-
-### v0.6.0 - Vereinfachte Noteneingabe (03.12.2025) ✅
-- Auto-Save für Noten (keine Speicher-Buttons mehr)
-- Tendenzen (+/·/-) statt Punkteingabe
-- Zentrale Notenübersicht aus Klassen/Fächer/Schüler-Screens
-- Änderungs-Tracking (Kürzel des Bearbeiters)
-- Neue Leistungsnachweis-Typen: Wochentest, Praktisch, Mündlich, Mitarbeit
-
-### v1.0.0 - MVP (Geplant: 20.12.2025)
-- Automatische Zeugnisnoten-Berechnung
-- Nachschreiber-Management mit Zeitgruppen
-- PDF-Export für Notenlisten & Zeugnisse
-- Settings-Bereich
+- **Projekt-Setup**
+  - Flutter Web mit Firebase
+  - Authentication (Email/Password)
+  - Firestore Datenbank
+  - RBS Styleguide Theme
+  - go_router Navigation
+  - Riverpod State Management
