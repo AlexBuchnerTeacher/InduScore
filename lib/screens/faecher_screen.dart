@@ -234,6 +234,8 @@ class _SubjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final subjectColor = RBSColors.fromHex(subject.color) ?? RBSColors.dynamicRed;
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -247,16 +249,16 @@ class _SubjectCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  // Fach Icon
+                  // Fach Icon mit Fachfarbe
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: RBSColors.dynamicRed.withValues(alpha: 0.1),
+                      color: subjectColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       _getIconForTyp(subject.typ),
-                      color: RBSColors.dynamicRed,
+                      color: subjectColor,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -276,6 +278,16 @@ class _SubjectCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // Farbindikator
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: subjectColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   // Actions
                   PopupMenuButton(
                     itemBuilder: (context) => [
@@ -379,7 +391,9 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _shortNameController;
+  late TextEditingController _hexColorController;
   late Set<Beruf> _selectedBerufe;
+  Color? _selectedColor;
   bool _isSaving = false;
 
   @override
@@ -390,12 +404,19 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
       text: widget.subject?.shortName,
     );
     _selectedBerufe = widget.subject?.berufe.toSet() ?? {};
+    _selectedColor = widget.subject?.color != null 
+        ? RBSColors.fromHex(widget.subject!.color)
+        : RBSColors.subjectColors.first;
+    _hexColorController = TextEditingController(
+      text: _selectedColor != null ? RBSColors.toHex(_selectedColor!) : '',
+    );
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _shortNameController.dispose();
+    _hexColorController.dispose();
     super.dispose();
   }
 
@@ -492,6 +513,89 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
                     ),
                   ),
                 const SizedBox(height: 16),
+                
+                // Farbauswahl
+                Text(
+                  'Farbe',
+                  style: GoogleFonts.roboto(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Farbpalette
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: RBSColors.subjectColors.map((color) {
+                    final isSelected = _selectedColor?.value == color.value;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedColor = color;
+                          _hexColorController.text = RBSColors.toHex(color);
+                        });
+                      },
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected ? Colors.black : Colors.transparent,
+                            width: 3,
+                          ),
+                          boxShadow: isSelected ? [
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ] : null,
+                        ),
+                        child: isSelected
+                            ? const Icon(Icons.check, color: Colors.white, size: 20)
+                            : null,
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
+                // Hex-Code Input
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: _selectedColor ?? RBSColors.dynamicRed,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _hexColorController,
+                        decoration: InputDecoration(
+                          labelText: 'Hex-Code',
+                          hintText: '#FF5E35',
+                          border: const OutlineInputBorder(),
+                          labelStyle: GoogleFonts.roboto(),
+                          hintStyle: GoogleFonts.roboto(),
+                          prefixIcon: const Icon(Icons.color_lens_outlined),
+                        ),
+                        style: GoogleFonts.roboto(),
+                        onChanged: (value) {
+                          final color = RBSColors.fromHex(value);
+                          if (color != null) {
+                            setState(() => _selectedColor = color);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -543,6 +647,7 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
       berufe: _selectedBerufe.toList(),
       wochenstunden: widget.subject?.wochenstunden ?? 2,
       credits: widget.subject?.credits ?? 3.0,
+      color: _selectedColor != null ? RBSColors.toHex(_selectedColor!) : null,
       createdAt: widget.subject?.createdAt ?? DateTime.now(),
     );
 

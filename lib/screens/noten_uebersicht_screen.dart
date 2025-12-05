@@ -215,7 +215,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                         child: RBSFilterChip(
                           label: subject.shortName ?? subject.name,
                           selected: _selectedSubjectId == subject.id,
-                          color: RBSColors.courtGreen,
+                          color: RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen,
                           onSelected: (selected) {
                             setState(() {
                               _selectedSubjectId = selected ? subject.id : null;

@@ -293,7 +293,7 @@ class _LeistungsnachweiseScreenState
                   if (subject != null)
                     RBSTag(
                       label: subject.shortName ?? subject.name,
-                      color: RBSColors.courtGreen,
+                      color: RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen,
                     ),
                 ],
               ),

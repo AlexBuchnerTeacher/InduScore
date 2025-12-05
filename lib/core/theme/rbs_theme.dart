@@ -36,6 +36,39 @@ class RBSColors {
   static const Color warning = Color(0xFFFFA726);
   static const Color error = dynamicRed;
   static const Color info = Color(0xFF29B6F6);
+  
+  // FÄCHER-FARBEN PALETTE (10 Default-Farben)
+  static const List<Color> subjectColors = [
+    Color(0xFFFF5E35), // Dynamic Red (RBS)
+    Color(0xFF00AB84), // Court Green (RBS)
+    Color(0xFF9BB537), // Growing Elder (RBS)
+    Color(0xFF2E7BB5), // Blau
+    Color(0xFF8E44AD), // Lila
+    Color(0xFFE67E22), // Orange
+    Color(0xFF16A085), // Türkis dunkel
+    Color(0xFFD35400), // Kürbis
+    Color(0xFF2980B9), // Blau dunkel
+    Color(0xFF27AE60), // Grün
+  ];
+  
+  /// Parst einen Hex-String zu einer Color
+  static Color? fromHex(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    try {
+      final hexCode = hex.replaceAll('#', '');
+      if (hexCode.length == 6) {
+        return Color(int.parse('FF$hexCode', radix: 16));
+      } else if (hexCode.length == 8) {
+        return Color(int.parse(hexCode, radix: 16));
+      }
+    } catch (_) {}
+    return null;
+  }
+  
+  /// Konvertiert eine Color zu Hex-String
+  static String toHex(Color color) {
+    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+  }
 }
 
 class RBSTypography {
