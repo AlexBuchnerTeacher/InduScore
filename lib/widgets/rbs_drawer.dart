@@ -80,6 +80,12 @@ class RBSDrawer extends ConsumerWidget {
                 const Divider(),
                 _buildDrawerItem(
                   context,
+                  icon: Icons.download_outlined,
+                  title: 'NOI Export',
+                  route: '/export',
+                ),
+                _buildDrawerItem(
+                  context,
                   icon: Icons.analytics_outlined,
                   title: 'Statistiken',
                   route: '/statistiken',

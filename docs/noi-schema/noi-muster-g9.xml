@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ImportG9 Schuljahr="2025/26" Schemaversion="1.0" Generierungsdatum="2023-10-24+02:00">
+    <Schueler_Notenimport_G9>
+        <Stammdaten>
+            <Lokales_Differenzierungsmerkmal>w2cp6x2rwy</Lokales_Differenzierungsmerkmal>
+            <Name>Drescher</Name>
+            <Vorname>Heide Ilka</Vorname>
+            <Geschlecht>weiblich</Geschlecht>
+            <Geburtsdatum>2007-04-02+02:00</Geburtsdatum>
+            <Bekenntnis>RK</Bekenntnis>
+        </Stammdaten>
+        <Belegung_NotenImport_G9>
+            <FachSubGroup>
+                <Schluessel_NotenImport>
+                    <Schluessel>0100500100</Schluessel>
+                </Schluessel_NotenImport>
+            </FachSubGroup>
+            <Kursdaten>
+                <Semester_Notenimport_G9>
+                    <Nummer>3</Nummer>
+                    <Leistung>
+                        <Schnitt_Kleine_Leistung>2.980198486863825</Schnitt_Kleine_Leistung>
+                        <Schnitt_Grosse_Leistung>6.955472490969057</Schnitt_Grosse_Leistung>
+                        <Schnitt_Gesamt>4.967835488916441</Schnitt_Gesamt>
+                        <Note>4</Note>
+                        <Schnitt_Praktische_Leistung>14.689793489633153</Schnitt_Praktische_Leistung>
+                        <Belegungsart>1038_05</Belegungsart>
+                    </Leistung>
+                    <Unterrichtselement>ff808081-8b6204b0-018b-62072a15-0c49</Unterrichtselement>
+                </Semester_Notenimport_G9>
+                <Semester_Notenimport_G9>
+                    <Nummer>4</Nummer>
+                    <Leistung>
+                        <Schnitt_Kleine_Leistung>13.6633866082978</Schnitt_Kleine_Leistung>
+                        <Schnitt_Grosse_Leistung>5.429512633122295</Schnitt_Grosse_Leistung>
+                        <Schnitt_Gesamt>9.546449620710048</Schnitt_Gesamt>
+                        <Note>9</Note>
+                        <Schnitt_Praktische_Leistung>13.659179089493003</Schnitt_Praktische_Leistung>
+                        <Belegungsart>1038_05</Belegungsart>
+                    </Leistung>
+                    <Unterrichtselement>ff808081-8b6204b0-018b-62072a15-0c49</Unterrichtselement>
+                </Semester_Notenimport_G9>
+            </Kursdaten>
+        </Belegung_NotenImport_G9>
+        <Abiturjahr>2025</Abiturjahr>
+    </Schueler_Notenimport_G9>
+</ImportG9>

@@ -14,6 +14,7 @@ import 'screens/schueler_screen.dart';
 import 'screens/leistungsnachweise_screen.dart';
 import 'screens/noten_eingabe_screen.dart';
 import 'screens/noten_uebersicht_screen.dart';
+import 'screens/noi_export_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -115,6 +116,11 @@ final _router = GoRouter(
       builder: (context, state) => NotenEingabeScreen(
         leistungsnachweisId: state.pathParameters['leistungsnachweisId']!,
       ),
+    ),
+    // NOI Export
+    GoRoute(
+      path: '/export',
+      builder: (context, state) => const NoiExportScreen(),
     ),
   ],
 );

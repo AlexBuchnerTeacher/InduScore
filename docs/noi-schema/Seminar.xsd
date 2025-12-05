@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid Studio 2018 (https://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:complexType abstract="true" name="Seminar">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Typ für ein Seminar.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Thema" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Das Thema des Seminars.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType abstract="true" name="PSeminar">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Typ für ein P-Seminar. Erbt von Seminar.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Seminar" />
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="PSeminar_Subgroup" type="PSeminar" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Platzhalter für ein konkretes P-Seminar.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="PSeminar_NotenImport" substitutionGroup="PSeminar_Subgroup">
+        <xs:annotation>
+            <xs:documentation>P-Seminar-Objekt für den Noten-Import.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="PSeminar">
+                    <xs:sequence>
+                        <xs:element name="Gesamtleistung" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Erreichte Gesamtleistung im P-Seminar.</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:double">
+                                    <xs:minInclusive value="0" />
+                                    <xs:maxInclusive value="30" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="PSeminar_FachwahlImport" substitutionGroup="PSeminar_Subgroup">
+        <xs:annotation>
+            <xs:documentation>P-Seminar-Objekt für den Fachwahlimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="PSeminar" />
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="PSeminar_LeistungsdatenPruefung" substitutionGroup="PSeminar_Subgroup">
+        <xs:annotation>
+            <xs:documentation>P-Seminar-Objekt für die Leistungsdatenprüfung.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="PSeminar">
+                    <xs:sequence>
+                        <xs:element name="Gesamtleistung" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Erreichte Gesamtleistung im P-Seminar.</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:int">
+                                    <xs:minInclusive value="0" />
+                                    <xs:maxInclusive value="15" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType abstract="true" name="WSeminar">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Typ für ein W-Seminar. Erbt von Seminar.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="Seminar" />
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="WSeminar_Subgroup" type="WSeminar" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Platzhalter für ein konkretes W-Seminar.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="WSeminar_NotenImport" substitutionGroup="WSeminar_Subgroup">
+        <xs:annotation>
+            <xs:documentation>W-Seminar-Objekt für den Noten-Import.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="WSeminar">
+                    <xs:sequence>
+                        <xs:element ref="WSeminarLeistung">
+                            <xs:annotation>
+                                <xs:documentation>Enthält die im W-Seminar erreichten Leistungen.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="WSeminar_FachwahlImport" substitutionGroup="WSeminar_Subgroup">
+        <xs:annotation>
+            <xs:documentation>W-Seminar-Objekt für den Fachwahlimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="WSeminar" />
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="WSeminar_LeistungsdatenPruefung" substitutionGroup="WSeminar_Subgroup">
+        <xs:annotation>
+            <xs:documentation>W-Seminar-Objekt für die Leistungsdatenprüfung.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="WSeminar">
+                    <xs:sequence>
+                        <xs:element ref="WSeminarLeistung">
+                            <xs:annotation>
+                                <xs:documentation>Enthält die im W-Seminar erreichten Leistungen.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="WSeminarLeistung">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Punkte_11_1" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>Erreichte Notenpunkte im Kurshalbjahr 11/1.</xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="0" />
+                            <xs:maxInclusive value="15" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="Punkte_11_2" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>Erreichte Notenpunkte im Kurshalbjahr 11/2.</xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="0" />
+                            <xs:maxInclusive value="15" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="Seminararbeit" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>Erreichte Notenpunkte in der Seminararbeit.</xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="0" />
+                            <xs:maxInclusive value="15" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="Praesentation" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>Erreichte Notenpunkte in der Präsentation.</xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="0" />
+                            <xs:maxInclusive value="15" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="Gesamtleistung" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>Erreichte Gesamtleistung im W-Seminar.</xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="0" />
+                            <xs:maxInclusive value="30" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid Studio (https://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="Fach.xsd" />
+    <xs:include schemaLocation="Leistung.xsd" />
+    <xs:complexType abstract="true" name="Semester">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Typ für ein Semester.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Nummer" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>Laufende Nummer des Semesters. Die Zählung beginnt mit 1 und endet mit 6.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:int">
+                        <xs:minInclusive value="1" />
+                        <xs:maxInclusive value="6" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="Sonderfall" type="xs:boolean" use="optional" />
+    </xs:complexType>
+    <xs:element name="Semester_Subgroup" type="Semester" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Platzhalter für ein konkretes Semester-Objekt.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Semester_Notenimport" substitutionGroup="Semester_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Semester für den Notenimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Semester">
+                    <xs:sequence>
+                        <xs:element name="Leistung" type="Leistung" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Klammert die Leistungen in einem Semester.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:choice>
+                            <xs:element name="Unterrichtselement" type="xs:string" />
+                            <xs:element name="Schuelerfach" type="xs:string" />
+                            <xs:element name="Schulefach" type="xs:string" />
+                        </xs:choice>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Semester_Leistungsdatenpruefung" substitutionGroup="Semester_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Semester für die Leistungsdatenprüfung.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Semester">
+                    <xs:sequence>
+                        <xs:element name="Leistung" type="Leistung" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Im jeweiligen Semester und im jeweiligen Kurs erbrachte Leistung.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Stunden" type="xs:int" />
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Semester_FachwahlImport" substitutionGroup="Semester_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Semester für den Fachwahlimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Semester">
+                    <xs:sequence>
+                        <xs:element name="Ersatz" type="Ersatz" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Gibt an, dass der Kurs in diesem Semester als Lehrplanalternative bzw. als Ersatzfach zu einem anderen Fach gewählt wurde.
+
+Derzeit muss die Belegung über ein Schuljahr hinweg konsistent sein.
+
+Nicht erlaubt z. B.
+
+Semester 1: Lehrplanalternative für Physik;
+Semester 2: Ersatzfach für Chemie.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Stunden" type="xs:int" />
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="Ersatz">
+        <xs:sequence>
+            <xs:element ref="FachSubGroup" />
+            <xs:element name="Ersatzart" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Semester_Notenimport_G9" substitutionGroup="Semester_Subgroup_G9">
+        <xs:annotation>
+            <xs:documentation>Semester für den Notenimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Semester_G9">
+                    <xs:sequence>
+                        <xs:element name="Leistung" type="Leistung_G9" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Klammert die Leistungen in einem Semester.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:choice>
+                            <xs:element name="Unterrichtselement" type="xs:string" />
+                            <xs:element name="Schuelerfach" type="xs:string" />
+                            <xs:element name="Schulefach" type="xs:string" />
+                        </xs:choice>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType abstract="true" name="Semester_G9">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Typ für ein Semester.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Nummer" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>Laufende Nummer des Semesters. Die Zählung beginnt mit 1 und endet mit 6.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:int">
+                        <xs:minInclusive value="1" />
+                        <xs:maxInclusive value="6" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Semester_Subgroup_G9" type="Semester_G9" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Platzhalter für ein konkretes Semester-Objekt.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Semester_FachwahlImport_G9" substitutionGroup="Semester_Subgroup_G9">
+        <xs:annotation>
+            <xs:documentation>Semester für den Fachwahlimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Semester_G9">
+                    <xs:sequence>
+                        <xs:element name="Ersatz" type="Ersatz" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Gibt an, dass der Kurs in diesem Semester als Lehrplanalternative bzw. als Ersatzfach zu einem anderen Fach gewählt wurde.
+
+Derzeit muss die Belegung über ein Schuljahr hinweg konsistent sein.
+
+Nicht erlaubt z. B.
+
+Semester 1: Lehrplanalternative für Physik;
+Semester 2: Ersatzfach für Chemie.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Stunden" type="xs:int" />
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

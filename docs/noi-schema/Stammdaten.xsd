@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid XML 2016 Designer Edition 14.1.5.6733 (https://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="Belegung.xsd" />
+    <xs:complexType name="Stammdaten">
+        <xs:sequence>
+            <xs:element name="Lokales_Differenzierungsmerkmal" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Lokales Differenzierungsmerkmal aus ASV.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Familienname der Schülerin bzw. des Schülers.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Vorname" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Vornamen der Schülerin bzw. des Schülers.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Geschlecht" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>"männlich" bzw. "weiblich"</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Geburtsdatum" type="xs:date">
+                <xs:annotation>
+                    <xs:documentation>Geburtsdatum der Schülerin / des Schülers</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Bekenntnis" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Bekenntnis der Schülerin / des Schülers:
+
+AK = alt-katholisch
+EV = evangelisch
+IL = islamisch
+IS = israelitisch
+NA = neuapostolisch
+OR = ohne Religionszugehörigkeit
+OX = orthodox
+RK = römisch-katholisch
+SR = sonstige(n)
+ST = Sieb.-Tags-Adv.
+ZJ = Zeuge Jehovas
+</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid Studio 2018 (https://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="Schluessel.xsd" />
+    <xs:complexType name="Fach">
+        <xs:annotation>
+            <xs:documentation>Fach Basisobjekt.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element ref="Schluessel_Subgroup" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="FachSubGroup" type="Fach">
+        <xs:annotation>
+            <xs:documentation>Allgemeines Fachobjekt.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Fach_FachwahlImport" substitutionGroup="FachSubGroup">
+        <xs:annotation>
+            <xs:documentation>Fach für den Fachwahlimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Fach">
+                    <xs:sequence>
+                        <xs:element name="Fach" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>Fach als konkrete Zeichenkette (für den Abgleich beim ASV-Import).</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Fach_Leistungsdatenpruefung" substitutionGroup="FachSubGroup">
+        <xs:annotation>
+            <xs:documentation>Fach für die Leistungsdatenprüfung.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Fach">
+                    <xs:sequence>
+                        <xs:element name="Fremdsprache" type="xs:boolean">
+                            <xs:annotation>
+                                <xs:documentation>Gibt an, ob es sich um eine Fremdsprache handelt.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                         <xs:element name="FortgefuehrteFremdsprache" type="xs:boolean">
+                            <xs:annotation>
+                                <xs:documentation>Gibt an, ob es sich um eine fortgefuehrte Fremdsprache handelt.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

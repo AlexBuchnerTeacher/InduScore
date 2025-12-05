@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid Studio (https://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="Kursdaten.xsd" />
+    <xs:include schemaLocation="Seminar.xsd" />
+    <xs:complexType abstract="true" name="Belegung">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Typ für eine Belegung.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element ref="FachSubGroup">
+                <xs:annotation>
+                    <xs:documentation>Platzhalter für eine FachSubGroup.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Kursdaten" type="Kursdaten">
+                <xs:annotation>
+                    <xs:documentation>Daten zum Kurs.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Belegung_Subgroup" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Platzhalter für konkrete Belegung.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Belegung_FachwahlImport" substitutionGroup="Belegung_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Belegung für den Fachwahl-Import</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Belegung">
+                    <xs:sequence>
+                        <xs:element name="AngebotsID" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>Technische ID des zugrundeliegenden Fachangebots aus ASV.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Belegungsart">
+                            <xs:annotation>
+                                <xs:documentation>Enthält die Belegungsart gemäß Werteliste 1038 in ASV:
+
+1038_05 = S (schriftliches Abiturfach)
+1038_06 = K (Colloquiumsfach)
+1038_07 = X (Belegung in 11 und 12)
+1038_08 = A (Belegung nur in 11)
+1038_09 = B (Belegung nur in 12)
+1038_10 = I (W-Seminar)
+1038_11 = P (P-Seminar)
+1038_18 = O (individuelle Belegung)
+1038_19 = K1 (erstes komb. Colloquium)
+1038_20 = K2 (zweites komb. Colloquium)
+1038_21 = S1 (schriftl. Abiturprüfung komb.)
+1038_30 = S (schriftliche Abiturprüfung im Leistungsfach)
+1038_31 = K (mündliche Abiturprüfung (Kolloquium) im Leistungsfach)
+</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:pattern value="1038_[0-9]{2}" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Belegung_NotenImport" substitutionGroup="Belegung_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Belegung für den Notenimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Belegung" />
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Belegung_LeistungsdatenPruefung" substitutionGroup="Belegung_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Belegung für die Leistungsdatenprüfung.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Belegung">
+                    <xs:sequence>
+                        <xs:element name="Belegungsart">
+                            <xs:annotation>
+                                <xs:documentation>Enthält die Belegungsart gemäß Werteliste 1038 in ASV:
+
+1038_05 = S (schriftliches Abiturfach)
+1038_06 = K (Colloquiumsfach)
+1038_07 = X (Belegung in 11 und 12)
+1038_08 = A (Belegung nur in 11)
+1038_09 = B (Belegung nur in 12)
+1038_10 = I (W-Seminar)
+1038_11 = P (P-Seminar)
+1038_18 = O (individuelle Belegung)
+1038_19 = K1 (erstes komb. Colloquium)
+1038_20 = K2 (zweites komb. Colloquium)
+1038_21 = S1 (schriftl. Abiturprüfung komb.)
+1038_30 = S (schriftliche Abiturprüfung im Leistungsfach)
+1038_31 = K (mündliche Abiturprüfung (Kolloquium) im Leistungsfach)
+
+</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:pattern value="^1038_[0-9]{2}$" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Belegung_NotenImport_G9" substitutionGroup="Belegung_Subgroup_G9">
+        <xs:annotation>
+            <xs:documentation>Belegung für den Notenimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Belegung_G9" />
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Belegung_Subgroup_G9" abstract="true" />
+    <xs:element name="Belegung_FachwahlImport_G9" substitutionGroup="Belegung_Subgroup_G9">
+        <xs:annotation>
+            <xs:documentation>Belegung für den Fachwahl-Import</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Belegung_G9">
+                    <xs:sequence>
+                        <xs:element name="AngebotsID" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>Technische ID des zugrundeliegenden Fachangebots aus ASV.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Belegungsart">
+                            <xs:annotation>
+                                <xs:documentation>Enthält die Belegungsart gemäß Werteliste 1038 in ASV:
+
+1038_05 = S (schriftliches Abiturfach)
+1038_06 = K (Colloquiumsfach)
+1038_07 = X (Belegung in 11 und 12)
+1038_08 = A (Belegung nur in 11)
+1038_09 = B (Belegung nur in 12)
+1038_10 = I (W-Seminar)
+1038_11 = P (P-Seminar)
+1038_18 = O (individuelle Belegung)
+1038_19 = K1 (erstes komb. Colloquium)
+1038_20 = K2 (zweites komb. Colloquium)
+1038_21 = S1 (schriftl. Abiturprüfung komb.)
+1038_30 = S (schriftliche Abiturprüfung im Leistungsfach)
+1038_31 = K (mündliche Abiturprüfung (Kolloquium) im Leistungsfach)
+</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:pattern value="1038_[0-9]{2}" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType abstract="true" name="Belegung_G9">
+        <xs:annotation>
+            <xs:documentation>Abstrakter Typ für eine Belegung.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element ref="FachSubGroup">
+                <xs:annotation>
+                    <xs:documentation>Platzhalter für eine FachSubGroup.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Kursdaten" type="Kursdaten_G9">
+                <xs:annotation>
+                    <xs:documentation>Daten zum Kurs.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

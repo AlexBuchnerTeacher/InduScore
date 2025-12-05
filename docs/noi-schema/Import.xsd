@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid Studio (https://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="Schueler.xsd" />
+    <xs:element name="ImportG8">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Import">
+                    <xs:sequence>
+                        <xs:element ref="Schueler_Subgroup" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="Import">
+        <xs:attribute name="Schuljahr" use="required">
+            <xs:annotation>
+                <xs:documentation>Schuljahr, in welches importiert werden soll. Schreibweise: 20xx/xx</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+                <xs:restriction base="xs:string" />
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Schemaversion" fixed="1.0" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Versionsnummer des XML-Schemas.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="Generierungsdatum" type="xs:date" use="required">
+            <xs:annotation>
+                <xs:documentation>Das Generierungsdatum der XML-Datei.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:element name="ImportG9">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Import">
+                    <xs:sequence>
+                        <xs:element ref="Schueler_Subgroup_G9" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

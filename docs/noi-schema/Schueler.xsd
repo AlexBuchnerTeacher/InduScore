@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid Studio (https://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="Stammdaten.xsd" />
+    <xs:include schemaLocation="Belegung.xsd" />
+    <xs:include schemaLocation="Seminar.xsd" />
+    <xs:include schemaLocation="Wunsch.xsd" />
+    <xs:complexType name="Schueler">
+        <xs:annotation>
+            <xs:documentation>Objekt für eine Schülerin / einen Schüler.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Stammdaten" type="Stammdaten">
+                <xs:annotation>
+                    <xs:documentation>Enthält die Stammdaten des Schüler-Objekts.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="Belegung_Subgroup" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Beliebig viele Belegungen dieser Schülerin / dieses Schülers.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Schueler_Subgroup" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Platzhalter für konkrete Schüler-Ausprägung.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Schueler_Notenimport" substitutionGroup="Schueler_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Schüler-Objekt für einen Notenimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Schueler">
+                    <xs:sequence>
+                        <xs:element name="Abiturjahr">
+                            <xs:annotation>
+                                <xs:documentation>Enthält das Abiturjahr (YYYY) der Schülerin bzw. des Schülers.</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:pattern value="\d{4}" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Schueler_Fachwahlimport" type="Schueler" substitutionGroup="Schueler_Subgroup">
+        <xs:annotation>
+            <xs:documentation>Schüler-Objekt für einen Fachwahl-Import.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="Schueler_G9">
+        <xs:annotation>
+            <xs:documentation>Objekt für eine Schülerin / einen Schüler.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Stammdaten" type="Stammdaten">
+                <xs:annotation>
+                    <xs:documentation>Enthält die Stammdaten des Schüler-Objekts.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="Belegung_Subgroup_G9" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Beliebig viele Belegungen dieser Schülerin / dieses Schülers.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Schueler_Fachwahlimport_G9" substitutionGroup="Schueler_Subgroup_G9">
+        <xs:annotation>
+            <xs:documentation>Schüler-Objekt für einen Fachwahl-Import.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Schueler_G9">
+                    <xs:sequence>
+                        <xs:element name="Wuensche" type="Wuensche" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Seminar- und Leistungsfachwünsche</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Schueler_Subgroup_G9" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Platzhalter für konkrete Schüler-Ausprägung.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Schueler_Notenimport_G9" substitutionGroup="Schueler_Subgroup_G9">
+        <xs:annotation>
+            <xs:documentation>Schüler-Objekt für einen Notenimport.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="Schueler_G9">
+                    <xs:sequence>
+                        <xs:element name="Abiturjahr">
+                            <xs:annotation>
+                                <xs:documentation>Enthält das Abiturjahr (YYYY) der Schülerin bzw. des Schülers.</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:pattern value="\d{4}" />
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="Wuensche">
+        <xs:sequence>
+            <xs:element name="Leistungsfachwunsch" type="Wunsch" minOccurs="0" maxOccurs="3">
+                <xs:annotation>
+                    <xs:documentation></xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Seminarwunsch" type="Wunsch" minOccurs="0" maxOccurs="3" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
