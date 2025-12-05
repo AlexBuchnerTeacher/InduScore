@@ -1,3 +1,16 @@
-﻿<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">
-  <circle cx=\"16\" cy=\"16\" r=\"15\" fill=\"#FF5E35\" />
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="20"/>
+      <feOffset dx="0" dy="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <circle cx="256" cy="256" r="200" fill="#FF5E35" filter="url(#shadow)"/>
 </svg>
