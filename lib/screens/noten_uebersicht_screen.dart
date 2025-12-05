@@ -332,6 +332,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
   }
 
   /// Ansicht gruppiert nach Fach (für Klassen-Kontext)
+  /// Matrix: Schüler in Zeilen, Fächer in Spalten
   Widget _buildBySubject(
     List<Student> students,
     List<Leistungsnachweis> leistungsnachweise,
@@ -343,49 +344,396 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     for (final ln in leistungsnachweise) {
       lnBySubject.putIfAbsent(ln.subjectId, () => []).add(ln);
     }
+    
+    // Sortiere Fächer
+    final sortedSubjectIds = lnBySubject.keys.toList();
+    sortedSubjectIds.sort((a, b) {
+      final subjectA = subjects.where((s) => s.id == a).firstOrNull;
+      final subjectB = subjects.where((s) => s.id == b).firstOrNull;
+      return (subjectA?.name ?? '').compareTo(subjectB?.name ?? '');
+    });
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: lnBySubject.length,
-      itemBuilder: (context, index) {
-        final subjectId = lnBySubject.keys.elementAt(index);
-        final subject = subjects.where((s) => s.id == subjectId).firstOrNull;
-        final subjectLN = lnBySubject[subjectId]!;
+    // Berechne Durchschnitte pro Schüler pro Fach
+    final studentFachSchnitte = <String, Map<String, double?>>{};
+    for (final student in students) {
+      studentFachSchnitte[student.id] = {};
+      for (final subjectId in sortedSubjectIds) {
+        final fachLNs = lnBySubject[subjectId]!;
+        double summe = 0;
+        double gewichtung = 0;
+        for (final ln in fachLNs) {
+          final key = '${student.id}_${ln.id}';
+          final eingabe = _noten[key];
+          if (eingabe?.note != null) {
+            final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+            summe += noteValue * ln.gewichtung;
+            gewichtung += ln.gewichtung;
+          }
+        }
+        studentFachSchnitte[student.id]![subjectId] = gewichtung > 0 ? summe / gewichtung : null;
+      }
+    }
+    
+    // Berechne Gesamt-Durchschnitt pro Schüler
+    final studentGesamtSchnitte = <String, double?>{};
+    for (final student in students) {
+      final fachSchnitte = studentFachSchnitte[student.id]!;
+      final validSchnitte = fachSchnitte.values.where((s) => s != null).cast<double>().toList();
+      studentGesamtSchnitte[student.id] = validSchnitte.isNotEmpty 
+          ? validSchnitte.reduce((a, b) => a + b) / validSchnitte.length 
+          : null;
+    }
 
-        return _buildSubjectSection(subject, subjectLN, students);
-      },
+    return _buildFaecherMatrix(
+      students: students,
+      sortedSubjectIds: sortedSubjectIds,
+      lnBySubject: lnBySubject,
+      subjects: subjects,
+      studentFachSchnitte: studentFachSchnitte,
+      studentGesamtSchnitte: studentGesamtSchnitte,
     );
   }
+  
+  /// Matrix-Ansicht: Schüler in Zeilen, Fächer-Durchschnitte in Spalten
+  Widget _buildFaecherMatrix({
+    required List<Student> students,
+    required List<String> sortedSubjectIds,
+    required Map<String, List<Leistungsnachweis>> lnBySubject,
+    required List<Subject> subjects,
+    required Map<String, Map<String, double?>> studentFachSchnitte,
+    required Map<String, double?> studentGesamtSchnitte,
+  }) {
+    // Berechne Spaltenbreite
+    final fachSpaltenBreite = 85.0;
+    final tableWidth = 180.0 + (sortedSubjectIds.length * fachSpaltenBreite) + 80;
 
-  Widget _buildSubjectSection(
-    Subject? subject,
-    List<Leistungsnachweis> leistungsnachweise,
-    List<Student> students,
-  ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Fach-Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: RBSColors.courtGreen.withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            ),
-            child: Text(
-              subject?.name ?? 'Unbekanntes Fach',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+    return Scrollbar(
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: tableWidth),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header-Zeile
+                  Container(
+                    decoration: BoxDecoration(
+                      color: RBSColors.paper,
+                      border: Border(bottom: BorderSide(color: Colors.grey[400]!, width: 2)),
+                    ),
+                    child: Row(
+                      children: [
+                        // Schüler-Spalte
+                        Container(
+                          width: 170,
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          child: const Text(
+                            'Schüler',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                        ),
+                        // Fach-Spalten
+                        ...sortedSubjectIds.map((subjectId) {
+                          final subject = subjects.where((s) => s.id == subjectId).firstOrNull;
+                          final fachColor = RBSColors.fromHex(subject?.color) ?? RBSColors.courtGreen;
+                          final lnCount = lnBySubject[subjectId]?.length ?? 0;
+                          
+                          return InkWell(
+                            onTap: () => _showFachDetailDialog(
+                              subject,
+                              lnBySubject[subjectId] ?? [],
+                              students,
+                            ),
+                            child: Container(
+                              width: fachSpaltenBreite,
+                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                              decoration: BoxDecoration(
+                                color: fachColor.withValues(alpha: 0.1),
+                                border: Border(left: BorderSide(color: fachColor, width: 3)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    subject?.shortName ?? subject?.name ?? '?',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: fachColor,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '$lnCount LN',
+                                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                        // Gesamt-Spalte
+                        Container(
+                          width: 70,
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: RBSColors.dynamicRed.withValues(alpha: 0.1),
+                          ),
+                          child: const Column(
+                            children: [
+                              Text('⌀', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              Text('Gesamt', style: TextStyle(fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Schüler-Zeilen
+                  ...students.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final student = entry.value;
+                    final isEven = index % 2 == 0;
+                    
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isEven ? Colors.white : Colors.grey[50],
+                        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+                      ),
+                      child: Row(
+                        children: [
+                          // Schüler-Name
+                          Container(
+                            width: 170,
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            child: Row(
+                              children: [
+                                Text(
+                                  '${index + 1}.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${student.lastName}, ${student.firstName}',
+                                    style: const TextStyle(fontSize: 13),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Fach-Durchschnitte
+                          ...sortedSubjectIds.map((subjectId) {
+                            final schnitt = studentFachSchnitte[student.id]?[subjectId];
+                            final subject = subjects.where((s) => s.id == subjectId).firstOrNull;
+                            
+                            return InkWell(
+                              onTap: () => _showFachDetailDialog(
+                                subject,
+                                lnBySubject[subjectId] ?? [],
+                                students,
+                                highlightStudentId: student.id,
+                              ),
+                              child: Container(
+                                width: fachSpaltenBreite,
+                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                                alignment: Alignment.center,
+                                child: schnitt != null
+                                    ? Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _getNoteColor(schnitt.round()).withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: _getNoteColor(schnitt.round()).withValues(alpha: 0.5),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          schnitt.toStringAsFixed(1),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            color: _getNoteColor(schnitt.round()),
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        '-',
+                                        style: TextStyle(color: Colors.grey[400]),
+                                      ),
+                              ),
+                            );
+                          }),
+                          // Gesamt-Durchschnitt
+                          Container(
+                            width: 70,
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            alignment: Alignment.center,
+                            child: studentGesamtSchnitte[student.id] != null
+                                ? Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getNoteColor(studentGesamtSchnitte[student.id]!.round())
+                                          .withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: _getNoteColor(studentGesamtSchnitte[student.id]!.round()),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      studentGesamtSchnitte[student.id]!.toStringAsFixed(1),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        color: _getNoteColor(studentGesamtSchnitte[student.id]!.round()),
+                                      ),
+                                    ),
+                                  )
+                                : Text('-', style: TextStyle(color: Colors.grey[400])),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  
+                  // Footer mit Klassen-Durchschnitten
+                  Container(
+                    decoration: BoxDecoration(
+                      color: RBSColors.paper,
+                      border: Border(top: BorderSide(color: Colors.grey[400]!, width: 2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 170,
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          child: const Text(
+                            '⌀ Klasse',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                        ),
+                        ...sortedSubjectIds.map((subjectId) {
+                          final schnitte = students
+                              .map((s) => studentFachSchnitte[s.id]?[subjectId])
+                              .where((s) => s != null)
+                              .cast<double>()
+                              .toList();
+                          final klassenSchnitt = schnitte.isNotEmpty
+                              ? schnitte.reduce((a, b) => a + b) / schnitte.length
+                              : null;
+                          
+                          return Container(
+                            width: fachSpaltenBreite,
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                            alignment: Alignment.center,
+                            child: klassenSchnitt != null
+                                ? Text(
+                                    klassenSchnitt.toStringAsFixed(2),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: _getNoteColor(klassenSchnitt.round()),
+                                    ),
+                                  )
+                                : Text('-', style: TextStyle(color: Colors.grey[400])),
+                          );
+                        }),
+                        Container(
+                          width: 70,
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          alignment: Alignment.center,
+                          child: () {
+                            final alleSchnitte = studentGesamtSchnitte.values
+                                .where((s) => s != null)
+                                .cast<double>()
+                                .toList();
+                            final gesamtSchnitt = alleSchnitte.isNotEmpty
+                                ? alleSchnitte.reduce((a, b) => a + b) / alleSchnitte.length
+                                : null;
+                            return gesamtSchnitt != null
+                                ? Text(
+                                    gesamtSchnitt.toStringAsFixed(2),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: _getNoteColor(gesamtSchnitt.round()),
+                                    ),
+                                  )
+                                : Text('-', style: TextStyle(color: Colors.grey[400]));
+                          }(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          // Noten-Tabelle
-          _buildNotenTable(students, leistungsnachweise),
-        ],
+        ),
+      ),
+    );
+  }
+  
+  /// Dialog mit Detail-Ansicht eines Fachs (alle LNs)
+  void _showFachDetailDialog(
+    Subject? subject,
+    List<Leistungsnachweis> leistungsnachweise,
+    List<Student> students, {
+    String? highlightStudentId,
+  }) {
+    final fachColor = RBSColors.fromHex(subject?.color) ?? RBSColors.courtGreen;
+    
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900, maxHeight: 600),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: fachColor.withValues(alpha: 0.1),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.book, color: fachColor),
+                    const SizedBox(width: 12),
+                    Text(
+                      subject?.name ?? 'Fach',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: fachColor,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              // Noten-Tabelle
+              Expanded(
+                child: _buildNotenTable(students, leistungsnachweise),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
