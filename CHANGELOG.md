@@ -9,6 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.0] - 2025-12-05
 
 ### Added
+- **CSV Import Service** für Schülerlisten
+  - Automatische Spaltenerkennung (Vorname, Nachname, Klasse, etc.)
+  - Unterstützung für Semikolon-, Komma- und Tab-getrennte Dateien
+  - Manuelles Spalten-Mapping im UI
+  - Vorschau vor dem Import
+  - Integration mit bestehendem Klassen-System
+
+- **PDF Export Service** für Notenberichte
+  - Schüler-Notenblatt: Alle Fächer mit Einzelnoten und Durchschnitt
+  - Fach-Notenliste: Alle Schüler einer Klasse mit Noten
+  - Professionelles Layout im RBS-Design
+  - Automatische Seitenumbrüche
+
+- **Erweiterter Export-Screen**
+  - NOI-Export (XML/CSV) für Zeugnisnoten
+  - PDF-Export für Schüler und Fächer
+  - Übersichtliche Kartenauswahl für Export-Typ
+  - Klassen- und Fach-Filter
+
+### Fixed
+- **Fächer-Filterung nach Beruf** (kritischer Bug)
+  - Fächer werden jetzt korrekt nach Beruf der Klasse gefiltert
+  - Leistungsnachweis-Dialog zeigt nur passende Fächer
+  - Export-Screen filtert Fächer nach Klassenzugehörigkeit
+  - Schüler sehen nur Fächer ihres Berufs
+
+### Changed
+- Drawer: "NOI Export" → "Daten Export" (umfasst jetzt mehr)
+- Neuer Menüpunkt "CSV Import" im Drawer
+
+
+## [0.8.0] - 2025-12-05
+
+### Added
+- **NOI Export Service** für Zeugnisnoten
+  - XML-Format für offizielle Notenverwaltungssysteme
+  - CSV-Format für Excel-Kompatibilität
+  - Bayerisches Berufsschul-Format (Halbjahr, Fach, Note)
+
+- **NOI Export Screen**
+  - Klassen- und Halbjahr-Auswahl
+  - Format-Auswahl (XML/CSV)
+  - Sofortiger Download im Browser
+
+
+## [0.7.0] - 2025-12-04
+
+### Added
 - **CSV Import Service** (`CsvImportService`)
   - Import von Schülerlisten aus CSV-Dateien (z.B. ASV-Export)
   - Automatische Spaltenerkennung (Vorname, Nachname, Klasse, etc.)

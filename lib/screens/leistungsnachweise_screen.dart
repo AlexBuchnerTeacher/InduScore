@@ -410,31 +410,57 @@ class _LeistungsnachweiseScreenState
                     ),
                     const SizedBox(height: RBSSpacing.md),
 
-                    // Fach auswählen
+                    // Fach auswählen (nur Fächer die zum Beruf der Klasse passen)
                     Text('Fach *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     subjectsAsync.when(
-                      data: (subjects) => DropdownButtonFormField<String>(
-                        initialValue: selectedSubjectId,
-                        decoration: const InputDecoration(
-                          hintText: 'Fach wählen',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: subjects
-                            .map(
-                              (s) => DropdownMenuItem(
-                                value: s.id,
-                                child:
-                                    Text(s.shortName ?? s.name),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setDialogState(() => selectedSubjectId = value);
-                        },
-                        validator: (value) =>
-                            value == null ? 'Bitte Fach wählen' : null,
-                      ),
+                      data: (subjects) {
+                        // Finde die gewählte Klasse um den Beruf zu ermitteln
+                        final selectedKlasse = klassenAsync.maybeWhen(
+                          data: (klassen) => klassen.where((k) => k.id == selectedKlasseId).firstOrNull,
+                          orElse: () => null,
+                        );
+                        
+                        // Filtere Fächer nach Beruf der Klasse
+                        final filteredSubjects = selectedKlasse != null
+                            ? subjects.where((s) => s.berufe.contains(selectedKlasse.beruf)).toList()
+                            : subjects;
+                        
+                        // Wenn aktuelles Fach nicht mehr passt, zurücksetzen
+                        if (selectedSubjectId != null && 
+                            !filteredSubjects.any((s) => s.id == selectedSubjectId)) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            setDialogState(() => selectedSubjectId = null);
+                          });
+                        }
+                        
+                        return DropdownButtonFormField<String>(
+                          initialValue: filteredSubjects.any((s) => s.id == selectedSubjectId) 
+                              ? selectedSubjectId 
+                              : null,
+                          decoration: InputDecoration(
+                            hintText: selectedKlasseId == null 
+                                ? 'Erst Klasse wählen' 
+                                : 'Fach wählen',
+                            border: const OutlineInputBorder(),
+                          ),
+                          items: filteredSubjects
+                              .map(
+                                (s) => DropdownMenuItem(
+                                  value: s.id,
+                                  child: Text(s.shortName ?? s.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: selectedKlasseId == null 
+                              ? null 
+                              : (value) {
+                                  setDialogState(() => selectedSubjectId = value);
+                                },
+                          validator: (value) =>
+                              value == null ? 'Bitte Fach wählen' : null,
+                        );
+                      },
                       loading: () => const CircularProgressIndicator(),
                       error: (error, stack) => const Text('Fehler beim Laden'),
                     ),

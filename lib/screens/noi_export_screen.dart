@@ -471,18 +471,31 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                       subjectsAsync.when(
                         loading: () => const CircularProgressIndicator(),
                         error: (e, s) => Text('Fehler: $e'),
-                        data: (subjects) => DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Fach',
-                            isDense: true,
-                          ),
-                          items: subjects.map((s) => DropdownMenuItem(
-                            value: s.id,
-                            child: Text(s.shortName ?? s.name),
-                          )).toList(),
-                          onChanged: (value) => setState(() => _selectedSubjectId = value),
-                        ),
+                        data: (subjects) {
+                          // Filtere Fächer nach Beruf der Klasse
+                          final selectedKlasse = klassenAsync.maybeWhen(
+                            data: (klassen) => klassen.where((k) => k.id == _selectedKlasseId).firstOrNull,
+                            orElse: () => null,
+                          );
+                          final filteredSubjects = selectedKlasse != null
+                              ? subjects.where((s) => s.berufe.contains(selectedKlasse.beruf)).toList()
+                              : subjects;
+                          
+                          return DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(),
+                              hintText: _selectedKlasseId == null ? 'Erst Klasse wählen' : 'Fach wählen',
+                              isDense: true,
+                            ),
+                            items: filteredSubjects.map((s) => DropdownMenuItem(
+                              value: s.id,
+                              child: Text(s.shortName ?? s.name),
+                            )).toList(),
+                            onChanged: _selectedKlasseId != null 
+                                ? (value) => setState(() => _selectedSubjectId = value)
+                                : null,
+                          );
+                        },
                       ),
                     ],
                   ),
