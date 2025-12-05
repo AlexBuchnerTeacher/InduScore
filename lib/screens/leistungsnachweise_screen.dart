@@ -192,80 +192,114 @@ class _LeistungsnachweiseScreenState
     final klasse = klassen.where((k) => k.id == ln.klasseId).firstOrNull;
     final subject = subjects.where((s) => s.id == ln.subjectId).firstOrNull;
     final dateFormat = DateFormat('dd.MM.yyyy');
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return RBSCard(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: _getTypColor(ln.typ),
-          child: Icon(
-            _getTypIcon(ln.typ),
-            color: RBSColors.white,
-            size: 20,
+      child: InkWell(
+        onTap: () => context.go('/noten/${ln.id}'),
+        borderRadius: BorderRadius.circular(RBSSpacing.sm),
+        child: Padding(
+          padding: const EdgeInsets.all(RBSSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header: Icon + Title + Actions
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: _getTypColor(ln.typ),
+                    radius: 20,
+                    child: Icon(
+                      _getTypIcon(ln.typ),
+                      color: RBSColors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: RBSSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(ln.bezeichnung, style: RBSTypography.h4),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${ln.typ.label} • ${ln.gewichtung}x • ${dateFormat.format(ln.datum)}',
+                          style: RBSTypography.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Actions - nur Icons auf kleinen Screens
+                  if (!isSmallScreen) ...[
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      onPressed: () => _showLeistungsnachweisDialog(context, leistungsnachweis: ln),
+                      tooltip: 'Bearbeiten',
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 20),
+                      onPressed: () => _confirmDelete(context, ln),
+                      tooltip: 'Löschen',
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ] else
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, size: 20),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          _showLeistungsnachweisDialog(context, leistungsnachweis: ln);
+                        } else if (value == 'delete') {
+                          _confirmDelete(context, ln);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 20),
+                              SizedBox(width: 8),
+                              Text('Bearbeiten'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Löschen', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              const SizedBox(height: RBSSpacing.sm),
+              // Tags Row
+              Wrap(
+                spacing: RBSSpacing.xs,
+                runSpacing: RBSSpacing.xs,
+                children: [
+                  if (klasse != null)
+                    RBSTag(
+                      label: klasse.name,
+                      color: _getBerufColor(klasse.beruf),
+                    ),
+                  if (subject != null)
+                    RBSTag(
+                      label: subject.shortName ?? subject.name,
+                      color: RBSColors.courtGreen,
+                    ),
+                ],
+              ),
+            ],
           ),
         ),
-        title: Text(ln.bezeichnung, style: RBSTypography.h4),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${ln.typ.label} • ${ln.gewichtung}x • ${dateFormat.format(ln.datum)}',
-              style: RBSTypography.bodySmall,
-            ),
-            Row(
-              children: [
-                if (klasse != null)
-                  Chip(
-                    label: Text(klasse.name),
-                    backgroundColor:
-                        _getBerufColor(klasse.beruf).withValues(alpha: 0.2),
-                    labelStyle: RBSTypography.bodySmall,
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                  ),
-                const SizedBox(width: RBSSpacing.xs),
-                if (subject != null)
-                  Chip(
-                    label: Text(subject.shortName ?? subject.name),
-                    backgroundColor:
-                        RBSColors.courtGreen.withValues(alpha: 0.2),
-                    labelStyle: RBSTypography.bodySmall,
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                  ),
-              ],
-            ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Noten eingeben Button - prominent
-            FilledButton.icon(
-              onPressed: () => context.go('/noten/${ln.id}'),
-              icon: const Icon(Icons.edit_note, size: 18),
-              label: const Text('Noten'),
-              style: FilledButton.styleFrom(
-                backgroundColor: RBSColors.dynamicRed,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                visualDensity: VisualDensity.compact,
-              ),
-            ),
-            const SizedBox(width: 4),
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () =>
-                  _showLeistungsnachweisDialog(context, leistungsnachweis: ln),
-              tooltip: 'Bearbeiten',
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _confirmDelete(context, ln),
-              tooltip: 'Löschen',
-            ),
-          ],
-        ),
-        isThreeLine: true,
       ),
     );
   }
