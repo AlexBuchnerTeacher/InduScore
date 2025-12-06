@@ -14,21 +14,19 @@ import '../models/zeugnisnote.dart';
 /// Angepasst für Berufsschule (Notensystem 1-6, Halbjahre)
 class NoiExportService {
   
-  /// Generiert NOI-XML für eine Klasse und ein Halbjahr
+  /// Generiert NOI-XML für eine Klasse
   /// 
   /// [klasse] - Die zu exportierende Klasse
   /// [students] - Alle Schüler der Klasse
   /// [subjects] - Alle Fächer
   /// [leistungsnachweise] - Alle LNs der Klasse
   /// [grades] - Alle Noten
-  /// [halbjahr] - 1 = 1. Halbjahr, 2 = 2. Halbjahr
   static String generateXml({
     required Klasse klasse,
     required List<Student> students,
     required List<Subject> subjects,
     required List<Leistungsnachweis> leistungsnachweise,
     required List<Grade> grades,
-    required int halbjahr,
   }) {
     final buffer = StringBuffer();
     final now = DateTime.now();
@@ -38,7 +36,6 @@ class NoiExportService {
     buffer.writeln('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
     buffer.writeln('<NotenImport_Berufsschule');
     buffer.writeln('    Schuljahr="${klasse.schuljahr}"');
-    buffer.writeln('    Halbjahr="$halbjahr"');
     buffer.writeln('    Klasse="${klasse.name}"');
     buffer.writeln('    Schemaversion="1.0"');
     buffer.writeln('    Generierungsdatum="${dateFormat.format(now)}">');
@@ -230,9 +227,9 @@ class NoiExportService {
   }
   
   /// Generiert Dateinamen für Export
-  static String getFilename(Klasse klasse, int halbjahr, String extension) {
+  static String getFilename(Klasse klasse, String extension) {
     final now = DateTime.now();
     final timestamp = DateFormat('yyyyMMdd_HHmm').format(now);
-    return 'NOI_${klasse.name}_HJ${halbjahr}_$timestamp.$extension';
+    return 'NOI_${klasse.name}_$timestamp.$extension';
   }
 }

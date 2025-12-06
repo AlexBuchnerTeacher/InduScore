@@ -4,6 +4,8 @@ import '../models/student.dart';
 import '../models/subject.dart';
 import '../models/klasse.dart';
 import '../models/leistungsnachweis.dart';
+import '../models/ln_exemption.dart';
+import '../models/app_user.dart';
 
 /// Ergebnis eines Schüler-Merge-Vorgangs
 class MergeResult {
@@ -513,5 +515,158 @@ class FirestoreService {
     }
 
     return totalWeight > 0 ? totalWeighted / totalWeight : 0.0;
+  }
+
+  // ============ LN EXEMPTIONS (Befreiungen) ============
+
+  CollectionReference get _lnExemptions => _db.collection('ln_exemptions');
+
+  /// Alle LN-Befreiungen abrufen
+  Stream<List<LnExemption>> getLnExemptions() {
+    return _lnExemptions.snapshots().map(
+      (snapshot) =>
+          snapshot.docs.map((doc) => LnExemption.fromFirestore(doc)).toList(),
+    );
+  }
+
+  /// Prüft ob ein Schüler von einem LN befreit ist
+  Future<bool> isStudentExempt(String studentId, String leistungsnachweisId) async {
+    final snapshot = await _lnExemptions
+        .where('studentId', isEqualTo: studentId)
+        .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
+        .get();
+    return snapshot.docs.isNotEmpty;
+  }
+
+  /// Schüler als "nicht relevant" für LN markieren
+  Future<String> createLnExemption({
+    required String studentId,
+    required String leistungsnachweisId,
+    String? grund,
+    String? createdBy,
+  }) async {
+    // Prüfen ob bereits vorhanden
+    final existing = await _lnExemptions
+        .where('studentId', isEqualTo: studentId)
+        .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
+        .get();
+    
+    if (existing.docs.isNotEmpty) {
+      return existing.docs.first.id; // Bereits vorhanden
+    }
+
+    final docRef = await _lnExemptions.add({
+      'studentId': studentId,
+      'leistungsnachweisId': leistungsnachweisId,
+      'grund': grund,
+      'createdAt': Timestamp.now(),
+      'createdBy': createdBy,
+    });
+    return docRef.id;
+  }
+
+  /// Befreiung aufheben
+  Future<void> deleteLnExemption(String studentId, String leistungsnachweisId) async {
+    final snapshot = await _lnExemptions
+        .where('studentId', isEqualTo: studentId)
+        .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
+        .get();
+    
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  /// Alle Befreiungen für einen LN abrufen
+  Stream<List<LnExemption>> getLnExemptionsByLn(String leistungsnachweisId) {
+    return _lnExemptions
+        .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => LnExemption.fromFirestore(doc)).toList());
+  }
+
+  // ============ APP USERS ============
+
+  CollectionReference get _appUsers => _db.collection('app_users');
+
+  /// Alle App-Benutzer abrufen
+  Stream<List<AppUser>> getAppUsers() {
+    return _appUsers
+        .orderBy('name')
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => AppUser.fromFirestore(doc)).toList());
+  }
+
+  /// Einzelnen Benutzer nach ID abrufen
+  Future<AppUser?> getAppUser(String id) async {
+    final doc = await _appUsers.doc(id).get();
+    if (!doc.exists) return null;
+    return AppUser.fromFirestore(doc);
+  }
+
+  /// Benutzer nach Email suchen
+  Future<AppUser?> getAppUserByEmail(String email) async {
+    final snapshot = await _appUsers
+        .where('email', isEqualTo: email.toLowerCase())
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) return null;
+    return AppUser.fromFirestore(snapshot.docs.first);
+  }
+
+  /// Neuen Benutzer erstellen
+  Future<String> createAppUser(AppUser user) async {
+    final docRef = await _appUsers.add(user.toFirestore());
+    return docRef.id;
+  }
+
+  /// Benutzer mit spezifischer ID erstellen (z.B. Firebase Auth UID)
+  Future<void> createAppUserWithId(String id, AppUser user) async {
+    await _appUsers.doc(id).set(user.toFirestore());
+  }
+
+  /// Benutzer aktualisieren
+  Future<void> updateAppUser(AppUser user) async {
+    await _appUsers.doc(user.id).update(user.toFirestore());
+  }
+
+  /// Letzten Login aktualisieren
+  Future<void> updateLastLogin(String userId) async {
+    await _appUsers.doc(userId).update({
+      'lastLoginAt': Timestamp.now(),
+    });
+  }
+
+  /// Benutzer deaktivieren
+  Future<void> deactivateAppUser(String userId) async {
+    await _appUsers.doc(userId).update({
+      'status': UserStatus.deaktiviert.name,
+    });
+  }
+
+  /// Benutzer aktivieren
+  Future<void> activateAppUser(String userId) async {
+    await _appUsers.doc(userId).update({
+      'status': UserStatus.aktiv.name,
+    });
+  }
+
+  /// Benutzer löschen
+  Future<void> deleteAppUser(String userId) async {
+    await _appUsers.doc(userId).delete();
+  }
+
+  /// Prüft ob ein Kürzel bereits vergeben ist
+  Future<bool> isKuerzelTaken(String kuerzel, {String? excludeUserId}) async {
+    final snapshot = await _appUsers
+        .where('kuerzel', isEqualTo: kuerzel.toUpperCase())
+        .get();
+    
+    if (excludeUserId != null) {
+      return snapshot.docs.any((doc) => doc.id != excludeUserId);
+    }
+    return snapshot.docs.isNotEmpty;
   }
 }

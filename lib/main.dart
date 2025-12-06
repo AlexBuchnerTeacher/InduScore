@@ -16,6 +16,7 @@ import 'screens/noten_eingabe_screen.dart';
 import 'screens/noten_uebersicht_screen.dart';
 import 'screens/noi_export_screen.dart';
 import 'screens/csv_import_screen.dart';
+import 'screens/user_verwaltung_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -127,6 +128,11 @@ final _router = GoRouter(
     GoRoute(
       path: '/import',
       builder: (context, state) => const CsvImportScreen(),
+    ),
+    // Benutzerverwaltung (nur Admins)
+    GoRoute(
+      path: '/einstellungen/benutzer',
+      builder: (context, state) => const UserVerwaltungScreen(),
     ),
   ],
 );

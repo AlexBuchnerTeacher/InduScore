@@ -41,6 +41,9 @@ class RBSDrawer extends ConsumerWidget {
             ),
           ),
 
+          // Zeitgruppen Filter
+          _buildZeitgruppenFilter(ref),
+
           // Navigation Items
           Expanded(
             child: ListView(
@@ -97,12 +100,13 @@ class RBSDrawer extends ConsumerWidget {
                   route: '/statistiken',
                   disabled: true,
                 ),
+                const Divider(),
+                // Admin-Bereich
                 _buildDrawerItem(
                   context,
-                  icon: Icons.settings_outlined,
-                  title: 'Einstellungen',
-                  route: '/einstellungen',
-                  disabled: true,
+                  icon: Icons.people_outlined,
+                  title: 'Benutzerverwaltung',
+                  route: '/einstellungen/benutzer',
                 ),
               ],
             ),
@@ -186,6 +190,52 @@ class RBSDrawer extends ConsumerWidget {
               Navigator.pop(context); // Drawer schließen
               context.go(route);
             },
+    );
+  }
+
+  Widget _buildZeitgruppenFilter(WidgetRef ref) {
+    final selectedZG = ref.watch(zeitgruppenFilterProvider);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: RBSSpacing.md,
+        vertical: RBSSpacing.sm,
+      ),
+      color: RBSColors.paper,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Zeitgruppe',
+            style: RBSTypography.bodySmall.copyWith(
+              color: RBSColors.textOnLight.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: RBSSpacing.xs),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<int?>(
+              showSelectedIcon: false,
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                textStyle: WidgetStatePropertyAll(RBSTypography.bodySmall),
+              ),
+              segments: const [
+                ButtonSegment<int?>(value: null, label: Text('Alle')),
+                ButtonSegment<int?>(value: 1, label: Text('ZG1')),
+                ButtonSegment<int?>(value: 2, label: Text('ZG2')),
+                ButtonSegment<int?>(value: 3, label: Text('ZG3')),
+              ],
+              selected: {selectedZG},
+              onSelectionChanged: (selection) {
+                ref
+                    .read(zeitgruppenFilterProvider.notifier)
+                    .setFilter(selection.first);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

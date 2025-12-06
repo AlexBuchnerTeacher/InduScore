@@ -22,12 +22,27 @@ class NotenEingabeScreen extends ConsumerStatefulWidget {
 class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
   final Map<String, _NotenEingabe> _noten = {};
   final Set<String> _savingStudents = {}; // Schüler, die gerade gespeichert werden
+  final Set<String> _exemptedStudentIds = {}; // Lokal verfolgte befreite Schüler
   Leistungsnachweis? _leistungsnachweis;
 
   @override
   Widget build(BuildContext context) {
     final leistungsnachweisAsync = ref.watch(leistungsnachweisProvider(widget.leistungsnachweisId));
     final gradesAsync = ref.watch(gradesByLeistungsnachweisProvider(widget.leistungsnachweisId));
+    final exemptionsAsync = ref.watch(lnExemptionsProvider);
+    
+    // Exemptions für diesen LN extrahieren
+    final exemptedIds = exemptionsAsync.maybeWhen(
+      data: (exemptions) => exemptions
+          .where((e) => e.leistungsnachweisId == widget.leistungsnachweisId)
+          .map((e) => e.studentId)
+          .toSet(),
+      orElse: () => <String>{},
+    );
+    // Lokale Kopie aktualisieren für UI
+    _exemptedStudentIds
+      ..clear()
+      ..addAll(exemptedIds);
 
     return Scaffold(
       appBar: AppBar(
@@ -208,7 +223,8 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
             itemCount: sortedStudents.length,
             itemBuilder: (context, index) {
               final student = sortedStudents[index];
-              return _buildStudentRow(student, index + 1);
+              final isExempted = _exemptedStudentIds.contains(student.id);
+              return _buildStudentRow(student, index + 1, isExempted: isExempted);
             },
           ),
         ),
@@ -219,37 +235,112 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
     );
   }
 
-  Widget _buildStudentRow(Student student, int nummer) {
-    final eingabe = _noten[student.id]!;
+  Widget _buildStudentRow(Student student, int nummer, {bool isExempted = false}) {
+    final eingabe = _noten[student.id];
+    // Schüler wurde bereits entfernt (z.B. durch Exemption)
+    if (eingabe == null) {
+      return const SizedBox.shrink();
+    }
     final isEven = nummer % 2 == 0;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isEven ? Colors.grey[50] : Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[200]!),
+    // Wenn bereits befreit: Swipe nach rechts zum Aufheben, sonst nach links zum Befreien
+    return Dismissible(
+      key: Key('exempt_${student.id}_${widget.leistungsnachweisId}_$isExempted'),
+      direction: isExempted ? DismissDirection.startToEnd : DismissDirection.endToStart,
+      dismissThresholds: const {
+        DismissDirection.endToStart: 0.4,
+        DismissDirection.startToEnd: 0.4,
+      },
+      background: Container(
+        alignment: isExempted ? Alignment.centerLeft : Alignment.centerRight,
+        padding: EdgeInsets.only(left: isExempted ? 20 : 0, right: isExempted ? 0 : 20),
+        color: isExempted ? Colors.green.shade600 : Colors.grey.shade600,
+        child: Row(
+          mainAxisAlignment: isExempted ? MainAxisAlignment.start : MainAxisAlignment.end,
+          children: [
+            Icon(isExempted ? Icons.undo : Icons.block, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(
+              isExempted ? 'Wieder relevant' : 'Nicht relevant',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
-      child: Row(
-        children: [
-          // Nummer
-          SizedBox(
-            width: 40,
-            child: Text(
-              '$nummer.',
-              style: const TextStyle(color: Colors.grey),
+      confirmDismiss: (direction) async {
+        // Verhindere doppelte Ausführung
+        if (!mounted) return false;
+        if (isExempted) {
+          // Befreiung aufheben
+          await _removeExemption(student);
+        } else {
+          // Befreiung hinzufügen
+          await _showExemptionDialog(student);
+        }
+        // Immer false zurückgeben - wir wollen das Item NICHT entfernen!
+        return false;
+      },
+      child: Opacity(
+        opacity: isExempted ? 0.5 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isExempted 
+                ? Colors.grey.shade200 
+                : (isEven ? Colors.grey[50] : Colors.white),
+            border: Border(
+              bottom: BorderSide(color: Colors.grey[200]!),
             ),
           ),
+          child: Row(
+            children: [
+              // Nummer + Exemption-Icon
+              SizedBox(
+                width: 40,
+                child: Row(
+                  children: [
+                    if (isExempted) 
+                      const Icon(Icons.block, size: 14, color: Colors.grey)
+                    else
+                      Text(
+                        '$nummer.',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                  ],
+                ),
+              ),
 
-          // Name
-          Expanded(
-            flex: 3,
-            child: Text(
-              student.displayName,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+            // Name
+            Expanded(
+              flex: 3,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      student.displayName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        decoration: isExempted ? TextDecoration.lineThrough : null,
+                        color: isExempted ? Colors.grey : null,
+                      ),
+                    ),
+                  ),
+                  if (isExempted)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'n.r.',
+                        style: TextStyle(fontSize: 10, color: Colors.white),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
 
           // Note (1-6) mit Kürzel in Ecke
           SizedBox(
@@ -347,8 +438,120 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
             ),
           ),
         ],
+          ),
+        ),
       ),
     );
+  }
+
+  /// Dialog um Schüler als "nicht relevant" für diesen LN zu markieren
+  Future<void> _showExemptionDialog(Student student) async {
+    // Prüfe ob mounted bevor wir Dialog öffnen
+    if (!mounted) return;
+    
+    // Speichere studentId und displayName lokal
+    final studentId = student.id;
+    final studentDisplayName = student.displayName;
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('LN als nicht relevant markieren?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$studentDisplayName wird von diesem Leistungsnachweis befreit.'),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _leistungsnachweis?.bezeichnung ?? 'Leistungsnachweis',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Der Schüler erscheint nicht mehr in der Nachschreiber-Liste.',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Befreien'),
+          ),
+        ],
+      ),
+    );
+
+    // Prüfe nochmals ob mounted nach Dialog
+    if (!mounted) return;
+
+    if (result == true) {
+      try {
+        final firestoreService = ref.read(firestoreServiceProvider);
+        await firestoreService.createLnExemption(
+          studentId: studentId,
+          leistungsnachweisId: widget.leistungsnachweisId,
+          grund: 'Nicht relevant',
+        );
+        
+        // Schüler bleibt in der Liste, wird nur visuell markiert
+        // Der Provider wird automatisch aktualisiert durch StreamProvider
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$studentDisplayName als nicht relevant markiert'),
+              action: SnackBarAction(
+                label: 'Rückgängig',
+                onPressed: () async {
+                  await firestoreService.deleteLnExemption(
+                    studentId,
+                    widget.leistungsnachweisId,
+                  );
+                },
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        debugPrint('Fehler bei LN-Befreiung: $e');
+      }
+    }
+  }
+
+  /// Befreiung für Schüler aufheben
+  Future<void> _removeExemption(Student student) async {
+    if (!mounted) return;
+    
+    try {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.deleteLnExemption(
+        student.id,
+        widget.leistungsnachweisId,
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${student.displayName} wieder als relevant markiert'),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Aufheben der Befreiung: $e');
+    }
   }
 
   Widget _buildTendenzButton(String studentId, _NotenEingabe eingabe, Tendenz tendenz, String label) {
@@ -526,9 +729,12 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
 
         if (eingabe.existingGradeId != null) {
           await firestoreService.updateGrade(grade);
+          // Kürzel sofort im lokalen State aktualisieren
+          _noten[studentId] = eingabe.copyWith(updatedBy: userKuerzel);
         } else {
           final newId = await firestoreService.createGrade(grade);
-          _noten[studentId] = eingabe.copyWith(existingGradeId: newId);
+          // ID und Kürzel im lokalen State aktualisieren
+          _noten[studentId] = eingabe.copyWith(existingGradeId: newId, updatedBy: userKuerzel);
         }
       } else if (eingabe.existingGradeId != null) {
         // Note wurde gelöscht - Grade löschen

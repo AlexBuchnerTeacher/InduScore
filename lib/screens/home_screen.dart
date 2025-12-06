@@ -14,6 +14,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final klassenAsync = ref.watch(klassenProvider);
+    final filteredKlassen = ref.watch(filteredKlassenProvider);
+    final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final leistungsnachweiseAsync = ref.watch(leistungsnachweiseProvider);
     final studentsAsync = ref.watch(studentsProvider);
     final subjectsAsync = ref.watch(subjectsProvider);
@@ -28,11 +30,14 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header mit Schuljahr
+            // Header mit Schuljahr und Zeitgruppen-Filter
             Row(
               children: [
                 const RBSHeadline(text: 'Dashboard', level: RBSHeadlineLevel.h2),
                 const Spacer(),
+                // Zeitgruppen-Filter
+                _buildZeitgruppenFilter(ref),
+                const SizedBox(width: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -63,18 +68,38 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: RBSSpacing.lg),
 
             // Schnellzugriff: Meine Klassen
-            const RBSHeadline(text: 'Meine Klassen', level: RBSHeadlineLevel.h4),
+            Row(
+              children: [
+                const RBSHeadline(text: 'Meine Klassen', level: RBSHeadlineLevel.h4),
+                if (zeitgruppenFilter != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Chip(
+                      label: Text('ZG$zeitgruppenFilter'),
+                      deleteIcon: const Icon(Icons.close, size: 16),
+                      onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
+                      backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
+                    ),
+                  ),
+              ],
+            ),
             const SizedBox(height: RBSSpacing.sm),
             klassenAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('Fehler: $e'),
-              data: (klassen) {
+              data: (_) {
+                // Verwende gefilterte Klassen
+                final klassen = filteredKlassen;
                 if (klassen.isEmpty) {
                   return _buildEmptyCard(
                     context,
                     icon: Icons.school_outlined,
-                    title: 'Noch keine Klassen',
-                    subtitle: 'Erstelle deine erste Klasse',
+                    title: zeitgruppenFilter != null 
+                        ? 'Keine Klassen in ZG$zeitgruppenFilter'
+                        : 'Noch keine Klassen',
+                    subtitle: zeitgruppenFilter != null
+                        ? 'Wähle eine andere Zeitgruppe'
+                        : 'Erstelle deine erste Klasse',
                     onTap: () => context.go('/klassen'),
                   );
                 }
@@ -104,6 +129,10 @@ class HomeScreen extends ConsumerWidget {
                 );
               },
             ),
+            const SizedBox(height: RBSSpacing.lg),
+
+            // Nachschreiber Section
+            _buildNachschreiberSection(context, ref),
             const SizedBox(height: RBSSpacing.lg),
 
             // Aktuelle Leistungsnachweise
@@ -369,8 +398,20 @@ class HomeScreen extends ConsumerWidget {
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isSmall = constraints.maxWidth < 500;
-        final crossAxisCount = isSmall ? 2 : 4;
+        final width = constraints.maxWidth;
+        final int crossAxisCount;
+        final double childAspectRatio;
+        
+        if (width < 400) {
+          crossAxisCount = 2;
+          childAspectRatio = 1.3;
+        } else if (width < 600) {
+          crossAxisCount = 2;
+          childAspectRatio = 1.8;
+        } else {
+          crossAxisCount = 4;
+          childAspectRatio = 1.5;
+        }
         
         return GridView.count(
           crossAxisCount: crossAxisCount,
@@ -378,7 +419,7 @@ class HomeScreen extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: isSmall ? 1.5 : 1.8,
+          childAspectRatio: childAspectRatio,
           children: [
             _buildStatCard(
               icon: Icons.school,
@@ -447,29 +488,285 @@ class HomeScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: color,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 24),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: color.withValues(alpha: 0.8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: color.withValues(alpha: 0.8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNachschreiberSection(BuildContext context, WidgetRef ref) {
+    final nachschreiber = ref.watch(filteredNachschreiberProvider);
+
+    if (nachschreiber.isEmpty) {
+      return const SizedBox.shrink(); // Keine Nachschreiber = Section ausblenden
+    }
+
+    // Gruppiere nach Eskalationsstufe
+    final stufe3 = nachschreiber.where((n) => n.stufe == NachschreiberStufe.stufe3).toList();
+    final stufe2 = nachschreiber.where((n) => n.stufe == NachschreiberStufe.stufe2).toList();
+    final stufe1 = nachschreiber.where((n) => n.stufe == NachschreiberStufe.stufe1).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const RBSHeadline(text: 'Nachschreiber', level: RBSHeadlineLevel.h4),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: nachschreiber.isNotEmpty 
+                    ? (stufe3.isNotEmpty ? Colors.red : (stufe2.isNotEmpty ? Colors.orange : Colors.amber))
+                    : Colors.grey,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${nachschreiber.length}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ),
           ],
         ),
+        const SizedBox(height: RBSSpacing.sm),
+        
+        // Kritisch (Stufe 3 - Rot)
+        if (stufe3.isNotEmpty) ...[
+          _buildNachschreiberStufeHeader('Kritisch (> 2 Wochen)', Colors.red, stufe3.length),
+          ...stufe3.take(5).map((n) => _buildNachschreiberCard(context, ref, n, Colors.red)),
+          if (stufe3.length > 5)
+            TextButton(
+              onPressed: () {}, // TODO: Alle anzeigen
+              child: Text('+ ${stufe3.length - 5} weitere'),
+            ),
+        ],
+        
+        // Dringend (Stufe 2 - Orange)
+        if (stufe2.isNotEmpty) ...[
+          _buildNachschreiberStufeHeader('Dringend (≤ 2 Wochen)', Colors.orange, stufe2.length),
+          ...stufe2.take(5).map((n) => _buildNachschreiberCard(context, ref, n, Colors.orange)),
+          if (stufe2.length > 5)
+            TextButton(
+              onPressed: () {},
+              child: Text('+ ${stufe2.length - 5} weitere'),
+            ),
+        ],
+        
+        // Neu (Stufe 1 - Gelb/Amber)
+        if (stufe1.isNotEmpty) ...[
+          _buildNachschreiberStufeHeader('Neu (≤ 2 Tage)', Colors.amber.shade700, stufe1.length),
+          ...stufe1.take(3).map((n) => _buildNachschreiberCard(context, ref, n, Colors.amber.shade700)),
+          if (stufe1.length > 3)
+            TextButton(
+              onPressed: () {},
+              child: Text('+ ${stufe1.length - 3} weitere'),
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildNachschreiberStufeHeader(String label, Color color, int count) {
+    return Padding(
+      padding: const EdgeInsets.only(top: RBSSpacing.sm, bottom: RBSSpacing.xs),
+      child: Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: RBSTypography.bodySmall.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildNachschreiberCard(BuildContext context, WidgetRef ref, Nachschreiber nachschreiber, Color color) {
+    final student = nachschreiber.student;
+    final ln = nachschreiber.leistungsnachweis;
+    final fachName = nachschreiber.subject?.shortName ?? nachschreiber.subject?.name ?? 'Unbekannt';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: RBSSpacing.xs),
+      child: ListTile(
+        dense: true,
+        leading: CircleAvatar(
+          radius: 16,
+          backgroundColor: color.withValues(alpha: 0.2),
+          child: Icon(Icons.warning_amber, color: color, size: 18),
+        ),
+        title: Text(
+          student.displayName,
+          style: RBSTypography.bodySmall.copyWith(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          '${nachschreiber.klasse.name} • $fachName • ${ln.bezeichnung}',
+          style: RBSTypography.bodySmall.copyWith(fontSize: 11),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${nachschreiber.tageAlt}d',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Nicht-relevant Button
+            IconButton(
+              icon: const Icon(Icons.block, size: 18),
+              color: Colors.grey,
+              tooltip: 'Als nicht relevant markieren',
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () => _showExemptionDialog(context, ref, nachschreiber),
+            ),
+          ],
+        ),
+        onTap: () {
+          // Zur Noteneingabe für diesen LN navigieren
+          context.go('/noten/klasse/${ln.klasseId}');
+        },
+      ),
+    );
+  }
+
+  Future<bool> _showExemptionDialog(BuildContext context, WidgetRef ref, Nachschreiber nachschreiber) async {
+    final student = nachschreiber.student;
+    final ln = nachschreiber.leistungsnachweis;
+    final fachName = nachschreiber.subject?.shortName ?? nachschreiber.subject?.name ?? 'Unbekannt';
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('LN als nicht relevant markieren?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${student.displayName} wird von diesem Leistungsnachweis befreit:'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ln.bezeichnung, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('$fachName • ${nachschreiber.klasse.name}'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Der Schüler erscheint nicht mehr in der Nachschreiber-Liste für diesen LN.',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Befreien'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.createLnExemption(
+        studentId: student.id,
+        leistungsnachweisId: ln.id,
+        grund: 'Nicht relevant',
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${student.displayName} von "${ln.bezeichnung}" befreit'),
+            action: SnackBarAction(
+              label: 'Rückgängig',
+              onPressed: () async {
+                await firestoreService.deleteLnExemption(student.id, ln.id);
+              },
+            ),
+          ),
+        );
+      }
+      return true;
+    }
+    return false;
+  }
+
+  Widget _buildZeitgruppenFilter(WidgetRef ref) {
+    final currentFilter = ref.watch(zeitgruppenFilterProvider);
+    
+    return SegmentedButton<int?>(
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(horizontal: 12),
+        ),
+      ),
+      segments: const [
+        ButtonSegment(value: null, label: Text('Alle')),
+        ButtonSegment(value: 1, label: Text('ZG1')),
+        ButtonSegment(value: 2, label: Text('ZG2')),
+        ButtonSegment(value: 3, label: Text('ZG3')),
+      ],
+      selected: {currentFilter},
+      onSelectionChanged: (selected) {
+        ref.read(zeitgruppenFilterProvider.notifier).setFilter(selected.first);
+      },
     );
   }
 }

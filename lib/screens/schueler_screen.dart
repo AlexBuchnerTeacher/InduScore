@@ -27,6 +27,8 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
   @override
   Widget build(BuildContext context) {
     final klassenAsync = ref.watch(klassenProvider);
+    final filteredKlassen = ref.watch(filteredKlassenProvider);
+    final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,21 +58,37 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             padding: const EdgeInsets.all(RBSSpacing.md),
             color: RBSColors.paper,
             child: klassenAsync.when(
-              data: (klassen) => Wrap(
-                spacing: RBSSpacing.sm,
-                runSpacing: RBSSpacing.sm,
-                children: klassen.map((klasse) {
-                  return RBSFilterChip(
-                    label: klasse.name,
-                    selected: _selectedKlasseId == klasse.id,
-                    color: _getBerufColor(klasse.beruf),
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedKlasseId = selected ? klasse.id : null;
-                      });
-                    },
-                  );
-                }).toList(),
+              data: (_) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Zeitgruppen Filter Chip
+                  if (zeitgruppenFilter != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: RBSSpacing.sm),
+                      child: Chip(
+                        label: Text('ZG$zeitgruppenFilter'),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
+                        backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
+                      ),
+                    ),
+                  Wrap(
+                    spacing: RBSSpacing.sm,
+                    runSpacing: RBSSpacing.sm,
+                    children: filteredKlassen.map((klasse) {
+                      return RBSFilterChip(
+                        label: klasse.name,
+                        selected: _selectedKlasseId == klasse.id,
+                        color: _getBerufColor(klasse.beruf),
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedKlasseId = selected ? klasse.id : null;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
               loading: () => const Center(
                 child: CircularProgressIndicator(),

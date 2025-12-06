@@ -4,40 +4,39 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.10.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
 
-## Features (v0.7.0)
-- **NEU: Schüler-Model überarbeitet**: Echte Namen (Vor-/Nachname), Status (aktiv/ausgetreten), Ein-/Austrittsdatum
-- **NEU: PDF-Import mit Merge**: Duplikate erkennen, Schüler matchen, Austritte markieren
-- **NEU: Responsive Leistungsnachweise**: PopupMenu auf Mobilgeräten, ganze Card klickbar
-- **NEU: Sortierung nach Nachname**: Alphabetisch in allen Listen
-- **NEU: Modernes Icon-Design**: App-Icon mit Schatten-Effekt
-- **Notenübersicht aus allen Kontexten**: Klick auf Klasse/Fach/Schüler zeigt alle Noten
-- **Auto-Save**: Noten werden sofort gespeichert (kein Save-Button nötig)
-- **Tendenzen statt Punkte**: Vereinfachte Noteneingabe mit +/·/- Tendenz
-- **Gewichtung**: Wochentest (1.0), Praktisch (1.5), Mündlich (1.0), Mitarbeit (1.0)
-- **Änderungs-Tracking**: Kürzel des letzten Bearbeiters in jeder Note
-- **Leistungsnachweise**: Wochentest, Praktisch, Mündlich, Mitarbeit
-- **Excel-Style Noteneingabe**: Schnelle Eingabe für ganze Klasse mit Statistiken
-- **Schülerverwaltung**: Filter nach Klasse, Aktiv/Ausgetreten Toggle
-- **Fächerverwaltung**: CRUD, Beruf-Zuordnung, Farbcodierung, Wochenstunden, Credits
-- **Klassenverwaltung**: Einfache Verwaltung von Klassen mit Format "EAT321"
-- **PDF-Import**: Klassenlisten aus PDF importieren (auch OCR)
-- **RBS Styleguide 1.2**: Dynamic Red, Roboto Condensed
-- **Firebase Integration**: Firestore & Authentication
-- **Responsive Design**: Optimiert für Desktop & Mobile
-- **Berufsschul-spezifisch**: IE, EAT, EBT, EGS, Zeitgruppen, Schuljahre
+## Features (v0.10.0)
+
+### Neu in v0.10.0
+- **Zeitgruppen-Filter (ZG-Filter)**: Globaler Filter im Drawer für ZG1/ZG2/ZG3
+- **Nachschreiber-Dashboard**: Übersicht mit 3 Eskalationsstufen (≤2d, ≤2w, >2w)
+- **LN-Befreiungen**: Schüler als "nicht relevant" markieren (Swipe-Geste)
+- **Benutzerverwaltung**: Admin-Bereich für Lehrer-Accounts mit Rollen
+
+### Kernfunktionen
+- **Matrix-Ansicht**: Schüler-Fächer-Matrix mit Durchschnitten
+- **Auto-Save Noteneingabe**: Excel-Style mit Tendenzen (+/·/-)
+- **CSV Import**: Schülerlisten mit automatischer Spaltenerkennung
+- **PDF Export**: Notenblätter und Klassenlisten
+- **NOI Export**: XML/CSV für Zeugnisnoten (Bayern)
+- **PDF-Import mit Merge**: Duplikate erkennen, Schüler matchen
+- **Änderungs-Tracking**: Kürzel des letzten Bearbeiters
+- **Responsive Design**: Desktop & Mobile optimiert
+- **RBS Styleguide 1.2**: München Design System
 
 
 ## Roadmap
 
 ### v0.8.0 - Zeugnisnoten & Export
+## Roadmap
+
+### v0.11.0 - Zeugnisnoten
 - [ ] Zeugnisnoten-Screen mit gewichtetem Durchschnitt
-- [ ] PDF-Export für Notenlisten
-- [ ] Nachschreiber-Management mit Zeitgruppen
+- [ ] Automatische Berechnung aus Leistungsnachweisen
 
 ### v1.0.0 - Datenschutz & Sicherheit
 - [ ] Ende-zu-Ende Verschlüsselung für Schülernamen
@@ -46,14 +45,14 @@ Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, 
 
 ## Live-Version
 
-Die aktuelle Version ist als Web-App über GitHub Pages verfügbar:
-https://alexbuchnerteacher.github.io/InduScore/
+Die aktuelle Version ist als Web-App über Firebase Hosting verfügbar:
+https://induscore-notentool.web.app/
 
 ## Tech Stack
 - **Framework**: Flutter 3.38.2 (Web)
 - **Language**: Dart 3.10.0
 - **State Management**: Riverpod 3.0.3
-- **Backend**: Firebase (Firestore, Auth)
+- **Backend**: Firebase (Firestore, Auth, Hosting)
 - **Routing**: go_router 17.0.0
 - **Design**: RBS Styleguide 1.2 (München)
 - **Fonts**: google_fonts 6.3.2
@@ -67,20 +66,23 @@ https://alexbuchnerteacher.github.io/InduScore/
 │   │   ├── theme/rbs_theme.dart       # RBS Design System
 │   │   └── widgets/rbs_components.dart# RBS UI Components
 │   ├── models/
+│   │   ├── app_user.dart              # Benutzer-Model (Admin/Lehrer)
 │   │   ├── beruf.dart                 # Beruf, Schuljahr, Zeitgruppe
+│   │   ├── grade.dart                 # Noten-Model
 │   │   ├── klasse.dart                # Klassen-Model
-│   │   ├── leistungsnachweis.dart     # Leistungsnachweise & IHK-Notenschlüssel
-│   │   ├── zeugnisnote.dart           # Zeugnisnoten-Berechnung
+│   │   ├── leistungsnachweis.dart     # Leistungsnachweise
+│   │   ├── ln_exemption.dart          # LN-Befreiungen
 │   │   ├── student.dart               # Schüler-Model
 │   │   ├── subject.dart               # Fächer-Model
-│   │   └── grade.dart                 # Noten-Model (Note, Punkte, Kommentar)
+│   │   └── zeugnisnote.dart           # Zeugnisnoten-Berechnung
 │   ├── providers/app_providers.dart   # Riverpod State Provider
 │   ├── screens/
-│   │   ├── home_screen.dart           # Dashboard
+│   │   ├── home_screen.dart           # Dashboard mit Nachschreiber
 │   │   ├── login_screen.dart          # Login/Auth
 │   │   ├── klassen_screen.dart        # Klassenverwaltung
 │   │   ├── faecher_screen.dart        # Fächerverwaltung
 │   │   ├── schueler_screen.dart       # Schülerverwaltung
+│   │   ├── user_verwaltung_screen.dart# Benutzerverwaltung (Admin)
 │   │   ├── leistungsnachweise_screen.dart  # Leistungsnachweise
 │   │   ├── noten_eingabe_screen.dart  # Excel-Style Noteneingabe
 │   │   └── noten_uebersicht_screen.dart # Zentrale Notenübersicht

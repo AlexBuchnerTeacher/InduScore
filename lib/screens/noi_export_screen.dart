@@ -4,6 +4,7 @@ import 'package:web/web.dart' as web;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../providers/app_providers.dart';
@@ -25,7 +26,6 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
   String? _selectedKlasseId;
   String? _selectedStudentId;
   String? _selectedSubjectId;
-  int _selectedHalbjahr = 1;
   String _selectedExportType = 'noi'; // noi, pdf_student, pdf_subject
   String _selectedFormat = 'xml'; // xml, csv
   bool _isExporting = false;
@@ -43,6 +43,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
         title: const Text('Daten exportieren'),
         backgroundColor: RBSColors.dynamicRed,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(RBSSpacing.lg),
@@ -224,6 +228,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                   loading: () => const CircularProgressIndicator(),
                   error: (e, s) => Text('Fehler: $e'),
                   data: (klassen) => DropdownButtonFormField<String>(
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       hintText: 'Klasse wählen',
@@ -231,7 +236,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                     ),
                     items: klassen.map((k) => DropdownMenuItem(
                       value: k.id,
-                      child: Text('${k.name} (${k.schuljahr})'),
+                      child: Text(
+                        '${k.name} (${k.schuljahr})',
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     )).toList(),
                     onChanged: (value) => setState(() => _selectedKlasseId = value),
                   ),
@@ -242,67 +250,32 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
         ),
         const SizedBox(height: RBSSpacing.md),
 
-        // Halbjahr und Format
-        Row(
-          children: [
-            Expanded(
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(RBSSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today, color: RBSColors.courtGreen),
-                          const SizedBox(width: RBSSpacing.sm),
-                          Text('Halbjahr', style: RBSTypography.label),
-                        ],
-                      ),
-                      const SizedBox(height: RBSSpacing.sm),
-                      SegmentedButton<int>(
-                        segments: const [
-                          ButtonSegment(value: 1, label: Text('1. HJ')),
-                          ButtonSegment(value: 2, label: Text('2. HJ')),
-                        ],
-                        selected: {_selectedHalbjahr},
-                        onSelectionChanged: (v) => setState(() => _selectedHalbjahr = v.first),
-                      ),
-                    ],
-                  ),
+        // Format-Auswahl
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(RBSSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.file_present, color: RBSColors.growingElder),
+                    const SizedBox(width: RBSSpacing.sm),
+                    Text('Format', style: RBSTypography.label),
+                  ],
                 ),
-              ),
-            ),
-            const SizedBox(width: RBSSpacing.md),
-            Expanded(
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(RBSSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.file_present, color: RBSColors.growingElder),
-                          const SizedBox(width: RBSSpacing.sm),
-                          Text('Format', style: RBSTypography.label),
-                        ],
-                      ),
-                      const SizedBox(height: RBSSpacing.sm),
-                      SegmentedButton<String>(
-                        segments: const [
-                          ButtonSegment(value: 'xml', label: Text('XML')),
-                          ButtonSegment(value: 'csv', label: Text('CSV')),
-                        ],
-                        selected: {_selectedFormat},
-                        onSelectionChanged: (v) => setState(() => _selectedFormat = v.first),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: RBSSpacing.sm),
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'xml', label: Text('XML')),
+                    ButtonSegment(value: 'csv', label: Text('CSV')),
+                  ],
+                  selected: {_selectedFormat},
+                  onSelectionChanged: (v) => setState(() => _selectedFormat = v.first),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );
@@ -343,6 +316,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                   loading: () => const CircularProgressIndicator(),
                   error: (e, s) => Text('Fehler: $e'),
                   data: (klassen) => DropdownButtonFormField<String>(
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       hintText: 'Erst Klasse wählen',
@@ -350,7 +324,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                     ),
                     items: klassen.map((k) => DropdownMenuItem(
                       value: k.id,
-                      child: Text('${k.name} (${k.schuljahr})'),
+                      child: Text(
+                        '${k.name} (${k.schuljahr})',
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     )).toList(),
                     onChanged: (value) => setState(() {
                       _selectedKlasseId = value;
@@ -380,6 +357,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                 ),
                 const SizedBox(height: RBSSpacing.sm),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     hintText: _selectedKlasseId == null 
@@ -389,7 +367,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                   ),
                   items: filteredStudents.map((s) => DropdownMenuItem(
                     value: s.id,
-                    child: Text('${s.lastName}, ${s.firstName}'),
+                    child: Text(
+                      '${s.lastName}, ${s.firstName}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   )).toList(),
                   onChanged: _selectedKlasseId != null
                       ? (value) => setState(() => _selectedStudentId = value)
@@ -435,6 +416,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                         loading: () => const CircularProgressIndicator(),
                         error: (e, s) => Text('Fehler: $e'),
                         data: (klassen) => DropdownButtonFormField<String>(
+                          isExpanded: true,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: 'Klasse',
@@ -442,7 +424,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                           ),
                           items: klassen.map((k) => DropdownMenuItem(
                             value: k.id,
-                            child: Text(k.name),
+                            child: Text(
+                              k.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           )).toList(),
                           onChanged: (value) => setState(() => _selectedKlasseId = value),
                         ),
@@ -482,6 +467,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                               : subjects;
                           
                           return DropdownButtonFormField<String>(
+                            isExpanded: true,
                             decoration: InputDecoration(
                               border: const OutlineInputBorder(),
                               hintText: _selectedKlasseId == null ? 'Erst Klasse wählen' : 'Fach wählen',
@@ -489,7 +475,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                             ),
                             items: filteredSubjects.map((s) => DropdownMenuItem(
                               value: s.id,
-                              child: Text(s.shortName ?? s.name),
+                              child: Text(
+                                s.shortName ?? s.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             )).toList(),
                             onChanged: _selectedKlasseId != null 
                                 ? (value) => setState(() => _selectedSubjectId = value)
@@ -627,9 +616,8 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
         subjects: subjects.cast(),
         leistungsnachweise: klassenLns.cast(),
         grades: klassenGrades.cast(),
-        halbjahr: _selectedHalbjahr,
       );
-      filename = NoiExportService.getFilename(klasse, _selectedHalbjahr, 'xml');
+      filename = NoiExportService.getFilename(klasse, 'xml');
       mimeType = 'application/xml';
     } else {
       content = NoiExportService.generateCsv(
@@ -639,7 +627,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
         leistungsnachweise: klassenLns.cast(),
         grades: klassenGrades.cast(),
       );
-      filename = NoiExportService.getFilename(klasse, _selectedHalbjahr, 'csv');
+      filename = NoiExportService.getFilename(klasse, 'csv');
       mimeType = 'text/csv';
     }
 

@@ -39,6 +39,23 @@ class AuthService {
     }
   }
 
+  /// Erstellt einen neuen User (für Admin-Zwecke)
+  /// HINWEIS: Dies loggt den Admin aus und den neuen User ein!
+  /// Für echte Admin-User-Erstellung braucht man Firebase Admin SDK
+  Future<UserCredential> createUserWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      return await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
   // Sign out
   Future<void> signOut() async {
     await _auth.signOut();

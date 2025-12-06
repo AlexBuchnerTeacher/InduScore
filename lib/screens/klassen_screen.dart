@@ -28,6 +28,8 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
   @override
   Widget build(BuildContext context) {
     final klassenAsync = ref.watch(klassenProvider);
+    final filteredByZG = ref.watch(filteredKlassenProvider);
+    final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final currentSchuljahr = ref.watch(currentSchuljahrProvider);
 
     return Scaffold(
@@ -73,6 +75,14 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
               spacing: RBSSpacing.sm,
               runSpacing: RBSSpacing.sm,
               children: [
+                // Zeitgruppen Filter Chip (zeigt aktiven Filter)
+                if (zeitgruppenFilter != null)
+                  Chip(
+                    label: Text('ZG$zeitgruppenFilter'),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
+                    backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
+                  ),
                 // Schuljahr Filter
                 RBSFilterChip(
                   label: _selectedSchuljahr ?? currentSchuljahr.toString(),
@@ -106,8 +116,8 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
           Expanded(
             child: klassenAsync.when(
               data: (klassen) {
-                // Apply filters
-                var filteredKlassen = klassen;
+                // Start with ZG-filtered classes
+                var filteredKlassen = filteredByZG;
                 if (_selectedSchuljahr != null) {
                   filteredKlassen = filteredKlassen
                       .where(

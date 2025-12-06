@@ -6,6 +6,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.10.0] - 2025-12-06
+
+### Added
+- **Globaler Zeitgruppen-Filter (ZG-Filter)**
+  - SegmentedButton im Drawer: Alle / ZG1 / ZG2 / ZG3
+  - Filter wirkt auf Dashboard, Klassen, Schüler, Leistungsnachweise
+  - Zeitgruppe wird aus Klassennamen extrahiert (vorletzte Ziffer)
+
+- **Nachschreiber-Dashboard**
+  - Neue Sektion auf dem Dashboard mit Eskalationsstufen
+  - Stufe 1 (gelb): ≤2 Tage überfällig
+  - Stufe 2 (orange): ≤2 Wochen überfällig  
+  - Stufe 3 (rot): >2 Wochen überfällig
+  - Badge mit Anzahl der Nachschreiber
+  - Schnellzugriff zum Befreien (Button + Swipe)
+
+- **LN-Befreiungen ("Nicht relevant")**
+  - Neues Model `LnExemption` für Schüler-LN-Befreiungen
+  - Schüler können als "nicht relevant" für LN markiert werden
+  - Befreite Schüler erscheinen nicht in Nachschreiber-Liste
+  - Swipe-Geste in Noteneingabe: Links = Befreien, Rechts = Aufheben
+  - Visuelle Markierung: Halbtransparent, durchgestrichen, "n.r." Badge
+  - Rückgängig-Funktion via SnackBar
+
+- **Benutzerverwaltung (Admin)**
+  - Neues Model `AppUser` mit Rollen (Admin/Lehrer)
+  - Vollständiger CRUD für Benutzer
+  - Felder: Name, E-Mail, Kürzel, Rolle, Status
+  - Suche und Filterung nach Rolle/Status
+  - Benutzer aktivieren/deaktivieren
+  - Neuer Menüpunkt unter Einstellungen (nur Admin)
+
+### Fixed
+- **Kürzel-Sofortaktualisierung**: Kürzel wird sofort nach Notenspeicherung angezeigt
+- **Swipe-Crash behoben**: Race-Condition bei gleichzeitigem Swipe + Click verhindert
+- **Null-Safety**: Robustere Fehlerbehandlung in Noteneingabe
+
+### Changed
+- Noteneingabe: Schüler bleiben nach Befreiung sichtbar (nur visuell markiert)
+- Drawer: Neuer ZG-Filter und Benutzerverwaltung-Link
+
+
 ## [0.9.1] - 2025-12-05
 
 ### Added

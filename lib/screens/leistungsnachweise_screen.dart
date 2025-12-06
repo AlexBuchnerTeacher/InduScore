@@ -29,6 +29,8 @@ class _LeistungsnachweiseScreenState
   Widget build(BuildContext context) {
     final leistungsnachweiseAsync = ref.watch(leistungsnachweiseProvider);
     final klassenAsync = ref.watch(klassenProvider);
+    final filteredKlassen = ref.watch(filteredKlassenProvider);
+    final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final subjectsAsync = ref.watch(subjectsProvider);
 
     return Scaffold(
@@ -52,9 +54,20 @@ class _LeistungsnachweiseScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Zeitgruppen Filter Chip
+                if (zeitgruppenFilter != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: RBSSpacing.sm),
+                    child: Chip(
+                      label: Text('ZG$zeitgruppenFilter'),
+                      deleteIcon: const Icon(Icons.close, size: 16),
+                      onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
+                      backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
+                    ),
+                  ),
                 // Klassen-Filter
                 klassenAsync.when(
-                  data: (klassen) => Wrap(
+                  data: (_) => Wrap(
                     spacing: RBSSpacing.sm,
                     runSpacing: RBSSpacing.sm,
                     children: [
@@ -64,7 +77,7 @@ class _LeistungsnachweiseScreenState
                         onSelected: (_) =>
                             setState(() => _selectedKlasseId = null),
                       ),
-                      ...klassen.map(
+                      ...filteredKlassen.map(
                         (klasse) => RBSFilterChip(
                           label: klasse.name,
                           selected: _selectedKlasseId == klasse.id,
