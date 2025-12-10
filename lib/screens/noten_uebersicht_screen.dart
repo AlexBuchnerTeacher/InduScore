@@ -522,10 +522,41 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(
-                                    '${student.lastName}, ${student.firstName}',
-                                    style: const TextStyle(fontSize: 13),
-                                    overflow: TextOverflow.ellipsis,
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          '${student.lastName}, ${student.firstName}',
+                                          style: const TextStyle(fontSize: 13),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      // Befreiungs-Indikatoren
+                                      if (student.befreiungDeutsch || student.befreiungPuG) ...[
+                                        const SizedBox(width: 4),
+                                        Tooltip(
+                                          message: [
+                                            if (student.befreiungDeutsch) 'Befreiung Deutsch',
+                                            if (student.befreiungPuG) 'Befreiung PuG',
+                                          ].join(', '),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                            decoration: BoxDecoration(
+                                              color: Colors.orange.withValues(alpha: 0.2),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              'B',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.orange[800],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               ],
@@ -842,62 +873,91 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundColor: RBSColors.dynamicRed,
-                  child: Text(
-                    student.displayName.isNotEmpty 
-                        ? student.displayName[0].toUpperCase() 
-                        : '?',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        student.displayName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: RBSColors.dynamicRed,
+                      child: Text(
+                        student.displayName.isNotEmpty 
+                            ? student.displayName[0].toUpperCase() 
+                            : '?',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            student.displayName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          Text(
+                            '$gesamtAnzahl von ${leistungsnachweise.length} Noten',
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Gesamt-Durchschnitt
+                    if (gesamtDurchschnitt != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _getNoteColor(gesamtDurchschnitt.round()).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: _getNoteColor(gesamtDurchschnitt.round()), width: 2),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '⌀ ${gesamtDurchschnitt.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: _getNoteColor(gesamtDurchschnitt.round()),
+                              ),
+                            ),
+                            Text(
+                              'Gesamt',
+                              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        '$gesamtAnzahl von ${leistungsnachweise.length} Noten',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
+                  ],
+                ),
+                // Zusätzliche Schüler-Informationen
+                if (student.geschlecht != null || student.religion != null || 
+                    student.befreiungDeutsch || student.befreiungPuG ||
+                    student.ausbildungsbetrieb != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      if (student.geschlecht != null && student.geschlecht!.isNotEmpty)
+                        _buildInfoChip(Icons.person, student.geschlecht == 'M' ? 'Männlich' : 'Weiblich'),
+                      if (student.religion != null && student.religion!.isNotEmpty)
+                        _buildInfoChip(Icons.church, student.religion!),
+                      if (student.befreiungDeutsch)
+                        _buildInfoChip(Icons.block, 'Befreiung Deutsch', color: Colors.orange),
+                      if (student.befreiungPuG)
+                        _buildInfoChip(Icons.block, 'Befreiung PuG', color: Colors.orange),
+                      if (student.ausbildungsbetrieb != null && student.ausbildungsbetrieb!.isNotEmpty)
+                        _buildInfoChip(Icons.business, student.ausbildungsbetrieb!),
                     ],
                   ),
-                ),
-                // Gesamt-Durchschnitt
-                if (gesamtDurchschnitt != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: _getNoteColor(gesamtDurchschnitt.round()).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: _getNoteColor(gesamtDurchschnitt.round()), width: 2),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          '⌀ ${gesamtDurchschnitt.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: _getNoteColor(gesamtDurchschnitt.round()),
-                          ),
-                        ),
-                        Text(
-                          'Gesamt',
-                          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  ),
+                ],
               ],
             ),
           ),
@@ -1617,6 +1677,32 @@ class _LNStatistik {
     required this.gesamt,
     required this.verteilung,
   });
+}
+
+/// Helper Widget für Info-Chips
+Widget _buildInfoChip(IconData icon, String label, {Color? color}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: (color ?? Colors.grey).withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: (color ?? Colors.grey).withValues(alpha: 0.3)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color ?? Colors.grey[700]),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: color ?? Colors.grey[700],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _NotenEingabe {

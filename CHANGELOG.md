@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.11.0] - 2025-12-10
+
+### Added
+- **ASV-Import mit Beziehungen** (Issue #36)
+  - Direkter Import von ASV-CSV-Exporten (Amtliche Schulverwaltung Bayern)
+  - Automatische Erkennung des ASV-Formats
+  - Automatisches Anlegen von Klassen (aus Klassennamen geparst)
+  - Automatisches Anlegen von Fächern (mit Kürzel und Name)
+  - Automatisches Anlegen von Lehrern (aus Kürzel)
+  - Speicherung der Schüler-Fach-Lehrer Beziehungen
+
+- **Erweiterte Schüler-Daten**
+  - Neues Feld: ASV-ID (lokales Differenzierungsmerkmal)
+  - Neues Feld: Geschlecht (M/W)
+  - Neues Feld: Religion
+  - Neues Feld: E-Mail
+  - Neues Feld: Ausbildungsbetrieb (für Ausbilder-Feature)
+  - Neues Feld: Befreiung Deutsch
+  - Neues Feld: Befreiung Politik und Gesellschaft (PuG)
+
+- **SchuelerUnterricht Model**
+  - Neue Entität für Schüler-Fach-Lehrer Zuordnungen
+  - Speichert: Schüler, Fach, Lehrer, Gruppe, Klasse
+  - Ermöglicht spätere Auswertungen nach Lehrer/Fach
+
+- **Befreiungen in der Notenübersicht**
+  - Befreiungs-Indikator "B" in der Schülerliste
+  - Tooltip zeigt welche Befreiungen aktiv sind
+  - Detail-Dialog mit allen Schüler-Informationen
+  - Info-Chips für Geschlecht, Religion, Betrieb
+
+### Changed
+- CSV Import Screen: Automatische ASV-Format-Erkennung
+- FirestoreService: Neue "Once"-Methoden für einmaliges Laden
+
+
 ## [0.10.0] - 2025-12-06
 
 ### Added
