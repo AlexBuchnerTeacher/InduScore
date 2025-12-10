@@ -43,6 +43,10 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: const Text('CSV Import'),
         backgroundColor: RBSColors.dynamicRed,
         foregroundColor: Colors.white,

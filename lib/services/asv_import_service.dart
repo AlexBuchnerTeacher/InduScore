@@ -74,16 +74,31 @@ class AsvImportService {
       return AsvParseResult(error: 'Kein ASV-Format erkannt');
     }
 
-    // Header-Indizes finden
+    // Header-Indizes finden (exaktes Matching)
     final headerMap = <String, int>{};
     for (int i = 0; i < headers.length; i++) {
       headerMap[headers[i]] = i;
     }
+    
+    // Fuzzy-Index für Lehrer/Unterricht-Spalten (toleriert Encoding-Probleme)
+    final lehrerFaecherIndex = _findHeaderIndex(headers, ['lehrkr', 'fach']) 
+        ?? headerMap['Alle Lehrkräfte (Kürzel) mit Fach'];
+    final unterrichtIndex = _findHeaderIndex(headers, ['unterricht', 'bezeichnung', 'lehrer'])
+        ?? headerMap['besuchter Unterricht des Schülers/der Schülerin mit Bezeichnung, Fach, Lehrer'];
 
     final rows = <AsvRow>[];
     for (int i = 1; i < lines.length; i++) {
       final values = parseAsvLine(lines[i]);
-      if (values.length < headers.length) continue;
+      
+      if (values.length < headers.length) {
+        continue;
+      }
+
+      // Werte aus dynamisch gefundenen Spalten lesen
+      final lehrerFaecherValue = lehrerFaecherIndex != null && lehrerFaecherIndex < values.length 
+          ? values[lehrerFaecherIndex] : '';
+      final unterrichtValue = unterrichtIndex != null && unterrichtIndex < values.length 
+          ? values[unterrichtIndex] : '';
 
       final row = AsvRow(
         asvId: _getValue(values, headerMap, 'lokales Differenzierungsmerkmal'),
@@ -97,8 +112,8 @@ class AsvImportService {
         austrittsDatum: _getValue(values, headerMap, 'Austritt am (voraussichtlich)'),
         befreiungDeutsch: _getValue(values, headerMap, 'Befreiung Deutsch') == 'ja',
         befreiungPuG: _getValue(values, headerMap, 'Befreiung Politik und Gesellschaft') == 'ja',
-        lehrerFaecher: _getValue(values, headerMap, 'Alle Lehrkräfte (Kürzel) mit Fach'),
-        unterricht: _getValue(values, headerMap, 'besuchter Unterricht des Schülers/der Schülerin mit Bezeichnung, Fach, Lehrer'),
+        lehrerFaecher: lehrerFaecherValue,
+        unterricht: unterrichtValue,
       );
 
       if (row.nachname.isNotEmpty && row.vorname.isNotEmpty) {
@@ -113,6 +128,39 @@ class AsvImportService {
     final index = headerMap[header];
     if (index == null || index >= values.length) return '';
     return values[index];
+  }
+
+  /// Findet Header-Index mit Fuzzy-Matching (toleriert Encoding-Probleme)
+  /// Sucht nach Schlüsselwörtern im Header
+  static int? _findHeaderIndex(List<String> headers, List<String> keywords) {
+    for (int i = 0; i < headers.length; i++) {
+      final header = headers[i].toLowerCase();
+      bool allMatch = true;
+      for (final keyword in keywords) {
+        // Normalisiere Umlaute für Vergleich
+        final normalizedHeader = _normalizeUmlauts(header);
+        final normalizedKeyword = keyword.toLowerCase();
+        if (!normalizedHeader.contains(normalizedKeyword)) {
+          allMatch = false;
+          break;
+        }
+      }
+      if (allMatch) return i;
+    }
+    return null;
+  }
+
+  /// Normalisiert Umlaute (auch kaputte Encoding-Varianten)
+  static String _normalizeUmlauts(String text) {
+    return text
+        // Standard-Umlaute
+        .replaceAll('ä', 'ae').replaceAll('ö', 'oe').replaceAll('ü', 'ue')
+        .replaceAll('Ä', 'Ae').replaceAll('Ö', 'Oe').replaceAll('Ü', 'Ue')
+        .replaceAll('ß', 'ss')
+        // Kaputte UTF-8 Varianten (Windows-1252 als UTF-8 gelesen)
+        .replaceAll('Ã¤', 'ae').replaceAll('Ã¶', 'oe').replaceAll('Ã¼', 'ue')
+        .replaceAll('Ã„', 'Ae').replaceAll('Ã–', 'Oe').replaceAll('Ãœ', 'Ue')
+        .replaceAll('ÃŸ', 'ss');
   }
 
   /// Extrahiert Lehrer-Informationen aus dem Unterrichtsfeld
@@ -241,6 +289,13 @@ class AsvImportService {
         // 2b. Unterricht parsen und Fächer/Lehrer anlegen
         final unterrichtInfos = parseUnterricht(row.unterricht);
         final lehrerKuerzelMap = parseLehrerKuerzel(row.lehrerFaecher);
+        
+        debugPrint('ASV-Import: Schüler ${row.vorname} ${row.nachname}');
+        debugPrint('  Unterricht-Feld: "${row.unterricht}"');
+        debugPrint('  Geparste Unterrichts-Infos: ${unterrichtInfos.length}');
+        for (final info in unterrichtInfos) {
+          debugPrint('    -> Fach: ${info.fachKuerzel}, Name: ${info.fachName}, Lehrer: ${info.lehrerName}');
+        }
         
         for (final info in unterrichtInfos) {
           // Fach anlegen/finden (shortName als Kürzel verwenden)

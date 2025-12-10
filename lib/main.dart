@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
@@ -46,6 +47,9 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Google Fonts konfigurieren - erlaubt Fallback auf Noto Sans für fehlende Zeichen
+  GoogleFonts.config.allowRuntimeFetching = true;
 
   // Initialize Firebase
   try {
