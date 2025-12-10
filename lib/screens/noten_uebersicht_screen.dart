@@ -1,3 +1,5 @@
+// InduScore Entwicklungsstand 0.11.3 - 10.12.2025
+// UI optimiert, Chips zentriert, LN-Hinweis verbessert
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +14,7 @@ import '../core/widgets/rbs_components.dart';
 import '../widgets/rbs_drawer.dart';
 
 /// Zentrale Notenübersicht mit flexiblen Filtern
-/// 
+///
 /// Kann gefiltert werden nach:
 /// - klasseId: Zeigt alle Schüler einer Klasse mit allen Fächern
 /// - fachId: Zeigt alle Klassen/Schüler mit diesem Fach
@@ -30,13 +32,14 @@ class NotenUebersichtScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<NotenUebersichtScreen> createState() => _NotenUebersichtScreenState();
+  ConsumerState<NotenUebersichtScreen> createState() =>
+      _NotenUebersichtScreenState();
 }
 
 class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
   final Map<String, _NotenEingabe> _noten = {};
   final Set<String> _savingGrades = {};
-  
+
   // Filter State
   String? _selectedSubjectId;
   String? _selectedKlasseId;
@@ -70,12 +73,8 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
             data: (leistungsnachweise) => gradesAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, s) => Center(child: Text('Fehler: $e')),
-              data: (grades) => _buildContent(
-                klassen,
-                subjects,
-                leistungsnachweise,
-                grades,
-              ),
+              data: (grades) =>
+                  _buildContent(klassen, subjects, leistungsnachweise, grades),
             ),
           ),
         ),
@@ -99,18 +98,26 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     // Filter Leistungsnachweise basierend auf Kontext
     var filteredLN = leistungsnachweise;
     if (widget.klasseId != null) {
-      filteredLN = filteredLN.where((ln) => ln.klasseId == widget.klasseId).toList();
+      filteredLN = filteredLN
+          .where((ln) => ln.klasseId == widget.klasseId)
+          .toList();
     }
     if (widget.fachId != null) {
-      filteredLN = filteredLN.where((ln) => ln.subjectId == widget.fachId).toList();
+      filteredLN = filteredLN
+          .where((ln) => ln.subjectId == widget.fachId)
+          .toList();
     }
-    
+
     // Zusätzliche Filter anwenden
     if (_selectedSubjectId != null) {
-      filteredLN = filteredLN.where((ln) => ln.subjectId == _selectedSubjectId).toList();
+      filteredLN = filteredLN
+          .where((ln) => ln.subjectId == _selectedSubjectId)
+          .toList();
     }
     if (_selectedKlasseId != null) {
-      filteredLN = filteredLN.where((ln) => ln.klasseId == _selectedKlasseId).toList();
+      filteredLN = filteredLN
+          .where((ln) => ln.klasseId == _selectedKlasseId)
+          .toList();
     }
     if (_selectedTyp != null) {
       filteredLN = filteredLN.where((ln) => ln.typ == _selectedTyp).toList();
@@ -122,14 +129,21 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     // Hole relevante Schüler
     List<Student> students = [];
     if (widget.studentId != null) {
-      // Einzelner Schüler - lade über Provider
-      final studentAsync = ref.watch(studentsByKlasseProvider(
-        filteredLN.isNotEmpty ? filteredLN.first.klasseId : '',
-      ));
-      students = studentAsync.value ?? [];
-      students = students.where((s) => s.id == widget.studentId).toList();
+      // Einzelner Schüler - lade direkt über studentProvider
+      final studentAsync = ref.watch(studentProvider(widget.studentId!));
+      if (studentAsync.hasValue) {
+        final student = studentAsync.value!;
+        students = [student];
+        // IMMER nach Klasse des Schülers filtern, nicht nur wenn leer!
+        filteredLN = filteredLN
+            .where((ln) => ln.klasseId == student.klasseId)
+            .toList();
+        filteredLN.sort((a, b) => b.datum.compareTo(a.datum));
+      }
     } else if (widget.klasseId != null) {
-      final studentAsync = ref.watch(studentsByKlasseProvider(widget.klasseId!));
+      final studentAsync = ref.watch(
+        studentsByKlasseProvider(widget.klasseId!),
+      );
       students = studentAsync.value ?? [];
     } else {
       // Alle Schüler aus allen relevanten Klassen
@@ -150,10 +164,16 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       children: [
         // Filter-Chips
         _buildFilterChips(leistungsnachweise, subjects, klassen),
-        
+
         // Content
         Expanded(
-          child: _buildFilteredContent(students, filteredLN, subjects, klassen, grades),
+          child: _buildFilteredContent(
+            students,
+            filteredLN,
+            subjects,
+            klassen,
+            grades,
+          ),
         ),
       ],
     );
@@ -165,8 +185,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     List<Klasse> klassen,
   ) {
     // Sammle verfügbare Filter-Optionen
-    final availableSubjectIds = leistungsnachweise.map((ln) => ln.subjectId).toSet();
-    final availableKlasseIds = leistungsnachweise.map((ln) => ln.klasseId).toSet();
+    final availableSubjectIds = leistungsnachweise
+        .map((ln) => ln.subjectId)
+        .toSet();
+    final availableKlasseIds = leistungsnachweise
+        .map((ln) => ln.klasseId)
+        .toSet();
     final availableTypen = leistungsnachweise.map((ln) => ln.typ).toSet();
 
     return Container(
@@ -183,67 +207,78 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
             // Typ-Filter
             ...LeistungsnachweisTyp.values
                 .where((t) => availableTypen.contains(t))
-                .map((typ) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: RBSFilterChip(
-                        label: typ.label,
-                        selected: _selectedTyp == typ,
-                        color: RBSColors.dynamicRed,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedTyp = selected ? typ : null;
-                          });
-                        },
-                      ),
-                    )),
-            
+                .map(
+                  (typ) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: RBSFilterChip(
+                      label: typ.label,
+                      selected: _selectedTyp == typ,
+                      color: RBSColors.dynamicRed,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedTyp = selected ? typ : null;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+
             // Trennstrich
-            if (availableTypen.isNotEmpty && (widget.klasseId != null && availableSubjectIds.length > 1))
+            if (availableTypen.isNotEmpty &&
+                (widget.klasseId != null && availableSubjectIds.length > 1))
               Container(
                 height: 24,
                 width: 1,
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 color: Colors.grey[400],
               ),
-            
+
             // Fach-Filter (nur wenn Klassen-Ansicht)
             if (widget.klasseId != null)
               ...subjects
                   .where((s) => availableSubjectIds.contains(s.id))
-                  .map((subject) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: RBSFilterChip(
-                          label: subject.shortName ?? subject.name,
-                          selected: _selectedSubjectId == subject.id,
-                          color: RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedSubjectId = selected ? subject.id : null;
-                            });
-                          },
-                        ),
-                      )),
-            
+                  .map(
+                    (subject) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: RBSFilterChip(
+                        label: subject.shortName ?? subject.name,
+                        selected: _selectedSubjectId == subject.id,
+                        color:
+                            RBSColors.fromHex(subject.color) ??
+                            RBSColors.courtGreen,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedSubjectId = selected ? subject.id : null;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+
             // Klassen-Filter (nur wenn Fach-Ansicht)
             if (widget.fachId != null)
               ...klassen
                   .where((k) => availableKlasseIds.contains(k.id))
-                  .map((klasse) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: RBSFilterChip(
-                          label: klasse.name,
-                          selected: _selectedKlasseId == klasse.id,
-                          color: RBSColors.dynamicRed,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedKlasseId = selected ? klasse.id : null;
-                            });
-                          },
-                        ),
-                      )),
-            
+                  .map(
+                    (klasse) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: RBSFilterChip(
+                        label: klasse.name,
+                        selected: _selectedKlasseId == klasse.id,
+                        color: RBSColors.dynamicRed,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedKlasseId = selected ? klasse.id : null;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+
             // Reset-Button wenn Filter aktiv
-            if (_selectedTyp != null || _selectedSubjectId != null || _selectedKlasseId != null)
+            if (_selectedTyp != null ||
+                _selectedSubjectId != null ||
+                _selectedKlasseId != null)
               Padding(
                 padding: const EdgeInsets.only(left: 8),
                 child: InkWell(
@@ -262,7 +297,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                     ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+                      borderRadius: BorderRadius.circular(
+                        RBSBorderRadius.small,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -289,8 +326,29 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     List<Grade> grades,
   ) {
     if (filteredLN.isEmpty) {
-      return const Center(
-        child: Text('Keine Leistungsnachweise gefunden'),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.info_outline, color: Colors.grey[400], size: 48),
+            const SizedBox(height: 12),
+            Text(
+              'Kein Leistungsnachweis vorhanden',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Der Schüler ist trotzdem sichtbar und kann Noten erhalten.',
+              style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       );
     }
 
@@ -300,7 +358,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     } else if (widget.fachId != null) {
       return _buildByKlasse(students, filteredLN, klassen, grades);
     } else if (widget.studentId != null) {
-      return _buildForStudent(students.firstOrNull, filteredLN, subjects, grades);
+      return _buildForStudent(
+        students.firstOrNull,
+        filteredLN,
+        subjects,
+        grades,
+      );
     }
 
     return const Center(child: Text('Bitte Filter auswählen'));
@@ -316,7 +379,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         final key = '${student.id}_${ln.id}';
         if (!_noten.containsKey(key)) {
           final existingGrade = grades
-              .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+              .where(
+                (g) =>
+                    g.studentId == student.id && g.leistungsnachweisId == ln.id,
+              )
               .firstOrNull;
 
           _noten[key] = _NotenEingabe(
@@ -344,7 +410,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     for (final ln in leistungsnachweise) {
       lnBySubject.putIfAbsent(ln.subjectId, () => []).add(ln);
     }
-    
+
     // Sortiere Fächer
     final sortedSubjectIds = lnBySubject.keys.toList();
     sortedSubjectIds.sort((a, b) {
@@ -365,22 +431,30 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
           final key = '${student.id}_${ln.id}';
           final eingabe = _noten[key];
           if (eingabe?.note != null) {
-            final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+            final noteValue = _getNoteWithTendenz(
+              eingabe!.note!,
+              eingabe.tendenz,
+            );
             summe += noteValue * ln.gewichtung;
             gewichtung += ln.gewichtung;
           }
         }
-        studentFachSchnitte[student.id]![subjectId] = gewichtung > 0 ? summe / gewichtung : null;
+        studentFachSchnitte[student.id]![subjectId] = gewichtung > 0
+            ? summe / gewichtung
+            : null;
       }
     }
-    
+
     // Berechne Gesamt-Durchschnitt pro Schüler
     final studentGesamtSchnitte = <String, double?>{};
     for (final student in students) {
       final fachSchnitte = studentFachSchnitte[student.id]!;
-      final validSchnitte = fachSchnitte.values.where((s) => s != null).cast<double>().toList();
-      studentGesamtSchnitte[student.id] = validSchnitte.isNotEmpty 
-          ? validSchnitte.reduce((a, b) => a + b) / validSchnitte.length 
+      final validSchnitte = fachSchnitte.values
+          .where((s) => s != null)
+          .cast<double>()
+          .toList();
+      studentGesamtSchnitte[student.id] = validSchnitte.isNotEmpty
+          ? validSchnitte.reduce((a, b) => a + b) / validSchnitte.length
           : null;
     }
 
@@ -393,7 +467,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       studentGesamtSchnitte: studentGesamtSchnitte,
     );
   }
-  
+
   /// Matrix-Ansicht: Schüler in Zeilen, Fächer-Durchschnitte in Spalten
   Widget _buildFaecherMatrix({
     required List<Student> students,
@@ -405,7 +479,8 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
   }) {
     // Berechne Spaltenbreite
     final fachSpaltenBreite = 85.0;
-    final tableWidth = 180.0 + (sortedSubjectIds.length * fachSpaltenBreite) + 80;
+    final tableWidth =
+        180.0 + (sortedSubjectIds.length * fachSpaltenBreite) + 80;
 
     return Scrollbar(
       thumbVisibility: true,
@@ -423,25 +498,37 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: RBSColors.paper,
-                      border: Border(bottom: BorderSide(color: Colors.grey[400]!, width: 2)),
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[400]!, width: 2),
+                      ),
                     ),
                     child: Row(
                       children: [
                         // Schüler-Spalte
                         Container(
                           width: 170,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
                           child: const Text(
                             'Schüler',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                         // Fach-Spalten
                         ...sortedSubjectIds.map((subjectId) {
-                          final subject = subjects.where((s) => s.id == subjectId).firstOrNull;
-                          final fachColor = RBSColors.fromHex(subject?.color) ?? RBSColors.courtGreen;
+                          final subject = subjects
+                              .where((s) => s.id == subjectId)
+                              .firstOrNull;
+                          final fachColor =
+                              RBSColors.fromHex(subject?.color) ??
+                              RBSColors.courtGreen;
                           final lnCount = lnBySubject[subjectId]?.length ?? 0;
-                          
+
                           return InkWell(
                             onTap: () => _showFachDetailDialog(
                               subject,
@@ -450,10 +537,15 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                             ),
                             child: Container(
                               width: fachSpaltenBreite,
-                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: fachColor.withValues(alpha: 0.1),
-                                border: Border(left: BorderSide(color: fachColor, width: 3)),
+                                border: Border(
+                                  left: BorderSide(color: fachColor, width: 3),
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -469,7 +561,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                                   ),
                                   Text(
                                     '$lnCount LN',
-                                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -479,13 +574,22 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                         // Gesamt-Spalte
                         Container(
                           width: 70,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: RBSColors.dynamicRed.withValues(alpha: 0.1),
                           ),
                           child: const Column(
                             children: [
-                              Text('⌀', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              Text(
+                                '⌀',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                               Text('Gesamt', style: TextStyle(fontSize: 10)),
                             ],
                           ),
@@ -493,24 +597,29 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                       ],
                     ),
                   ),
-                  
+
                   // Schüler-Zeilen
                   ...students.asMap().entries.map((entry) {
                     final index = entry.key;
                     final student = entry.value;
                     final isEven = index % 2 == 0;
-                    
+
                     return Container(
                       decoration: BoxDecoration(
                         color: isEven ? Colors.white : Colors.grey[50],
-                        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey[200]!),
+                        ),
                       ),
                       child: Row(
                         children: [
                           // Schüler-Name
                           Container(
                             width: 170,
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
                             child: Row(
                               children: [
                                 Text(
@@ -532,18 +641,27 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                                         ),
                                       ),
                                       // Befreiungs-Indikatoren
-                                      if (student.befreiungDeutsch || student.befreiungPuG) ...[
+                                      if (student.befreiungDeutsch ||
+                                          student.befreiungPuG) ...[
                                         const SizedBox(width: 4),
                                         Tooltip(
                                           message: [
-                                            if (student.befreiungDeutsch) 'Befreiung Deutsch',
-                                            if (student.befreiungPuG) 'Befreiung PuG',
+                                            if (student.befreiungDeutsch)
+                                              'Befreiung Deutsch',
+                                            if (student.befreiungPuG)
+                                              'Befreiung PuG',
                                           ].join(', '),
                                           child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 4,
+                                              vertical: 1,
+                                            ),
                                             decoration: BoxDecoration(
-                                              color: Colors.orange.withValues(alpha: 0.2),
-                                              borderRadius: BorderRadius.circular(4),
+                                              color: Colors.orange.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: Text(
                                               'B',
@@ -564,9 +682,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                           ),
                           // Fach-Durchschnitte
                           ...sortedSubjectIds.map((subjectId) {
-                            final schnitt = studentFachSchnitte[student.id]?[subjectId];
-                            final subject = subjects.where((s) => s.id == subjectId).firstOrNull;
-                            
+                            final schnitt =
+                                studentFachSchnitte[student.id]?[subjectId];
+                            final subject = subjects
+                                .where((s) => s.id == subjectId)
+                                .firstOrNull;
+
                             return InkWell(
                               onTap: () => _showFachDetailDialog(
                                 subject,
@@ -576,16 +697,28 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                               ),
                               child: Container(
                                 width: fachSpaltenBreite,
-                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 4,
+                                ),
                                 alignment: Alignment.center,
                                 child: schnitt != null
                                     ? Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: _getNoteColor(schnitt.round()).withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(12),
+                                          color: _getNoteColor(
+                                            schnitt.round(),
+                                          ).withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                           border: Border.all(
-                                            color: _getNoteColor(schnitt.round()).withValues(alpha: 0.5),
+                                            color: _getNoteColor(
+                                              schnitt.round(),
+                                            ).withValues(alpha: 0.5),
                                           ),
                                         ),
                                         child: Text(
@@ -593,13 +726,17 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 13,
-                                            color: _getNoteColor(schnitt.round()),
+                                            color: _getNoteColor(
+                                              schnitt.round(),
+                                            ),
                                           ),
                                         ),
                                       )
                                     : Text(
                                         '-',
-                                        style: TextStyle(color: Colors.grey[400]),
+                                        style: TextStyle(
+                                          color: Colors.grey[400],
+                                        ),
                                       ),
                               ),
                             );
@@ -607,50 +744,76 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                           // Gesamt-Durchschnitt
                           Container(
                             width: 70,
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
                             alignment: Alignment.center,
                             child: studentGesamtSchnitte[student.id] != null
                                 ? Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: _getNoteColor(studentGesamtSchnitte[student.id]!.round())
-                                          .withValues(alpha: 0.2),
+                                      color: _getNoteColor(
+                                        studentGesamtSchnitte[student.id]!
+                                            .round(),
+                                      ).withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                        color: _getNoteColor(studentGesamtSchnitte[student.id]!.round()),
+                                        color: _getNoteColor(
+                                          studentGesamtSchnitte[student.id]!
+                                              .round(),
+                                        ),
                                         width: 2,
                                       ),
                                     ),
                                     child: Text(
-                                      studentGesamtSchnitte[student.id]!.toStringAsFixed(1),
+                                      studentGesamtSchnitte[student.id]!
+                                          .toStringAsFixed(1),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
-                                        color: _getNoteColor(studentGesamtSchnitte[student.id]!.round()),
+                                        color: _getNoteColor(
+                                          studentGesamtSchnitte[student.id]!
+                                              .round(),
+                                        ),
                                       ),
                                     ),
                                   )
-                                : Text('-', style: TextStyle(color: Colors.grey[400])),
+                                : Text(
+                                    '-',
+                                    style: TextStyle(color: Colors.grey[400]),
+                                  ),
                           ),
                         ],
                       ),
                     );
                   }),
-                  
+
                   // Footer mit Klassen-Durchschnitten
                   Container(
                     decoration: BoxDecoration(
                       color: RBSColors.paper,
-                      border: Border(top: BorderSide(color: Colors.grey[400]!, width: 2)),
+                      border: Border(
+                        top: BorderSide(color: Colors.grey[400]!, width: 2),
+                      ),
                     ),
                     child: Row(
                       children: [
                         Container(
                           width: 170,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
                           child: const Text(
                             '⌀ Klasse',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                         ...sortedSubjectIds.map((subjectId) {
@@ -660,27 +823,39 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                               .cast<double>()
                               .toList();
                           final klassenSchnitt = schnitte.isNotEmpty
-                              ? schnitte.reduce((a, b) => a + b) / schnitte.length
+                              ? schnitte.reduce((a, b) => a + b) /
+                                    schnitte.length
                               : null;
-                          
+
                           return Container(
                             width: fachSpaltenBreite,
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 4,
+                            ),
                             alignment: Alignment.center,
                             child: klassenSchnitt != null
                                 ? Text(
                                     klassenSchnitt.toStringAsFixed(2),
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: _getNoteColor(klassenSchnitt.round()),
+                                      color: _getNoteColor(
+                                        klassenSchnitt.round(),
+                                      ),
                                     ),
                                   )
-                                : Text('-', style: TextStyle(color: Colors.grey[400])),
+                                : Text(
+                                    '-',
+                                    style: TextStyle(color: Colors.grey[400]),
+                                  ),
                           );
                         }),
                         Container(
                           width: 70,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
                           alignment: Alignment.center,
                           child: () {
                             final alleSchnitte = studentGesamtSchnitte.values
@@ -688,17 +863,23 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                                 .cast<double>()
                                 .toList();
                             final gesamtSchnitt = alleSchnitte.isNotEmpty
-                                ? alleSchnitte.reduce((a, b) => a + b) / alleSchnitte.length
+                                ? alleSchnitte.reduce((a, b) => a + b) /
+                                      alleSchnitte.length
                                 : null;
                             return gesamtSchnitt != null
                                 ? Text(
                                     gesamtSchnitt.toStringAsFixed(2),
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: _getNoteColor(gesamtSchnitt.round()),
+                                      color: _getNoteColor(
+                                        gesamtSchnitt.round(),
+                                      ),
                                     ),
                                   )
-                                : Text('-', style: TextStyle(color: Colors.grey[400]));
+                                : Text(
+                                    '-',
+                                    style: TextStyle(color: Colors.grey[400]),
+                                  );
                           }(),
                         ),
                       ],
@@ -712,7 +893,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       ),
     );
   }
-  
+
   /// Dialog mit Detail-Ansicht eines Fachs (alle LNs)
   void _showFachDetailDialog(
     Subject? subject,
@@ -721,7 +902,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     String? highlightStudentId,
   }) {
     final fachColor = RBSColors.fromHex(subject?.color) ?? RBSColors.courtGreen;
-    
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -736,7 +917,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: fachColor.withValues(alpha: 0.1),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -759,9 +942,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                 ),
               ),
               // Noten-Tabelle
-              Expanded(
-                child: _buildNotenTable(students, leistungsnachweise),
-              ),
+              Expanded(child: _buildNotenTable(students, leistungsnachweise)),
             ],
           ),
         ),
@@ -789,9 +970,11 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         final klasseId = lnByKlasse.keys.elementAt(index);
         final klasse = klassen.where((k) => k.id == klasseId).firstOrNull;
         final klasseLN = lnByKlasse[klasseId]!;
-        
+
         // Schüler dieser Klasse
-        final klasseStudents = students.where((s) => s.klasseId == klasseId).toList();
+        final klasseStudents = students
+            .where((s) => s.klasseId == klasseId)
+            .toList();
 
         return _buildKlasseSection(klasse, klasseLN, klasseStudents);
       },
@@ -814,14 +997,13 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: RBSColors.dynamicRed.withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
             ),
             child: Text(
               klasse?.name ?? 'Unbekannte Klasse',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
           // Noten-Tabelle
@@ -847,12 +1029,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     for (final ln in leistungsnachweise) {
       lnBySubject.putIfAbsent(ln.subjectId, () => []).add(ln);
     }
-    
+
     // Berechne Gesamt-Statistik
     double gesamtSumme = 0;
     double gesamtGewichtung = 0;
     int gesamtAnzahl = 0;
-    
+
     for (final ln in leistungsnachweise) {
       final key = '${student.id}_${ln.id}';
       final eingabe = _noten[key];
@@ -863,8 +1045,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         gesamtAnzahl++;
       }
     }
-    
-    final gesamtDurchschnitt = gesamtGewichtung > 0 ? gesamtSumme / gesamtGewichtung : null;
+
+    final gesamtDurchschnitt = gesamtGewichtung > 0
+        ? gesamtSumme / gesamtGewichtung
+        : null;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -881,8 +1065,8 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                     CircleAvatar(
                       backgroundColor: RBSColors.dynamicRed,
                       child: Text(
-                        student.displayName.isNotEmpty 
-                            ? student.displayName[0].toUpperCase() 
+                        student.displayName.isNotEmpty
+                            ? student.displayName[0].toUpperCase()
                             : '?',
                         style: const TextStyle(color: Colors.white),
                       ),
@@ -901,7 +1085,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                           ),
                           Text(
                             '$gesamtAnzahl von ${leistungsnachweise.length} Noten',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
                           ),
                         ],
                       ),
@@ -909,11 +1096,19 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                     // Gesamt-Durchschnitt
                     if (gesamtDurchschnitt != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: _getNoteColor(gesamtDurchschnitt.round()).withValues(alpha: 0.15),
+                          color: _getNoteColor(
+                            gesamtDurchschnitt.round(),
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: _getNoteColor(gesamtDurchschnitt.round()), width: 2),
+                          border: Border.all(
+                            color: _getNoteColor(gesamtDurchschnitt.round()),
+                            width: 2,
+                          ),
                         ),
                         child: Column(
                           children: [
@@ -922,12 +1117,17 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
-                                color: _getNoteColor(gesamtDurchschnitt.round()),
+                                color: _getNoteColor(
+                                  gesamtDurchschnitt.round(),
+                                ),
                               ),
                             ),
                             Text(
                               'Gesamt',
-                              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
@@ -935,8 +1135,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   ],
                 ),
                 // Zusätzliche Schüler-Informationen
-                if (student.geschlecht != null || student.religion != null || 
-                    student.befreiungDeutsch || student.befreiungPuG ||
+                if (student.geschlecht != null ||
+                    student.religion != null ||
+                    student.befreiungDeutsch ||
+                    student.befreiungPuG ||
                     student.ausbildungsbetrieb != null) ...[
                   const SizedBox(height: 12),
                   const Divider(),
@@ -945,16 +1147,33 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      if (student.geschlecht != null && student.geschlecht!.isNotEmpty)
-                        _buildInfoChip(Icons.person, student.geschlecht == 'M' ? 'Männlich' : 'Weiblich'),
-                      if (student.religion != null && student.religion!.isNotEmpty)
+                      if (student.geschlecht != null &&
+                          student.geschlecht!.isNotEmpty)
+                        _buildInfoChip(
+                          Icons.person,
+                          student.geschlecht == 'M' ? 'Männlich' : 'Weiblich',
+                        ),
+                      if (student.religion != null &&
+                          student.religion!.isNotEmpty)
                         _buildInfoChip(Icons.church, student.religion!),
                       if (student.befreiungDeutsch)
-                        _buildInfoChip(Icons.block, 'Befreiung Deutsch', color: Colors.orange),
+                        _buildInfoChip(
+                          Icons.block,
+                          'Befreiung Deutsch',
+                          color: Colors.orange,
+                        ),
                       if (student.befreiungPuG)
-                        _buildInfoChip(Icons.block, 'Befreiung PuG', color: Colors.orange),
-                      if (student.ausbildungsbetrieb != null && student.ausbildungsbetrieb!.isNotEmpty)
-                        _buildInfoChip(Icons.business, student.ausbildungsbetrieb!),
+                        _buildInfoChip(
+                          Icons.block,
+                          'Befreiung PuG',
+                          color: Colors.orange,
+                        ),
+                      if (student.ausbildungsbetrieb != null &&
+                          student.ausbildungsbetrieb!.isNotEmpty)
+                        _buildInfoChip(
+                          Icons.business,
+                          student.ausbildungsbetrieb!,
+                        ),
                     ],
                   ),
                 ],
@@ -963,7 +1182,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Fächer mit Noten
         ...lnBySubject.entries.map((entry) {
           final subject = subjects.where((s) => s.id == entry.key).firstOrNull;
@@ -982,7 +1201,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     double summe = 0;
     double gewichtungsSumme = 0;
     int anzahl = 0;
-    
+
     for (final ln in leistungsnachweise) {
       final key = '${student.id}_${ln.id}';
       final eingabe = _noten[key];
@@ -993,7 +1212,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         anzahl++;
       }
     }
-    
+
     final durchschnitt = gewichtungsSumme > 0 ? summe / gewichtungsSumme : null;
 
     return Card(
@@ -1006,7 +1225,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: RBSColors.courtGreen.withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
             ),
             child: Row(
               children: [
@@ -1019,11 +1240,18 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                 // Durchschnitt Badge
                 if (durchschnitt != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: _getNoteColor(durchschnitt.round()).withValues(alpha: 0.15),
+                      color: _getNoteColor(
+                        durchschnitt.round(),
+                      ).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _getNoteColor(durchschnitt.round())),
+                      border: Border.all(
+                        color: _getNoteColor(durchschnitt.round()),
+                      ),
                     ),
                     child: Text(
                       '⌀ ${durchschnitt.toStringAsFixed(2)}',
@@ -1115,19 +1343,24 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       final noten = <double>[];
       int count = 0;
       final verteilung = <int, int>{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
-      
+
       for (final student in students) {
         final key = '${student.id}_${ln.id}';
         final eingabe = _noten[key];
         if (eingabe?.note != null) {
-          final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+          final noteValue = _getNoteWithTendenz(
+            eingabe!.note!,
+            eingabe.tendenz,
+          );
           noten.add(noteValue);
           count++;
           verteilung[eingabe.note!] = (verteilung[eingabe.note!] ?? 0) + 1;
         }
       }
-      
-      final durchschnitt = noten.isEmpty ? null : noten.reduce((a, b) => a + b) / noten.length;
+
+      final durchschnitt = noten.isEmpty
+          ? null
+          : noten.reduce((a, b) => a + b) / noten.length;
       lnStats[ln.id] = _LNStatistik(
         durchschnitt: durchschnitt,
         anzahl: count,
@@ -1135,25 +1368,28 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         verteilung: verteilung,
       );
     }
-    
+
     // Berechne Schüler-Durchschnitte
     final studentStats = <String, double?>{};
     for (final student in students) {
       final noten = <double>[];
       double gewichtungsSumme = 0;
-      
+
       for (final ln in leistungsnachweise) {
         final key = '${student.id}_${ln.id}';
         final eingabe = _noten[key];
         if (eingabe?.note != null) {
-          final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
+          final noteValue = _getNoteWithTendenz(
+            eingabe!.note!,
+            eingabe.tendenz,
+          );
           noten.add(noteValue * ln.gewichtung);
           gewichtungsSumme += ln.gewichtung;
         }
       }
-      
-      studentStats[student.id] = gewichtungsSumme > 0 
-          ? noten.reduce((a, b) => a + b) / gewichtungsSumme 
+
+      studentStats[student.id] = gewichtungsSumme > 0
+          ? noten.reduce((a, b) => a + b) / gewichtungsSumme
           : null;
     }
 
@@ -1176,90 +1412,132 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   const DataColumn(
                     label: SizedBox(
                       width: 140,
-                      child: Text('Schüler', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  ...leistungsnachweise.map((ln) => DataColumn(
-                    label: SizedBox(
-                      width: 110,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            ln.bezeichnung,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                          ),
-                          Text(
-                            '${ln.typ.label} ${ln.gewichtung}x',
-                            style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                          ),
-                        ],
+                      child: Text(
+                        'Schüler',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                  )),
+                  ),
+                  ...leistungsnachweise.map(
+                    (ln) => DataColumn(
+                      label: SizedBox(
+                        width: 110,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ln.bezeichnung,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                            ),
+                            Text(
+                              '${ln.typ.label} ${ln.gewichtung}x',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   // Spalte für Schüler-Durchschnitt
                   const DataColumn(
                     label: SizedBox(
                       width: 70,
-                      child: Text('⌀', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      child: Text(
+                        '⌀',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 ],
-                rows: students.map((student) => DataRow(
-                  cells: [
-                    DataCell(
-                      SizedBox(
-                        width: 140,
-                        child: Text(
-                          student.displayName,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    ...leistungsnachweise.map((ln) {
-                      final key = '${student.id}_${ln.id}';
-                      final eingabe = _noten[key];
-                      if (eingabe == null) return const DataCell(Text('-'));
-
-                      return DataCell(
-                        SizedBox(
-                          width: 110,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildCompactNoteDropdown(key, eingabe, student.id, ln.id),
-                              const SizedBox(width: 4),
-                              _buildCompactTendenzButtons(key, eingabe, student.id, ln.id),
-                            ],
+                rows: students
+                    .map(
+                      (student) => DataRow(
+                        cells: [
+                          DataCell(
+                            SizedBox(
+                              width: 140,
+                              child: Text(
+                                student.displayName,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ),
-                        ),
-                      );
-                    }),
-                    // Schüler-Durchschnitt
-                    DataCell(
-                      SizedBox(
-                        width: 70,
-                        child: studentStats[student.id] != null
-                            ? Text(
-                                studentStats[student.id]!.toStringAsFixed(1),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: _getNoteColor(studentStats[student.id]!.round()),
+                          ...leistungsnachweise.map((ln) {
+                            final key = '${student.id}_${ln.id}';
+                            final eingabe = _noten[key];
+                            if (eingabe == null)
+                              return const DataCell(Text('-'));
+
+                            return DataCell(
+                              SizedBox(
+                                width: 110,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildCompactNoteDropdown(
+                                      key,
+                                      eingabe,
+                                      student.id,
+                                      ln.id,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    _buildCompactTendenzButtons(
+                                      key,
+                                      eingabe,
+                                      student.id,
+                                      ln.id,
+                                    ),
+                                  ],
                                 ),
-                              )
-                            : const Text('-', style: TextStyle(color: Colors.grey)),
+                              ),
+                            );
+                          }),
+                          // Schüler-Durchschnitt
+                          DataCell(
+                            SizedBox(
+                              width: 70,
+                              child: studentStats[student.id] != null
+                                  ? Text(
+                                      studentStats[student.id]!.toStringAsFixed(
+                                        1,
+                                      ),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: _getNoteColor(
+                                          studentStats[student.id]!.round(),
+                                        ),
+                                      ),
+                                    )
+                                  : const Text(
+                                      '-',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                )).toList(),
+                    )
+                    .toList(),
               ),
-              
+
               // Statistik-Footer
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: RBSColors.paper,
                   border: Border(top: BorderSide(color: Colors.grey[300]!)),
@@ -1272,8 +1550,20 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('⌀ Durchschnitt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                          Text('Eingetragen', style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                          const Text(
+                            '⌀ Durchschnitt',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            'Eingetragen',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[600],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -1287,20 +1577,25 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              stats?.durchschnitt != null 
+                              stats?.durchschnitt != null
                                   ? stats!.durchschnitt!.toStringAsFixed(2)
                                   : '-',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: stats?.durchschnitt != null 
-                                    ? _getNoteColor(stats!.durchschnitt!.round())
+                                color: stats?.durchschnitt != null
+                                    ? _getNoteColor(
+                                        stats!.durchschnitt!.round(),
+                                      )
                                     : Colors.grey,
                               ),
                             ),
                             Text(
                               '${stats?.anzahl ?? 0}/${stats?.gesamt ?? 0}',
-                              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
@@ -1314,10 +1609,13 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   ],
                 ),
               ),
-              
+
               // Notenverteilung
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey[50],
                   border: Border(top: BorderSide(color: Colors.grey[200]!)),
@@ -1326,7 +1624,13 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                   children: [
                     const SizedBox(
                       width: 140,
-                      child: Text('Verteilung', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+                      child: Text(
+                        'Verteilung',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     ...leistungsnachweise.map((ln) {
@@ -1336,7 +1640,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                         child: _buildVerteilungChips(stats?.verteilung ?? {}),
                       );
                     }),
-                    const SizedBox(width: 70), // Platzhalter für Durchschnitt-Spalte
+                    const SizedBox(
+                      width: 70,
+                    ), // Platzhalter für Durchschnitt-Spalte
                   ],
                 ),
               ),
@@ -1367,14 +1673,18 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     return Wrap(
       spacing: 2,
       runSpacing: 2,
-      children: [1, 2, 3, 4, 5, 6].where((n) => (verteilung[n] ?? 0) > 0).map((note) {
+      children: [1, 2, 3, 4, 5, 6].where((n) => (verteilung[n] ?? 0) > 0).map((
+        note,
+      ) {
         final count = verteilung[note] ?? 0;
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
           decoration: BoxDecoration(
             color: _getNoteColor(note).withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: _getNoteColor(note).withValues(alpha: 0.3)),
+            border: Border.all(
+              color: _getNoteColor(note).withValues(alpha: 0.3),
+            ),
           ),
           child: Text(
             '$note:$count',
@@ -1400,7 +1710,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     }
   }
 
-  Widget _buildNoteDropdown(String key, _NotenEingabe eingabe, String studentId, String lnId) {
+  Widget _buildNoteDropdown(
+    String key,
+    _NotenEingabe eingabe,
+    String studentId,
+    String lnId,
+  ) {
     return SizedBox(
       width: 60,
       child: Stack(
@@ -1447,7 +1762,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     );
   }
 
-  Widget _buildCompactNoteDropdown(String key, _NotenEingabe eingabe, String studentId, String lnId) {
+  Widget _buildCompactNoteDropdown(
+    String key,
+    _NotenEingabe eingabe,
+    String studentId,
+    String lnId,
+  ) {
     return SizedBox(
       width: 45,
       height: 32,
@@ -1466,7 +1786,10 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
               iconSize: 16,
               style: const TextStyle(fontSize: 14),
               items: [
-                const DropdownMenuItem<int?>(value: null, child: Text('-', style: TextStyle(color: Colors.black))),
+                const DropdownMenuItem<int?>(
+                  value: null,
+                  child: Text('-', style: TextStyle(color: Colors.black)),
+                ),
                 ...List.generate(6, (i) => i + 1).map(
                   (note) => DropdownMenuItem<int>(
                     value: note,
@@ -1497,7 +1820,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     );
   }
 
-  Widget _buildTendenzButtons(String key, _NotenEingabe eingabe, String studentId, String lnId) {
+  Widget _buildTendenzButtons(
+    String key,
+    _NotenEingabe eingabe,
+    String studentId,
+    String lnId,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1510,18 +1838,51 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     );
   }
 
-  Widget _buildCompactTendenzButtons(String key, _NotenEingabe eingabe, String studentId, String lnId) {
+  Widget _buildCompactTendenzButtons(
+    String key,
+    _NotenEingabe eingabe,
+    String studentId,
+    String lnId,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildCompactTendenzButton(key, eingabe, studentId, lnId, Tendenz.plus, '+'),
-        _buildCompactTendenzButton(key, eingabe, studentId, lnId, Tendenz.keine, '·'),
-        _buildCompactTendenzButton(key, eingabe, studentId, lnId, Tendenz.minus, '-'),
+        _buildCompactTendenzButton(
+          key,
+          eingabe,
+          studentId,
+          lnId,
+          Tendenz.plus,
+          '+',
+        ),
+        _buildCompactTendenzButton(
+          key,
+          eingabe,
+          studentId,
+          lnId,
+          Tendenz.keine,
+          '·',
+        ),
+        _buildCompactTendenzButton(
+          key,
+          eingabe,
+          studentId,
+          lnId,
+          Tendenz.minus,
+          '-',
+        ),
       ],
     );
   }
 
-  Widget _buildTendenzButton(String key, _NotenEingabe eingabe, String studentId, String lnId, Tendenz tendenz, String label) {
+  Widget _buildTendenzButton(
+    String key,
+    _NotenEingabe eingabe,
+    String studentId,
+    String lnId,
+    Tendenz tendenz,
+    String label,
+  ) {
     final isSelected = eingabe.tendenz == tendenz;
     return InkWell(
       onTap: () => _updateTendenz(key, studentId, lnId, tendenz),
@@ -1546,7 +1907,14 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     );
   }
 
-  Widget _buildCompactTendenzButton(String key, _NotenEingabe eingabe, String studentId, String lnId, Tendenz tendenz, String label) {
+  Widget _buildCompactTendenzButton(
+    String key,
+    _NotenEingabe eingabe,
+    String studentId,
+    String lnId,
+    Tendenz tendenz,
+    String label,
+  ) {
     final isSelected = eingabe.tendenz == tendenz;
     return InkWell(
       onTap: () => _updateTendenz(key, studentId, lnId, tendenz),
@@ -1578,7 +1946,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     _saveGrade(key, studentId, lnId);
   }
 
-  void _updateTendenz(String key, String studentId, String lnId, Tendenz tendenz) {
+  void _updateTendenz(
+    String key,
+    String studentId,
+    String lnId,
+    Tendenz tendenz,
+  ) {
     setState(() {
       _noten[key] = _noten[key]!.copyWith(tendenz: tendenz);
     });
@@ -1614,9 +1987,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
           await firestoreService.updateGrade(grade);
         } else {
           final newId = await firestoreService.createGrade(grade);
-          _noten[key] = eingabe.copyWith(existingGradeId: newId, updatedBy: userKuerzel);
+          _noten[key] = eingabe.copyWith(
+            existingGradeId: newId,
+            updatedBy: userKuerzel,
+          );
         }
-        
+
         // Update local state with new kuerzel
         setState(() {
           _noten[key] = _noten[key]!.copyWith(updatedBy: userKuerzel);
@@ -1649,13 +2025,20 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
 
   Color _getNoteColor(int note) {
     switch (note) {
-      case 1: return Colors.green[700]!;
-      case 2: return Colors.green;
-      case 3: return Colors.orange;
-      case 4: return Colors.orange[700]!;
-      case 5: return Colors.red;
-      case 6: return Colors.red[900]!;
-      default: return Colors.grey;
+      case 1:
+        return Colors.green[700]!;
+      case 2:
+        return Colors.green;
+      case 3:
+        return Colors.orange;
+      case 4:
+        return Colors.orange[700]!;
+      case 5:
+        return Colors.red;
+      case 6:
+        return Colors.red[900]!;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -1682,22 +2065,26 @@ class _LNStatistik {
 /// Helper Widget für Info-Chips
 Widget _buildInfoChip(IconData icon, String label, {Color? color}) {
   return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     decoration: BoxDecoration(
-      color: (color ?? Colors.grey).withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: (color ?? Colors.grey).withValues(alpha: 0.3)),
+      color: (color ?? Colors.grey).withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: (color ?? Colors.grey).withValues(alpha: 0.25)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 14, color: color ?? Colors.grey[700]),
-        const SizedBox(width: 4),
+        Icon(icon, size: 16, color: color ?? Colors.grey[700]),
+        const SizedBox(width: 6),
         Text(
-          label,
+          label.trim(),
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
             color: color ?? Colors.grey[700],
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.1,
           ),
         ),
       ],

@@ -1,3 +1,5 @@
+// InduScore Entwicklungsstand 0.11.3 - 10.12.2025
+// UI optimiert, Chips zentriert, LN-Hinweis verbessert
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';

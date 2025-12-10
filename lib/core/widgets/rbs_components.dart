@@ -73,10 +73,7 @@ class RBSTag extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: isLight ? tagColor : tagColor.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
@@ -85,11 +82,7 @@ class RBSTag extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(
-                  icon,
-                  size: 14,
-                  color: isLight ? Colors.white : tagColor,
-                ),
+                Icon(icon, size: 14, color: isLight ? Colors.white : tagColor),
                 const SizedBox(width: 4),
               ],
               Text(
@@ -255,16 +248,13 @@ class RBSFilterChip extends StatelessWidget {
     return FilterChip(
       label: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              size: 16,
-              color: selected ? Colors.white : chipColor,
-            ),
+            Icon(icon, size: 16, color: selected ? Colors.white : chipColor),
             const SizedBox(width: 4),
           ],
-          Text(label),
+          Text(label.trim(), textAlign: TextAlign.center),
         ],
       ),
       selected: selected,
@@ -276,13 +266,8 @@ class RBSFilterChip extends StatelessWidget {
       labelStyle: RBSTypography.tag.copyWith(
         color: selected ? Colors.white : chipColor,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 }
@@ -312,16 +297,13 @@ class RBSActionChip extends StatelessWidget {
     return ActionChip(
       label: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              size: 16,
-              color: filled ? Colors.white : chipColor,
-            ),
+            Icon(icon, size: 16, color: filled ? Colors.white : chipColor),
             const SizedBox(width: 4),
           ],
-          Text(label),
+          Text(label.trim(), textAlign: TextAlign.center),
         ],
       ),
       onPressed: onPressed,
@@ -330,13 +312,8 @@ class RBSActionChip extends StatelessWidget {
       labelStyle: RBSTypography.tag.copyWith(
         color: filled ? Colors.white : chipColor,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 }
@@ -362,7 +339,7 @@ class RBSChoiceChip extends StatelessWidget {
     final chipColor = color ?? RBSColors.dynamicRed;
 
     return ChoiceChip(
-      label: Text(label),
+      label: Text(label.trim(), textAlign: TextAlign.center),
       selected: selected,
       onSelected: onSelected,
       showCheckmark: false,
@@ -372,13 +349,8 @@ class RBSChoiceChip extends StatelessWidget {
       labelStyle: RBSTypography.tag.copyWith(
         color: selected ? Colors.white : chipColor,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 }

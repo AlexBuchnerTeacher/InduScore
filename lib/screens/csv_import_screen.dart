@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:web/web.dart' as web;
@@ -628,8 +629,14 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
 
   void _analyzeFile(Uint8List bytes, String fileName) {
     try {
-      // Zuerst als String dekodieren für ASV-Prüfung
-      final content = String.fromCharCodes(bytes);
+      // Zuerst als UTF-8 String dekodieren für ASV-Prüfung
+      // Fallback auf Latin1 wenn UTF-8 fehlschlägt
+      String content;
+      try {
+        content = utf8.decode(bytes);
+      } catch (_) {
+        content = latin1.decode(bytes);
+      }
       final lines = content.split('\n').where((l) => l.trim().isNotEmpty).toList();
       
       if (lines.isNotEmpty) {
