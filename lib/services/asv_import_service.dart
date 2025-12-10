@@ -268,38 +268,54 @@ class AsvImportService {
             stats.faecherNeu++;
           }
 
-          // Lehrer-Kürzel aus dem Kürzel-Feld finden
-          String? lehrerKuerzel;
-          for (final entry in lehrerKuerzelMap.entries) {
-            if (entry.value.contains(info.fachKuerzel)) {
-              lehrerKuerzel = entry.key;
-              break;
-            }
-          }
-
-          // Lehrer anlegen/finden
+          // Lehrer anlegen/finden basierend auf Nachnamen
+          // Da das Kürzel-Feld keine eindeutige Zuordnung zum Nachnamen erlaubt,
+          // verwenden wir den Nachnamen in Großbuchstaben als provisorisches Kürzel
+          final lehrerNachname = info.lehrerName;
+          final provisorischesKuerzel = lehrerNachname.toUpperCase().substring(0, lehrerNachname.length > 3 ? 3 : lehrerNachname.length);
+          
+          // Suche nach existierendem Lehrer mit diesem Namen oder Kürzel
           AppUser? lehrer;
-          if (lehrerKuerzel != null) {
-            if (usersByKuerzel.containsKey(lehrerKuerzel)) {
-              lehrer = usersByKuerzel[lehrerKuerzel]!;
-            } else if (newUsers.containsKey(lehrerKuerzel)) {
-              lehrer = newUsers[lehrerKuerzel]!;
-            } else {
-              // Neuen Lehrer anlegen
-              lehrer = AppUser(
-                id: '',
-                email: '${lehrerKuerzel.toLowerCase()}@schule.de', // Placeholder
-                name: info.lehrerName,
-                kuerzel: lehrerKuerzel,
-                rolle: UserRole.lehrer,
-                createdAt: DateTime.now(),
-              );
-              final newId = await _firestoreService.createAppUser(lehrer);
-              lehrer = lehrer.copyWith(id: newId);
-              newUsers[lehrerKuerzel] = lehrer;
-              usersByKuerzel[lehrerKuerzel] = lehrer;
-              stats.lehrerNeu++;
+          
+          // Erst nach Namen suchen
+          final existingByName = usersByKuerzel.values.where((u) => 
+            u.name.toLowerCase() == lehrerNachname.toLowerCase() ||
+            u.name.toLowerCase().contains(lehrerNachname.toLowerCase())
+          ).firstOrNull;
+          
+          if (existingByName != null) {
+            lehrer = existingByName;
+          } else if (newUsers.values.any((u) => u.name.toLowerCase() == lehrerNachname.toLowerCase())) {
+            lehrer = newUsers.values.firstWhere((u) => u.name.toLowerCase() == lehrerNachname.toLowerCase());
+          } else {
+            // Neuen Lehrer anlegen mit Nachnamen als Name und provisorischem Kürzel
+            // Versuche das echte Kürzel aus dem Kürzel-Feld zu finden
+            String? echtesKuerzel;
+            for (final entry in lehrerKuerzelMap.entries) {
+              if (entry.value.contains(info.fachKuerzel)) {
+                // Prüfe ob dieses Kürzel schon einem anderen Lehrer zugeordnet wurde
+                if (!newUsers.containsKey(entry.key) && !usersByKuerzel.containsKey(entry.key)) {
+                  echtesKuerzel = entry.key;
+                  break;
+                }
+              }
             }
+            
+            final kuerzelToUse = echtesKuerzel ?? provisorischesKuerzel;
+            
+            lehrer = AppUser(
+              id: '',
+              email: '${kuerzelToUse.toLowerCase()}@schule.de', // Placeholder
+              name: lehrerNachname,
+              kuerzel: kuerzelToUse,
+              rolle: UserRole.lehrer,
+              createdAt: DateTime.now(),
+            );
+            final newId = await _firestoreService.createAppUser(lehrer);
+            lehrer = lehrer.copyWith(id: newId);
+            newUsers[kuerzelToUse] = lehrer;
+            usersByKuerzel[kuerzelToUse] = lehrer;
+            stats.lehrerNeu++;
           }
         }
 
@@ -375,15 +391,14 @@ class AsvImportService {
         for (final info in unterrichtInfos) {
           final subject = subjectsByKuerzel[info.fachKuerzel];
           
-          // Lehrer finden
-          String? lehrerKuerzel;
-          for (final entry in lehrerKuerzelMap.entries) {
-            if (entry.value.contains(info.fachKuerzel)) {
-              lehrerKuerzel = entry.key;
-              break;
-            }
-          }
-          final lehrer = lehrerKuerzel != null ? usersByKuerzel[lehrerKuerzel] : null;
+          // Lehrer finden über Nachnamen
+          final lehrerNachname = info.lehrerName.toLowerCase();
+          final lehrer = usersByKuerzel.values.where((u) => 
+            u.name.toLowerCase() == lehrerNachname ||
+            u.name.toLowerCase().contains(lehrerNachname)
+          ).firstOrNull ?? newUsers.values.where((u) => 
+            u.name.toLowerCase() == lehrerNachname
+          ).firstOrNull;
 
           if (subject != null && lehrer != null) {
             unterrichtToCreate.add(SchuelerUnterricht(
