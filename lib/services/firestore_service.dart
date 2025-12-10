@@ -6,6 +6,7 @@ import '../models/klasse.dart';
 import '../models/leistungsnachweis.dart';
 import '../models/ln_exemption.dart';
 import '../models/app_user.dart';
+import '../models/schueler_unterricht.dart';
 
 /// Ergebnis eines Schüler-Merge-Vorgangs
 class MergeResult {
@@ -668,5 +669,133 @@ class FirestoreService {
       return snapshot.docs.any((doc) => doc.id != excludeUserId);
     }
     return snapshot.docs.isNotEmpty;
+  }
+
+  // ============ SCHUELER-UNTERRICHT (Beziehungen) ============
+
+  CollectionReference get _schuelerUnterricht => _db.collection('schueler_unterricht');
+
+  /// Alle Unterrichts-Beziehungen abrufen
+  Stream<List<SchuelerUnterricht>> getSchuelerUnterricht() {
+    return _schuelerUnterricht
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+            .toList());
+  }
+
+  /// Unterricht nach Schüler
+  Stream<List<SchuelerUnterricht>> getUnterrichtByStudent(String studentId) {
+    return _schuelerUnterricht
+        .where('studentId', isEqualTo: studentId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+            .toList());
+  }
+
+  /// Unterricht nach Lehrer
+  Stream<List<SchuelerUnterricht>> getUnterrichtByLehrer(String lehrerId) {
+    return _schuelerUnterricht
+        .where('lehrerId', isEqualTo: lehrerId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+            .toList());
+  }
+
+  /// Neue Unterrichts-Beziehung erstellen
+  Future<String> createSchuelerUnterricht(SchuelerUnterricht unterricht) async {
+    final docRef = await _schuelerUnterricht.add(unterricht.toFirestore());
+    return docRef.id;
+  }
+
+  /// Unterrichts-Beziehung löschen
+  Future<void> deleteSchuelerUnterricht(String id) async {
+    await _schuelerUnterricht.doc(id).delete();
+  }
+
+  /// Alle Beziehungen eines Schülers löschen
+  Future<void> deleteUnterrichtByStudent(String studentId) async {
+    final snapshot = await _schuelerUnterricht
+        .where('studentId', isEqualTo: studentId)
+        .get();
+    final batch = _db.batch();
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
+
+  // ============ ONCE-METHODEN (für Import) ============
+
+  /// Alle Klassen einmalig abrufen (nicht als Stream)
+  Future<List<Klasse>> getKlassenOnce() async {
+    final snapshot = await _klassen.get();
+    return snapshot.docs.map((doc) => Klasse.fromFirestore(doc)).toList();
+  }
+
+  /// Alle Fächer einmalig abrufen
+  Future<List<Subject>> getSubjectsOnce() async {
+    final snapshot = await _subjects.get();
+    return snapshot.docs.map((doc) => Subject.fromFirestore(doc)).toList();
+  }
+
+  /// Alle AppUser einmalig abrufen
+  Future<List<AppUser>> getAppUsersOnce() async {
+    final snapshot = await _appUsers.get();
+    return snapshot.docs.map((doc) => AppUser.fromFirestore(doc)).toList();
+  }
+
+  /// Alle Schüler einmalig abrufen
+  Future<List<Student>> getStudentsOnce() async {
+    final snapshot = await _students.get();
+    return snapshot.docs.map((doc) => Student.fromFirestore(doc)).toList();
+  }
+
+  /// Alle Unterrichts-Beziehungen einmalig abrufen
+  Future<List<SchuelerUnterricht>> getSchuelerUnterrichtOnce() async {
+    final snapshot = await _schuelerUnterricht.get();
+    return snapshot.docs.map((doc) => SchuelerUnterricht.fromFirestore(doc)).toList();
+  }
+
+  /// Schüler nach ASV-ID suchen
+  Future<Student?> getStudentByAsvId(String asvId) async {
+    final snapshot = await _students
+        .where('asvId', isEqualTo: asvId)
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) return null;
+    return Student.fromFirestore(snapshot.docs.first);
+  }
+
+  /// Lehrer nach Kürzel suchen
+  Future<AppUser?> getAppUserByKuerzel(String kuerzel) async {
+    final snapshot = await _appUsers
+        .where('kuerzel', isEqualTo: kuerzel.toUpperCase())
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) return null;
+    return AppUser.fromFirestore(snapshot.docs.first);
+  }
+
+  /// Fach nach Kürzel suchen
+  Future<Subject?> getSubjectByKuerzel(String kuerzel) async {
+    final snapshot = await _subjects
+        .where('kuerzel', isEqualTo: kuerzel)
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) return null;
+    return Subject.fromFirestore(snapshot.docs.first);
+  }
+
+  /// Klasse nach Name suchen
+  Future<Klasse?> getKlasseByName(String name) async {
+    final snapshot = await _klassen
+        .where('name', isEqualTo: name)
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) return null;
+    return Klasse.fromFirestore(snapshot.docs.first);
   }
 }
