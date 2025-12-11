@@ -111,7 +111,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final fachColWidth = 110.0; // Changed from const to allow hot reload
+    final fachColWidth = 120.0; // 120 - 8 (padding) = 112px für EditableNoteCell (>101px benötigt)
 
     return Column(
       children: [
@@ -500,7 +500,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final lnColWidth = 110.0; // Match byKlasse width for consistency
+    final lnColWidth = 120.0; // Match byKlasse for consistency
 
     return Column(
       children: [
