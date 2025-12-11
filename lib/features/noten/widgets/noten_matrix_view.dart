@@ -347,6 +347,10 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
   }
 
   Widget _buildBefreiungBadge(Student student) {
+    final kuerzel = <String>[];
+    if (student.befreiungDeutsch) kuerzel.add('D');
+    if (student.befreiungPuG) kuerzel.add('PuG');
+    
     return Tooltip(
       message: [
         if (student.befreiungDeutsch) 'Befreiung Deutsch',
@@ -360,7 +364,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
-          'B',
+          kuerzel.join(', '),
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
@@ -376,6 +380,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     required Leistungsnachweis ln,
     required double width,
   }) {
+    // Suche Grade - entweder aus widget.grades oder aus lokalem State
     final grade = widget.grades
         .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
         .firstOrNull;
@@ -385,6 +390,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       padding: const EdgeInsets.all(4),
       alignment: Alignment.center,
       child: EditableNoteCell(
+        key: ValueKey('${student.id}_${ln.id}'),
         studentId: student.id,
         leistungsnachweisId: ln.id,
         note: grade?.note,

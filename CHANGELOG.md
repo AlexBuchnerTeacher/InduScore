@@ -6,7 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.11.0] - 2025-12-10
+## [0.12.0] - 2025-12-11
+
+### Added
+- **Feature-based Architektur**: Neue Ordnerstruktur `lib/features/` für bessere Wartbarkeit
+- **NotenMatrixView**: Universelle Matrix-Komponente für alle Noten-Ansichten
+  - 3 Modi: byKlasse, bySchueler, byLN (aktuell byKlasse vollständig)
+  - Horizontal scrollbare Fächer (nebeneinander)
+  - Sticky left column (Schüler-Namen)
+  - Inline-Editing mit direktem Firebase-Update
+  - EditableNoteCell mit Tendenz-Buttons
+- **Klassen-Detail Screen**: Neue Matrix-Ansicht für Klassen
+  - Filter nach Fach und LN-Typ
+  - Durchschnitte (Fach + Gesamt + Klasse)
+  - Cross-Linking vorbereitet
+
+### Changed
+- **Coding Guidelines umgesetzt**: Single Responsibility, max 300 Zeilen pro File
+- **Logik ausgelagert**: `noten_matrix_logic.dart` für Business Logic
+- **Controller getrennt**: `noten_matrix_controller.dart` für UI-State
+- **Befreiungs-Badge**: Zeigt jetzt Fach-Kürzel (D, PuG) statt generisches "B"
+
+### Fixed
+- Type-Cast Fehler bei Filter-Listen (`List<dynamic>` → `List<String>`)
+- updatedBy wird korrekt gespeichert (Stream-Provider aktualisiert automatisch)
+
+
+## [0.11.3] - 2025-12-10
 
 ### Added
 - **ASV-Import mit Beziehungen** (Issue #36)

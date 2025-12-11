@@ -4,14 +4,25 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.10.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.12.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
 
-## Features (v0.10.0)
+## Features (v0.12.0)
 
-### Neu in v0.10.0
+### Neu in v0.12.0
+- **Feature-based Architektur**: Saubere Code-Struktur nach Coding Guidelines
+- **NotenMatrixView**: Universelle Matrix-Komponente mit 3 Modi
+- **Klassen-Detail**: Neue horizontal scrollbare Matrix-Ansicht
+- **Inline-Editing**: Direkte Noten-Änderung in der Tabelle
+- **Befreiungs-Anzeige**: Fach-Kürzel (D, PuG) statt "B"
+
+### Neu in v0.11.3
+- **UI-Optimierungen**: Filter-Chips zentriert, verbesserter LN-Hinweis
+- **Code-Qualität**: Alle Lint-Warnungen behoben
+
+### Neu in v0.11.0
 - **Zeitgruppen-Filter (ZG-Filter)**: Globaler Filter im Drawer für ZG1/ZG2/ZG3
 - **Nachschreiber-Dashboard**: Übersicht mit 3 Eskalationsstufen (≤2d, ≤2w, >2w)
 - **LN-Befreiungen**: Schüler als "nicht relevant" markieren (Swipe-Geste)

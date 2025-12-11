@@ -180,7 +180,7 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
   Widget _buildKlasseCard(BuildContext context, Klasse klasse) {
     return RBSCard(
       child: ListTile(
-        onTap: () => context.go('/noten/klasse/${klasse.id}'),
+        onTap: () => context.go('/klassen/${klasse.id}'),
         leading: CircleAvatar(
           backgroundColor: _getBerufColor(klasse.beruf),
           child: Text(

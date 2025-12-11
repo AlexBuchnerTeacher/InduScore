@@ -20,6 +20,8 @@ import 'screens/noten_uebersicht_screen.dart';
 import 'screens/noi_export_screen.dart';
 import 'screens/csv_import_screen.dart';
 import 'screens/user_verwaltung_screen.dart';
+import 'screens/test_matrix_screen.dart';
+import 'features/klassen/klassen_detail_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -88,6 +90,12 @@ final _router = GoRouter(
       builder: (context, state) => const KlassenScreen(),
     ),
     GoRoute(
+      path: '/klassen/:id',
+      builder: (context, state) => KlassenDetailScreen(
+        klasseId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
       path: '/faecher',
       builder: (context, state) => const FaecherScreen(),
     ),
@@ -139,6 +147,13 @@ final _router = GoRouter(
     GoRoute(
       path: '/einstellungen/benutzer',
       builder: (context, state) => const UserVerwaltungScreen(),
+    ),
+    // TEST: Matrix View (Development only)
+    GoRoute(
+      path: '/test-matrix',
+      builder: (context, state) => TestMatrixScreen(
+        klasseId: state.uri.queryParameters['klasseId'],
+      ),
     ),
   ],
 );
