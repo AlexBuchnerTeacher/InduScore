@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
-import '../../../models/beruf.dart';
 import '../../../models/klasse.dart';
 
 /// Einzelner Klassen-Chip

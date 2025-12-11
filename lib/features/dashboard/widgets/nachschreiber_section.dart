@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../providers/app_providers.dart';
-import '../../../models/nachschreiber.dart';
 
 /// Nachschreiber-Section mit Stufen-Gruppierung
 class NachschreiberSection extends ConsumerWidget {
