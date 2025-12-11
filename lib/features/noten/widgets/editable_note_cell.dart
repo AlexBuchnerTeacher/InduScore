@@ -154,25 +154,28 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell> {
   }
 
   Widget _buildTendenzButtons() {
+    final buttonSize = widget.compact ? 18.0 : 28.0;
+    final spacing = widget.compact ? 1.0 : 2.0;
+    
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildTendenzButton(Tendenz.plus, '+'),
-        const SizedBox(width: 2),
-        _buildTendenzButton(Tendenz.keine, '·'),
-        const SizedBox(width: 2),
-        _buildTendenzButton(Tendenz.minus, '-'),
+        _buildTendenzButton(Tendenz.plus, '+', buttonSize),
+        SizedBox(width: spacing),
+        _buildTendenzButton(Tendenz.keine, '·', buttonSize),
+        SizedBox(width: spacing),
+        _buildTendenzButton(Tendenz.minus, '-', buttonSize),
       ],
     );
   }
 
-  Widget _buildTendenzButton(Tendenz tendenz, String label) {
+  Widget _buildTendenzButton(Tendenz tendenz, String label, double size) {
     final isSelected = widget.tendenz == tendenz;
     return InkWell(
       onTap: () => widget.onTendenzChanged(tendenz),
       child: Container(
-        width: 28,
-        height: 28,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: isSelected ? RBSColors.dynamicRed : Colors.grey[200],
           borderRadius: BorderRadius.circular(4),

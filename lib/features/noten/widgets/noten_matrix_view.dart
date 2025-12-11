@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../models/grade.dart';
 import '../../../models/klasse.dart';
@@ -110,7 +111,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    const fachColWidth = 90.0;
+    const fachColWidth = 110.0; // Increased for dropdown (45px) + tendenz buttons (3×18+2×1=56px)
 
     return Column(
       children: [
@@ -1053,10 +1054,10 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
   Future<void> _handleNoteChange(String studentId, String lnId, int? note) async {
     final firestoreService = ref.read(firestoreServiceProvider);
-    final user = ref.read(currentUserProvider);
-    final userKuerzel = NotenMatrixLogic.getUserKuerzel(user?.email);
+    final userEmail = FirebaseAuth.instance.currentUser?.email;
+    final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
 
-    print('🔍 _handleNoteChange: user=${user?.email}, kuerzel=$userKuerzel');
+    print('🔍 _handleNoteChange: user=$userEmail, kuerzel=$userKuerzel');
 
     final existingGrade = widget.grades
         .where((g) => g.studentId == studentId && g.leistungsnachweisId == lnId)
@@ -1109,8 +1110,8 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     if (existingGrade == null) return;
 
     final firestoreService = ref.read(firestoreServiceProvider);
-    final user = ref.read(currentUserProvider);
-    final userKuerzel = NotenMatrixLogic.getUserKuerzel(user?.email);
+    final userEmail = FirebaseAuth.instance.currentUser?.email;
+    final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
 
     // Optimistic update: Show userKuerzel immediately
     if (userKuerzel != null) {

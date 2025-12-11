@@ -145,13 +145,11 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
         .toList();
 
     // Verfügbare Klassen (nur ZG-gefilterte) und Typen für Filter
-    final availableKlasseIds = <String>[
-      ...filteredLN.map((ln) => ln.klasseId).toSet()
-    ];
+    final lnKlasseIds = filteredLN.map((ln) => ln.klasseId).toSet();
+    final availableKlasseIds = <String>[...lnKlasseIds];
     final availableKlassen = zgFilteredKlassen.where((k) => availableKlasseIds.contains(k.id)).toList();
-    final availableTypen = <LeistungsnachweisTyp>[
-      ...filteredLN.map((ln) => ln.typ).toSet()
-    ];
+    final lnTypen = filteredLN.map((ln) => ln.typ).toSet();
+    final availableTypen = <LeistungsnachweisTyp>[...lnTypen];
 
     if (filteredStudents.isEmpty) {
       return _buildEmptyState(
