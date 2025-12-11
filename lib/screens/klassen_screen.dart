@@ -34,6 +34,13 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: 'Menü',
+          ),
+        ),
         title: const Text('Klassenverwaltung'),
         actions: [
           // Import Button - deutlich sichtbar
@@ -180,7 +187,7 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
   Widget _buildKlasseCard(BuildContext context, Klasse klasse) {
     return RBSCard(
       child: ListTile(
-        onTap: () => context.go('/noten/klasse/${klasse.id}'),
+        onTap: () => context.go('/klassen/${klasse.id}'),
         leading: CircleAvatar(
           backgroundColor: _getBerufColor(klasse.beruf),
           child: Text(

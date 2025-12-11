@@ -1477,8 +1477,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                           ...leistungsnachweise.map((ln) {
                             final key = '${student.id}_${ln.id}';
                             final eingabe = _noten[key];
-                            if (eingabe == null)
+                            if (eingabe == null) {
                               return const DataCell(Text('-'));
+                            }
 
                             return DataCell(
                               SizedBox(

@@ -20,6 +20,11 @@ import 'screens/noten_uebersicht_screen.dart';
 import 'screens/noi_export_screen.dart';
 import 'screens/csv_import_screen.dart';
 import 'screens/user_verwaltung_screen.dart';
+import 'screens/test_matrix_screen.dart';
+import 'features/klassen/klassen_detail_screen.dart';
+import 'features/schueler/schueler_detail_screen.dart';
+import 'features/leistungsnachweise/ln_editor_screen.dart';
+import 'features/faecher/faecher_detail_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -88,16 +93,40 @@ final _router = GoRouter(
       builder: (context, state) => const KlassenScreen(),
     ),
     GoRoute(
+      path: '/klassen/:id',
+      builder: (context, state) => KlassenDetailScreen(
+        klasseId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
       path: '/faecher',
       builder: (context, state) => const FaecherScreen(),
+    ),
+    GoRoute(
+      path: '/faecher/:id',
+      builder: (context, state) => FaecherDetailScreen(
+        subjectId: state.pathParameters['id']!,
+      ),
     ),
     GoRoute(
       path: '/schueler',
       builder: (context, state) => const SchuelerScreen(),
     ),
     GoRoute(
+      path: '/schueler/:id',
+      builder: (context, state) => SchuelerDetailScreen(
+        schuelerId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
       path: '/leistungsnachweise',
       builder: (context, state) => const LeistungsnachweiseScreen(),
+    ),
+    GoRoute(
+      path: '/leistungsnachweis/:id/edit',
+      builder: (context, state) => LNEditorScreen(
+        leistungsnachweisId: state.pathParameters['id']!,
+      ),
     ),
     // Noten-Übersicht Routen (müssen vor /noten/:id stehen wegen Routing-Priorität)
     GoRoute(
@@ -139,6 +168,13 @@ final _router = GoRouter(
     GoRoute(
       path: '/einstellungen/benutzer',
       builder: (context, state) => const UserVerwaltungScreen(),
+    ),
+    // TEST: Matrix View (Development only)
+    GoRoute(
+      path: '/test-matrix',
+      builder: (context, state) => TestMatrixScreen(
+        klasseId: state.uri.queryParameters['klasseId'],
+      ),
     ),
   ],
 );

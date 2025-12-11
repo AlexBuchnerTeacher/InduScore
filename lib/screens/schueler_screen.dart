@@ -32,6 +32,13 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: 'Menü',
+          ),
+        ),
         title: const Text('Schülerverwaltung'),
         actions: [
           // Toggle für ausgetretene Schüler
@@ -153,7 +160,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
         margin: const EdgeInsets.only(bottom: RBSSpacing.sm),
         color: isAusgetreten ? Colors.grey[200] : null,
         child: ListTile(
-          onTap: () => context.go('/noten/schueler/${student.id}'),
+          onTap: () => context.go('/schueler/${student.id}'),
           leading: CircleAvatar(
             backgroundColor: isAusgetreten ? Colors.grey : RBSColors.dynamicRed,
             child: Text(

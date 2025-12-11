@@ -35,6 +35,13 @@ class _LeistungsnachweiseScreenState
 
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: 'Menü',
+          ),
+        ),
         title: const Text('Leistungsnachweise'),
         actions: [
           IconButton(
@@ -209,7 +216,7 @@ class _LeistungsnachweiseScreenState
 
     return RBSCard(
       child: InkWell(
-        onTap: () => context.go('/noten/${ln.id}'),
+        onTap: () => context.go('/leistungsnachweis/${ln.id}/edit'),
         borderRadius: BorderRadius.circular(RBSSpacing.sm),
         child: Padding(
           padding: const EdgeInsets.all(RBSSpacing.md),
