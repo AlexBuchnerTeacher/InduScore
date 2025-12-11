@@ -685,7 +685,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                         .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
                         .firstOrNull
                         ?.updatedAt,
-                    compact: false,
+                    compact: true,
                     onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
                     onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
                   ),
@@ -926,7 +926,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                 tendenz: grade?.tendenz ?? Tendenz.keine,
                 updatedBy: _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
                 updatedAt: grade?.updatedAt,
-                compact: false,
+                compact: true,
                 onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
                 onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
               ),
