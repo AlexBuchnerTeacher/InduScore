@@ -500,7 +500,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    const lnColWidth = 100.0;
+    final lnColWidth = 110.0; // Match byKlasse width for consistency
 
     return Column(
       children: [
