@@ -716,6 +716,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         border: Border(top: BorderSide(color: Colors.grey[400]!, width: 2)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: leftColWidth,
@@ -725,7 +726,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
-          Expanded(child: Container()),
+          const SizedBox(width: 16),
           Container(
             width: 80,
             padding: const EdgeInsets.all(12),
@@ -965,14 +966,12 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         border: Border(top: BorderSide(color: Colors.grey[400]!, width: 2)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(width: 40),
-          const Expanded(
-            flex: 2,
-            child: Text(
-              '⌀ Durchschnitt',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            ),
+          const Text(
+            '⌀ Durchschnitt',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
           const SizedBox(width: 16),
           Container(
