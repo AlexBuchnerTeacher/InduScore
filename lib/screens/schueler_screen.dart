@@ -32,6 +32,13 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: 'Menü',
+          ),
+        ),
         title: const Text('Schülerverwaltung'),
         actions: [
           // Toggle für ausgetretene Schüler

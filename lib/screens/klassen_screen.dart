@@ -34,6 +34,13 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: 'Menü',
+          ),
+        ),
         title: const Text('Klassenverwaltung'),
         actions: [
           // Import Button - deutlich sichtbar
