@@ -111,7 +111,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final fachColWidth = 120.0; // 120 - 8 (padding) = 112px für EditableNoteCell (>101px benötigt)
+    final fachColWidth = 150.0; // 150 - 8 (padding) = 142px für EditableNoteCell inkl. Tendenz
 
     return Column(
       children: [
@@ -401,7 +401,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         tendenz: grade?.tendenz ?? Tendenz.keine,
         updatedBy: _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
         updatedAt: grade?.updatedAt,
-        compact: true,
+        compact: false,
         onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
         onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
       ),
@@ -500,7 +500,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final lnColWidth = 120.0; // Match byKlasse for consistency
+    final lnColWidth = 150.0; // Match byKlasse for consistency, inkl. Tendenz
 
     return Column(
       children: [
@@ -685,7 +685,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                         .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
                         .firstOrNull
                         ?.updatedAt,
-                    compact: true,
+                    compact: false,
                     onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
                     onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
                   ),
@@ -926,7 +926,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                 tendenz: grade?.tendenz ?? Tendenz.keine,
                 updatedBy: _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
                 updatedAt: grade?.updatedAt,
-                compact: true,
+                compact: false,
                 onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
                 onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
               ),
