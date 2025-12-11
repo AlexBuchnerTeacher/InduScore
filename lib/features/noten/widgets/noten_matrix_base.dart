@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../models/grade.dart';
-import '../../../models/leistungsnachweis.dart';
 import '../../../models/student.dart';
 import '../../../providers/app_providers.dart';
 import '../noten_matrix_logic.dart';
@@ -110,7 +109,7 @@ mixin NotenMatrixBaseMixin<T extends ConsumerStatefulWidget> on ConsumerState<T>
       case 5:
         return const Color(0xFFE53935); // Rot
       case 6:
-        return const Color(0xFF C62828); // Dunkelrot
+        return const Color(0xFFC62828); // Dunkelrot
       default:
         return Colors.grey;
     }
