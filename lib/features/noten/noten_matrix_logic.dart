@@ -174,10 +174,24 @@ class NotenMatrixLogic {
   }
 
   /// Extrahiert Benutzer-Kürzel aus Email
+  /// Unterstützt Formate:
+  /// - vorname.nachname@domain -> VN
+  /// - bu@domain -> BU
+  /// - v.n@domain -> VN
   static String? getUserKuerzel(String? email) {
     if (email == null || !email.contains('@')) return null;
-    final parts = email.split('@')[0].split('.');
-    if (parts.length < 2) return null;
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    
+    final localPart = email.split('@')[0];
+    final parts = localPart.split('.');
+    
+    if (parts.length >= 2) {
+      // Format: vorname.nachname@domain
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (localPart.length >= 2) {
+      // Format: bu@domain -> BU (erste 2 Buchstaben)
+      return localPart.substring(0, 2).toUpperCase();
+    }
+    
+    return null;
   }
 }

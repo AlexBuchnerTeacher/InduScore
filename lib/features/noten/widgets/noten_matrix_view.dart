@@ -111,7 +111,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    const fachColWidth = 110.0; // Increased for dropdown (45px) + tendenz buttons (3×18+2×1=56px)
+    final fachColWidth = 110.0; // Changed from const to allow hot reload
 
     return Column(
       children: [
@@ -1058,6 +1058,11 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
 
     print('🔍 _handleNoteChange: user=$userEmail, kuerzel=$userKuerzel');
+    if (userKuerzel != null) {
+      print('   → Kürzel extrahiert: $userKuerzel aus $userEmail');
+    } else {
+      print('   → FEHLER: Konnte kein Kürzel aus $userEmail extrahieren');
+    }
 
     final existingGrade = widget.grades
         .where((g) => g.studentId == studentId && g.leistungsnachweisId == lnId)
