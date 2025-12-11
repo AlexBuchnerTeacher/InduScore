@@ -24,6 +24,7 @@ import 'screens/test_matrix_screen.dart';
 import 'features/klassen/klassen_detail_screen.dart';
 import 'features/schueler/schueler_detail_screen.dart';
 import 'features/leistungsnachweise/ln_editor_screen.dart';
+import 'features/faecher/faecher_detail_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -100,6 +101,12 @@ final _router = GoRouter(
     GoRoute(
       path: '/faecher',
       builder: (context, state) => const FaecherScreen(),
+    ),
+    GoRoute(
+      path: '/faecher/:id',
+      builder: (context, state) => FaecherDetailScreen(
+        subjectId: state.pathParameters['id']!,
+      ),
     ),
     GoRoute(
       path: '/schueler',

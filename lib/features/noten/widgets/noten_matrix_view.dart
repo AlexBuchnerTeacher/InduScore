@@ -75,6 +75,9 @@ class NotenMatrixView extends ConsumerStatefulWidget {
 class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
   final ScrollController _horizontalScrollController = ScrollController();
   final ScrollController _verticalScrollController = ScrollController();
+  
+  // Optimistic updates für updatedBy - zeigt Kürzel sofort an
+  final Map<String, String> _optimisticUpdatedBy = {};
 
   @override
   void dispose() {
@@ -395,7 +398,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         leistungsnachweisId: ln.id,
         note: grade?.note,
         tendenz: grade?.tendenz ?? Tendenz.keine,
-        updatedBy: grade?.updatedBy,
+        updatedBy: _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
         updatedAt: grade?.updatedAt,
         compact: true,
         onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
@@ -920,7 +923,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                 leistungsnachweisId: ln.id,
                 note: grade?.note,
                 tendenz: grade?.tendenz ?? Tendenz.keine,
-                updatedBy: grade?.updatedBy,
+                updatedBy: _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
                 updatedAt: grade?.updatedAt,
                 compact: false,
                 onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
@@ -1058,6 +1061,13 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         .firstOrNull;
 
     if (note != null) {
+      // Optimistic update: Show userKuerzel immediately
+      if (userKuerzel != null) {
+        setState(() {
+          _optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
+        });
+      }
+
       final grade = Grade(
         id: existingGrade?.id ?? '',
         studentId: studentId,
@@ -1077,6 +1087,10 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       }
     } else if (existingGrade != null) {
       await firestoreService.deleteGrade(existingGrade.id);
+      // Clear optimistic state
+      setState(() {
+        _optimisticUpdatedBy.remove('${studentId}_$lnId');
+      });
     }
   }
 
@@ -1090,6 +1104,13 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     final firestoreService = ref.read(firestoreServiceProvider);
     final user = ref.read(currentUserProvider);
     final userKuerzel = NotenMatrixLogic.getUserKuerzel(user?.email);
+
+    // Optimistic update: Show userKuerzel immediately
+    if (userKuerzel != null) {
+      setState(() {
+        _optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
+      });
+    }
 
     final updatedGrade = existingGrade.copyWith(
       tendenz: tendenz,

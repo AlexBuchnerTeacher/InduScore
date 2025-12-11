@@ -240,7 +240,7 @@ class _SubjectCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       child: InkWell(
-        onTap: () => context.go('/noten/fach/${subject.id}'),
+        onTap: () => context.go('/faecher/${subject.id}'),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
