@@ -110,7 +110,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    const fachColWidth = 80.0;
+    const fachColWidth = 90.0;
 
     return Column(
       children: [
@@ -1056,6 +1056,8 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     final user = ref.read(currentUserProvider);
     final userKuerzel = NotenMatrixLogic.getUserKuerzel(user?.email);
 
+    print('🔍 _handleNoteChange: user=${user?.email}, kuerzel=$userKuerzel');
+
     final existingGrade = widget.grades
         .where((g) => g.studentId == studentId && g.leistungsnachweisId == lnId)
         .firstOrNull;
@@ -1065,7 +1067,10 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       if (userKuerzel != null) {
         setState(() {
           _optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
+          print('✅ Optimistic state set: ${studentId}_$lnId -> $userKuerzel');
         });
+      } else {
+        print('❌ userKuerzel is NULL - cannot set optimistic state');
       }
 
       final grade = Grade(
@@ -1082,8 +1087,10 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
       if (existingGrade != null) {
         await firestoreService.updateGrade(grade);
+        print('📝 Grade updated in Firestore: ${grade.id}');
       } else {
         await firestoreService.createGrade(grade);
+        print('📝 Grade created in Firestore');
       }
     } else if (existingGrade != null) {
       await firestoreService.deleteGrade(existingGrade.id);

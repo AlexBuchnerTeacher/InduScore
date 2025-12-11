@@ -96,8 +96,9 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
     required List<Leistungsnachweis> allLN,
     required List<Grade> grades,
   }) {
-    // Filter LNs: Nur LNs der Klasse des Schülers
-    var filteredLN = allLN
+    // Filter LNs nach Zeitgruppe, dann nach Klasse des Schülers
+    final zgFilteredLN = ref.watch(filteredLeistungsnachweiseProvider);
+    var filteredLN = zgFilteredLN
         .where((ln) => ln.klasseId == student.klasseId)
         .toList();
 
@@ -112,16 +113,12 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
     }
 
     // Verfügbare Fächer und Typen für Filter
-    final availableSubjectIds = filteredLN
-        .map((ln) => ln.subjectId)
-        .toSet()
-        .toList()
-        .cast<String>();
-    final availableTypen = filteredLN
-        .map((ln) => ln.typ)
-        .toSet()
-        .toList()
-        .cast<LeistungsnachweisTyp>();
+    final availableSubjectIds = <String>[
+      ...filteredLN.map((ln) => ln.subjectId).toSet()
+    ];
+    final availableTypen = <LeistungsnachweisTyp>[
+      ...filteredLN.map((ln) => ln.typ).toSet()
+    ];
 
     if (filteredLN.isEmpty) {
       return Center(

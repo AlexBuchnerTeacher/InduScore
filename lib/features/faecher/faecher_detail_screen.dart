@@ -125,8 +125,10 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
     required List<Leistungsnachweis> allLN,
     required List<Grade> grades,
   }) {
-    // Filter LNs für dieses Fach
-    var filteredLN = allLN.where((ln) => ln.subjectId == widget.subjectId).toList();
+    // Filter nach Zeitgruppe, dann nach diesem Fach
+    final zgFilteredLN = ref.watch(filteredLeistungsnachweiseProvider);
+    final zgFilteredKlassen = ref.watch(filteredKlassenProvider);
+    var filteredLN = zgFilteredLN.where((ln) => ln.subjectId == widget.subjectId).toList();
 
     // Anwenden zusätzlicher Filter
     if (_selectedKlasseId != null) {
@@ -136,23 +138,20 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
       filteredLN = filteredLN.where((ln) => ln.typ == _selectedTyp).toList();
     }
 
-    // Filter Schüler: Nur Schüler aus Klassen mit LNs in diesem Fach
+    // Filter Schüler: Nur Schüler aus ZG-gefilterten Klassen mit LNs in diesem Fach
     final relevantKlasseIds = filteredLN.map((ln) => ln.klasseId).toSet();
     final filteredStudents = allStudents
         .where((s) => relevantKlasseIds.contains(s.klasseId))
         .toList();
 
-    // Verfügbare Klassen und Typen für Filter
-    final availableKlasseIds = filteredLN
-        .map((ln) => ln.klasseId)
-        .toSet()
-        .toList()
-        .cast<String>();
-    final availableTypen = filteredLN
-        .map((ln) => ln.typ)
-        .toSet()
-        .toList()
-        .cast<LeistungsnachweisTyp>();
+    // Verfügbare Klassen (nur ZG-gefilterte) und Typen für Filter
+    final availableKlasseIds = <String>[
+      ...filteredLN.map((ln) => ln.klasseId).toSet()
+    ];
+    final availableKlassen = zgFilteredKlassen.where((k) => availableKlasseIds.contains(k.id)).toList();
+    final availableTypen = <LeistungsnachweisTyp>[
+      ...filteredLN.map((ln) => ln.typ).toSet()
+    ];
 
     if (filteredStudents.isEmpty) {
       return _buildEmptyState(
@@ -165,7 +164,7 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
     if (filteredLN.isEmpty) {
       return Column(
         children: [
-          _buildFilterBar(klassen, availableKlasseIds, availableTypen),
+          _buildFilterBar(availableKlassen, availableKlasseIds, availableTypen),
           Expanded(
             child: _buildEmptyState(
               icon: Icons.assignment_outlined,
@@ -182,7 +181,7 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
     return Column(
       children: [
         // Filter Bar
-        _buildFilterBar(klassen, availableKlasseIds, availableTypen),
+        _buildFilterBar(availableKlassen, availableKlasseIds, availableTypen),
         
         // Matrix View - nutze byKlasse mode mit aggregierten Daten
         Expanded(

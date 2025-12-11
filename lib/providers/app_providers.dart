@@ -175,6 +175,22 @@ final filteredKlassenProvider = Provider<List<Klasse>>((ref) {
   return klassen.where((k) => extractZeitgruppe(k.name) == zeitgruppe).toList();
 });
 
+/// Gefilterte Leistungsnachweise nach Zeitgruppe (über Klasse)
+final filteredLeistungsnachweiseProvider = Provider<List<Leistungsnachweis>>((ref) {
+  final allLN = ref.watch(leistungsnachweiseProvider).value ?? [];
+  final zeitgruppe = ref.watch(zeitgruppenFilterProvider);
+  
+  if (zeitgruppe == null) return allLN;
+  
+  final klassen = ref.watch(klassenProvider).value ?? [];
+  final klassenInZG = klassen
+      .where((k) => extractZeitgruppe(k.name) == zeitgruppe)
+      .map((k) => k.id)
+      .toSet();
+  
+  return allLN.where((ln) => klassenInZG.contains(ln.klasseId)).toList();
+});
+
 // ============ LEISTUNGSNACHWEIS PROVIDERS ============
 
 // All Leistungsnachweise stream

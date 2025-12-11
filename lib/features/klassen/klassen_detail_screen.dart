@@ -131,28 +131,25 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
     required List<Grade> grades,
     required List<Klasse> klassenList,
   }) {
-    // Filter LNs für diese Klasse
-    var filteredLN = allLN.where((ln) => ln.klasseId == widget.klasseId).toList();
+    // Filter LNs für diese Klasse (schon durch ZG-Filter vorher gefiltert)
+    final filteredLN = ref.watch(filteredLeistungsnachweiseProvider);
+    var klasseLN = filteredLN.where((ln) => ln.klasseId == widget.klasseId).toList();
 
     // Anwenden zusätzlicher Filter
     if (_selectedSubjectId != null) {
-      filteredLN = filteredLN.where((ln) => ln.subjectId == _selectedSubjectId).toList();
+      klasseLN = klasseLN.where((ln) => ln.subjectId == _selectedSubjectId).toList();
     }
     if (_selectedTyp != null) {
-      filteredLN = filteredLN.where((ln) => ln.typ == _selectedTyp).toList();
+      klasseLN = klasseLN.where((ln) => ln.typ == _selectedTyp).toList();
     }
 
     // Verfügbare Fächer und Typen für Filter
-    final availableSubjectIds = filteredLN
-        .map((ln) => ln.subjectId)
-        .toSet()
-        .toList()
-        .cast<String>();
-    final availableTypen = filteredLN
-        .map((ln) => ln.typ)
-        .toSet()
-        .toList()
-        .cast<LeistungsnachweisTyp>();
+    final availableSubjectIds = <String>[
+      ...klasseLN.map((ln) => ln.subjectId).toSet()
+    ];
+    final availableTypen = <LeistungsnachweisTyp>[
+      ...klasseLN.map((ln) => ln.typ).toSet()
+    ];
 
     if (students.isEmpty) {
       return _buildEmptyState(
@@ -162,7 +159,7 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
       );
     }
 
-    if (filteredLN.isEmpty) {
+    if (klasseLN.isEmpty) {
       return Column(
         children: [
           _buildFilterBar(subjects, availableSubjectIds, availableTypen),
@@ -190,7 +187,7 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
             mode: MatrixViewMode.byKlasse,
             klasseId: widget.klasseId,
             students: students,
-            leistungsnachweise: filteredLN,
+            leistungsnachweise: klasseLN,
             subjects: subjects,
             grades: grades,
             klassen: klassenList,
