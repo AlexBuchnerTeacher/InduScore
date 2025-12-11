@@ -5,6 +5,9 @@ import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
 import '../../models/leistungsnachweis.dart';
 import '../../models/subject.dart';
+import '../../models/student.dart';
+import '../../models/grade.dart';
+import '../../models/klasse.dart';
 import '../../providers/app_providers.dart';
 import '../noten/widgets/noten_matrix_view.dart';
 import '../../widgets/rbs_drawer.dart';
@@ -56,7 +59,7 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
         title: klasseAsync.when(
           data: (klasse) => Text('Klasse ${klasse.name}'),
           loading: () => const Text('Laden...'),
-          error: (_, __) => const Text('Klasse'),
+          error: (_, _) => const Text('Klasse'),
         ),
         actions: [
           IconButton(
@@ -121,12 +124,12 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
   }
 
   Widget _buildContent({
-    required klasse,
-    required students,
-    required subjects,
-    required allLN,
-    required grades,
-    required klassenList,
+    required Klasse klasse,
+    required List<Student> students,
+    required List<Subject> subjects,
+    required List<Leistungsnachweis> allLN,
+    required List<Grade> grades,
+    required List<Klasse> klassenList,
   }) {
     // Filter LNs für diese Klasse
     var filteredLN = allLN.where((ln) => ln.klasseId == widget.klasseId).toList();

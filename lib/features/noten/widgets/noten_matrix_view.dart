@@ -653,7 +653,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    '${ln.typ.label}',
+                    ln.typ.label,
                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                   Text(
@@ -748,8 +748,259 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
   /// Matrix: Schüler (Zeilen) × Note (Spalte) - für einen LN
   Widget _buildByLNView() {
-    // TODO: Implementierung für LN-Ansicht
-    return const Center(child: Text('LN-Ansicht (TODO)'));
+    if (widget.leistungsnachweise.isEmpty || widget.leistungsnachweisId == null) {
+      return const Center(child: Text('Kein Leistungsnachweis ausgewählt'));
+    }
+
+    final ln = widget.leistungsnachweise.first;
+    final subject = widget.subjects
+        .where((s) => s.id == ln.subjectId)
+        .firstOrNull;
+    final fachColor = RBSColors.fromHex(subject?.color) ?? RBSColors.courtGreen;
+    final sortedStudents = NotenMatrixLogic.sortStudentsByName(widget.students);
+
+    return Column(
+      children: [
+        // LN Info Header
+        _buildLNInfoHeader(ln, subject, fachColor),
+
+        // Metadata
+        _buildMetadataHeader(),
+
+        // Student List
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: sortedStudents.length + 2, // +2 für Header und Footer
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _buildLNTableHeader();
+              } else if (index == sortedStudents.length + 1) {
+                return _buildLNFooter(sortedStudents, ln);
+              } else {
+                final student = sortedStudents[index - 1];
+                return _buildLNStudentRow(student, ln, index - 1);
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLNInfoHeader(Leistungsnachweis ln, Subject? subject, Color fachColor) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: fachColor.withValues(alpha: 0.1),
+        border: Border(
+          left: BorderSide(color: fachColor, width: 4),
+          bottom: BorderSide(color: Colors.grey[300]!),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.assignment, color: fachColor, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${subject?.name ?? "Fach"} - ${ln.typ.label}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: fachColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Datum: ${ln.datum.day}.${ln.datum.month}.${ln.datum.year} | '
+                  'Gewichtung: ${ln.gewichtung}x',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                ),
+                if (ln.beschreibung != null && ln.beschreibung!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    ln.beschreibung!,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLNTableHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: RBSColors.paper,
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 40),
+          const Expanded(
+            flex: 2,
+            child: Text(
+              'Schüler',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Container(
+            width: 200,
+            alignment: Alignment.center,
+            child: const Text(
+              'Note',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLNStudentRow(Student student, Leistungsnachweis ln, int index) {
+    final grade = widget.grades
+        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+        .firstOrNull;
+
+    final isEven = index % 2 == 0;
+
+    return InkWell(
+      onTap: widget.onStudentTap != null 
+          ? () => widget.onStudentTap!(student.id) 
+          : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isEven ? Colors.white : Colors.grey[50],
+          border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        ),
+        child: Row(
+          children: [
+            // Index
+            SizedBox(
+              width: 40,
+              child: Text(
+                '${index + 1}.',
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
+            ),
+            // Name
+            Expanded(
+              flex: 2,
+              child: Row(
+                children: [
+                  Text(
+                    '${student.lastName}, ${student.firstName}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  if (student.befreiungDeutsch || student.befreiungPuG) ...[
+                    const SizedBox(width: 8),
+                    _buildBefreiungBadge(student),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Note
+            SizedBox(
+              width: 200,
+              child: EditableNoteCell(
+                key: ValueKey('${student.id}_${ln.id}'),
+                studentId: student.id,
+                leistungsnachweisId: ln.id,
+                note: grade?.note,
+                tendenz: grade?.tendenz ?? Tendenz.keine,
+                updatedBy: grade?.updatedBy,
+                updatedAt: grade?.updatedAt,
+                compact: false,
+                onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
+                onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLNFooter(List<Student> students, Leistungsnachweis ln) {
+    // Berechne Durchschnitt
+    final grades = widget.grades
+        .where((g) => g.leistungsnachweisId == ln.id)
+        .toList();
+    
+    if (grades.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: RBSColors.paper,
+          border: Border(top: BorderSide(color: Colors.grey[400]!, width: 2)),
+        ),
+        child: const Text(
+          'Noch keine Noten erfasst',
+          style: TextStyle(fontSize: 13, color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    final sum = grades
+        .map((g) => NotenMatrixLogic.getNoteWithTendenz(g.note, g.tendenz))
+        .reduce((a, b) => a + b);
+    final durchschnitt = sum / grades.length;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: RBSColors.paper,
+        border: Border(top: BorderSide(color: Colors.grey[400]!, width: 2)),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 40),
+          const Expanded(
+            flex: 2,
+            child: Text(
+              '⌀ Durchschnitt',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Container(
+            width: 200,
+            alignment: Alignment.center,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: _getNoteColor(durchschnitt.round()).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _getNoteColor(durchschnitt.round()),
+                  width: 2,
+                ),
+              ),
+              child: Text(
+                '${durchschnitt.toStringAsFixed(2)} (${grades.length}/${students.length})',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: _getNoteColor(durchschnitt.round()),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMetadataHeader() {

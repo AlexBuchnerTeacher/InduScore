@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
 import '../../models/leistungsnachweis.dart';
+import '../../models/student.dart';
+import '../../models/subject.dart';
+import '../../models/grade.dart';
+import '../../models/klasse.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/rbs_drawer.dart';
 import '../noten/widgets/noten_matrix_view.dart';
@@ -51,7 +55,7 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
         title: studentAsync.when(
           data: (student) => Text('${student.lastName}, ${student.firstName}'),
           loading: () => const Text('Schüler-Detail'),
-          error: (_, __) => const Text('Fehler'),
+          error: (_, _) => const Text('Fehler'),
         ),
       ),
       drawer: const RBSDrawer(),
@@ -86,11 +90,11 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
   }
 
   Widget _buildContent({
-    required student,
-    required klassen,
-    required subjects,
-    required allLN,
-    required grades,
+    required Student student,
+    required List<Klasse> klassen,
+    required List<Subject> subjects,
+    required List<Leistungsnachweis> allLN,
+    required List<Grade> grades,
   }) {
     // Filter LNs: Nur LNs der Klasse des Schülers
     var filteredLN = allLN

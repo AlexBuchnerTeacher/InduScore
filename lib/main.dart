@@ -23,6 +23,7 @@ import 'screens/user_verwaltung_screen.dart';
 import 'screens/test_matrix_screen.dart';
 import 'features/klassen/klassen_detail_screen.dart';
 import 'features/schueler/schueler_detail_screen.dart';
+import 'features/leistungsnachweise/ln_editor_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -113,6 +114,12 @@ final _router = GoRouter(
     GoRoute(
       path: '/leistungsnachweise',
       builder: (context, state) => const LeistungsnachweiseScreen(),
+    ),
+    GoRoute(
+      path: '/leistungsnachweis/:id/edit',
+      builder: (context, state) => LNEditorScreen(
+        leistungsnachweisId: state.pathParameters['id']!,
+      ),
     ),
     // Noten-Übersicht Routen (müssen vor /noten/:id stehen wegen Routing-Priorität)
     GoRoute(

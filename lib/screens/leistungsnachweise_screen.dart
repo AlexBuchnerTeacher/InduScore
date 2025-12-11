@@ -209,7 +209,7 @@ class _LeistungsnachweiseScreenState
 
     return RBSCard(
       child: InkWell(
-        onTap: () => context.go('/noten/${ln.id}'),
+        onTap: () => context.go('/leistungsnachweis/${ln.id}/edit'),
         borderRadius: BorderRadius.circular(RBSSpacing.sm),
         child: Padding(
           padding: const EdgeInsets.all(RBSSpacing.md),
