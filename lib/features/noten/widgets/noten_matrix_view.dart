@@ -482,8 +482,268 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
   /// Matrix: LNs pro Fach (Zeilen) × Note (Spalte) - für einen Schüler
   Widget _buildBySchuelerView() {
-    // TODO: Implementierung für Schüler-Ansicht
-    return const Center(child: Text('Schüler-Ansicht (TODO)'));
+    if (widget.students.isEmpty || widget.schuelerId == null) {
+      return const Center(child: Text('Kein Schüler ausgewählt'));
+    }
+
+    final student = widget.students.first;
+    final lnBySubject = NotenMatrixLogic.groupLNsBySubject(widget.leistungsnachweise);
+    final sortedSubjectIds = lnBySubject.keys.toList()
+      ..sort((a, b) {
+        final subjectA = widget.subjects.firstWhere((s) => s.id == a);
+        final subjectB = widget.subjects.firstWhere((s) => s.id == b);
+        return subjectA.name.compareTo(subjectB.name);
+      });
+
+    const leftColWidth = 170.0;
+    const lnColWidth = 100.0;
+
+    return Column(
+      children: [
+        // Metadata Header
+        _buildMetadataHeader(),
+
+        // Scrollable Table
+        Expanded(
+          child: SingleChildScrollView(
+            controller: _verticalScrollController,
+            child: SingleChildScrollView(
+              controller: _horizontalScrollController,
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Row
+                  _buildSchuelerHeaderRow(
+                    leftColWidth: leftColWidth,
+                    lnColWidth: lnColWidth,
+                    sortedSubjectIds: sortedSubjectIds,
+                    lnBySubject: lnBySubject,
+                  ),
+
+                  // Fach-Rows mit LNs
+                  ...sortedSubjectIds.map((subjectId) {
+                    final subject = widget.subjects.firstWhere((s) => s.id == subjectId);
+                    final lns = lnBySubject[subjectId] ?? [];
+                    final sortedLNs = NotenMatrixLogic.sortLNsByDate(lns);
+
+                    return _buildSchuelerFachRow(
+                      subject: subject,
+                      lns: sortedLNs,
+                      student: student,
+                      leftColWidth: leftColWidth,
+                      lnColWidth: lnColWidth,
+                    );
+                  }),
+
+                  // Footer: Gesamt-Durchschnitt
+                  _buildSchuelerFooter(
+                    leftColWidth: leftColWidth,
+                    lnColWidth: lnColWidth,
+                    sortedSubjectIds: sortedSubjectIds,
+                    student: student,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSchuelerHeaderRow({
+    required double leftColWidth,
+    required double lnColWidth,
+    required List<String> sortedSubjectIds,
+    required Map<String, List<Leistungsnachweis>> lnBySubject,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: RBSColors.paper,
+        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: leftColWidth,
+            padding: const EdgeInsets.all(12),
+            child: const Text(
+              'Fach / Leistungsnachweis',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          ...sortedSubjectIds.map((subjectId) {
+            final subject = widget.subjects.firstWhere((s) => s.id == subjectId);
+            final lns = lnBySubject[subjectId] ?? [];
+            final fachColor = RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen;
+
+            return Container(
+              width: lnColWidth * lns.length,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: fachColor.withValues(alpha: 0.1),
+                border: Border(
+                  left: BorderSide(color: fachColor, width: 2),
+                  right: BorderSide(color: Colors.grey[200]!),
+                ),
+              ),
+              child: Text(
+                subject.shortName ?? subject.name,
+                style: TextStyle(fontWeight: FontWeight.bold, color: fachColor),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }),
+          Container(
+            width: 80,
+            padding: const EdgeInsets.all(12),
+            child: const Text(
+              '⌀ Fach',
+              style: TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSchuelerFachRow({
+    required Subject subject,
+    required List<Leistungsnachweis> lns,
+    required Student student,
+    required double leftColWidth,
+    required double lnColWidth,
+  }) {
+    final fachColor = RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen;
+    final fachSchnitt = NotenMatrixLogic.calculateFachDurchschnitt(
+      studentId: student.id,
+      subjectId: subject.id,
+      leistungsnachweise: widget.leistungsnachweise,
+      grades: widget.grades,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Row(
+        children: [
+          // Fach-Name
+          Container(
+            width: leftColWidth,
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            decoration: BoxDecoration(
+              color: fachColor.withValues(alpha: 0.05),
+            ),
+            child: Text(
+              subject.name,
+              style: TextStyle(fontWeight: FontWeight.bold, color: fachColor),
+            ),
+          ),
+
+          // LN-Zellen
+          ...lns.map((ln) {
+            return Container(
+              width: lnColWidth,
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    '${ln.typ.label}',
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${ln.datum.day}.${ln.datum.month}.${ln.datum.year}',
+                    style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 4),
+                  EditableNoteCell(
+                    key: ValueKey('${student.id}_${ln.id}'),
+                    studentId: student.id,
+                    leistungsnachweisId: ln.id,
+                    note: widget.grades
+                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+                        .firstOrNull
+                        ?.note,
+                    tendenz: widget.grades
+                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+                        .firstOrNull
+                        ?.tendenz ?? Tendenz.keine,
+                    updatedBy: widget.grades
+                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+                        .firstOrNull
+                        ?.updatedBy,
+                    updatedAt: widget.grades
+                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+                        .firstOrNull
+                        ?.updatedAt,
+                    compact: false,
+                    onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
+                    onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
+                  ),
+                ],
+              ),
+            );
+          }),
+
+          // Fach-Durchschnitt
+          _buildDurchschnittCell(fachSchnitt, 80),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSchuelerFooter({
+    required double leftColWidth,
+    required double lnColWidth,
+    required List<String> sortedSubjectIds,
+    required Student student,
+  }) {
+    final gesamtSchnitt = NotenMatrixLogic.calculateGesamtDurchschnitt(
+      studentId: student.id,
+      subjectIds: sortedSubjectIds,
+      leistungsnachweise: widget.leistungsnachweise,
+      grades: widget.grades,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: RBSColors.paper,
+        border: Border(top: BorderSide(color: Colors.grey[400]!, width: 2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: leftColWidth,
+            padding: const EdgeInsets.all(12),
+            child: const Text(
+              '⌀ Gesamt',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ),
+          Expanded(child: Container()),
+          Container(
+            width: 80,
+            padding: const EdgeInsets.all(12),
+            alignment: Alignment.center,
+            child: gesamtSchnitt != null
+                ? Text(
+                    gesamtSchnitt.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: _getNoteColor(gesamtSchnitt.round()),
+                    ),
+                  )
+                : Text('-', style: TextStyle(color: Colors.grey[400])),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Matrix: Schüler (Zeilen) × Note (Spalte) - für einen LN
