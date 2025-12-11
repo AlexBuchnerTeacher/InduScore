@@ -1057,13 +1057,6 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     final userEmail = FirebaseAuth.instance.currentUser?.email;
     final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
 
-    print('🔍 _handleNoteChange: user=$userEmail, kuerzel=$userKuerzel');
-    if (userKuerzel != null) {
-      print('   → Kürzel extrahiert: $userKuerzel aus $userEmail');
-    } else {
-      print('   → FEHLER: Konnte kein Kürzel aus $userEmail extrahieren');
-    }
-
     final existingGrade = widget.grades
         .where((g) => g.studentId == studentId && g.leistungsnachweisId == lnId)
         .firstOrNull;
@@ -1073,10 +1066,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       if (userKuerzel != null) {
         setState(() {
           _optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
-          print('✅ Optimistic state set: ${studentId}_$lnId -> $userKuerzel');
         });
-      } else {
-        print('❌ userKuerzel is NULL - cannot set optimistic state');
       }
 
       final grade = Grade(
@@ -1093,10 +1083,8 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
       if (existingGrade != null) {
         await firestoreService.updateGrade(grade);
-        print('📝 Grade updated in Firestore: ${grade.id}');
       } else {
         await firestoreService.createGrade(grade);
-        print('📝 Grade created in Firestore');
       }
     } else if (existingGrade != null) {
       await firestoreService.deleteGrade(existingGrade.id);
