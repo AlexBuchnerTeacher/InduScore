@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.13.0] - 2025-12-12
+
+### Added
+- **Matrix-Refactoring komplett**: Alle 5 Detail-Screens mit Inline-Editing
+  - KlassenDetailScreen: Schüler × Fächer Matrix (byKlasse-Modus)
+  - SchuelerDetailScreen: Alle LNs eines Schülers gruppiert nach Fach (bySchueler-Modus)
+  - FaecherDetailScreen: Alle Schüler eines Fachs cross-class (byFach-Modus)
+  - LNEditorScreen: Noteneingabe für einzelnen LN (byLN-Modus)
+  - NotenMatrixView: 1125 Zeilen, 3 Modi, vollständig funktional
+- **Optimistic Updates**: Kürzel "geändert von" zeigt sofort an (vor Firebase-Bestätigung)
+- **Dashboard-Refactoring**: 773 → 145 Zeilen (-81%)
+  - 5 Widget-Komponenten extrahiert: statistics_cards, klassen_chips, nachschreiber_section, leistungsnachweise_list, dashboard_widgets
+  - Nachschreiber-Section mit Eskalationsstufen (Kritisch/Dringend/Neu)
+  - 4 Statistik-Kacheln responsive (Klassen, Schüler, Fächer, Noten)
+- **Zeitgruppen-Filter global**: Alle Detail-Screens filtern nach ZG1/ZG2/ZG3
+- **Navigation verbessert**: Hamburger-Menü in allen Übersichts-Screens (Web-Support)
+
+### Changed
+- **getUserKuerzel()**: Unterstützt jetzt vorname.nachname@domain UND kurze Emails (bu@domain)
+- **EditableNoteCell**: Kompakter (45px) und voller Modus (60px + Tendenz-Buttons)
+- **Type-Safety für Web**: Spread-Operator Pattern `<String>[...source]` statt `.cast<T>()`
+
+### Fixed
+- **Layout-Overflow behoben**: fachColWidth 80→90→110→120→150→160px, finaler Fix
+- **FirebaseAuth direkt**: currentUserProvider null-Problem gelöst mit FirebaseAuth.instance.currentUser
+- **Tendenz-Buttons**: compact: false wiederhergestellt nach Layout-Fix
+- **Import-Fehler**: Nachschreiber aus providers statt models, unused imports entfernt
+
+### Technical Debt
+- NotenMatrixView: 1125 Zeilen (>300 Guideline), Splitting vorbereitet mit noten_matrix_base.dart
+- noten_matrix_base.dart: Mixin erstellt aber noch nicht integriert (breaking change)
+
 ## [0.12.0] - 2025-12-11
 
 ### Added
