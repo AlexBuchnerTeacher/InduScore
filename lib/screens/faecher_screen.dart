@@ -24,8 +24,9 @@ class FaecherScreen extends ConsumerStatefulWidget {
 }
 
 class _FaecherScreenState extends ConsumerState<FaecherScreen> {
-  // Aktuell ausgewählter Beruf für Filter
-  Beruf? _selectedBeruf;
+  // Aktuell ausgewählte Berufe für Multi-Select Filter
+  // ignore: prefer_final_fields
+  Set<Beruf> _selectedBerufe = {};
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +44,11 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
         ),
         title: const Text('Fächerverwaltung'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _showSubjectDialog(),
@@ -65,11 +71,15 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
                 ...Beruf.values.map(
                   (beruf) => RBSFilterChip(
                     label: beruf.code,
-                    selected: _selectedBeruf == beruf,
+                    selected: _selectedBerufe.contains(beruf),
                     color: _getBerufColor(beruf),
-                    onSelected: (selected) {
+                    onSelected: (_) {
                       setState(() {
-                        _selectedBeruf = selected ? beruf : null;
+                        if (_selectedBerufe.contains(beruf)) {
+                          _selectedBerufe.remove(beruf);
+                        } else {
+                          _selectedBerufe.add(beruf);
+                        }
                       });
                     },
                   ),
@@ -84,9 +94,9 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
               data: (subjects) {
                 // Filter anwenden
                 var filtered = subjects;
-                if (_selectedBeruf != null) {
+                if (_selectedBerufe.isNotEmpty) {
                   filtered = filtered
-                      .where((s) => s.berufe.contains(_selectedBeruf))
+                      .where((s) => s.berufe.any((b) => _selectedBerufe.contains(b)))
                       .toList();
                 }
 

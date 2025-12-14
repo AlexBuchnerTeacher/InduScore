@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../models/grade.dart';
 import '../models/leistungsnachweis.dart';
 import '../models/student.dart';
+import '../models/tendenz.dart';
 import '../providers/app_providers.dart';
 import '../core/theme/rbs_theme.dart';
 
@@ -46,6 +47,13 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/leistungsnachweise'),

@@ -3,7 +3,7 @@ name: induscore
 description: "InduScore - Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München"
 publish_to: 'none'
 
-version: 0.13.0 # Matrix-Refactoring komplett, Dashboard-Refactoring, alle 5 Detail-Screens
+version: 0.13.4 # Notenübersicht-Screen Refactoring: 57% Reduktion, Sticky Headers
 
 environment:
   sdk: ^3.10.0

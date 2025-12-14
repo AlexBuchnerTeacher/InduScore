@@ -33,13 +33,26 @@ class LNEditorScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/leistungsnachweise'),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/leistungsnachweise');
+            }
+          },
         ),
         title: lnAsync.when(
           data: (ln) => Text('${ln.typ.label} - ${ln.datum.day}.${ln.datum.month}.${ln.datum.year}'),
           loading: () => const Text('Leistungsnachweis'),
           error: (_, _) => const Text('Fehler'),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
+        ],
       ),
       drawer: const RBSDrawer(),
       body: lnAsync.when(

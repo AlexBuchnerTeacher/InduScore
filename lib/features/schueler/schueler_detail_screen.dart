@@ -50,13 +50,26 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/schueler'),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/schueler');
+            }
+          },
         ),
         title: studentAsync.when(
           data: (student) => Text('${student.lastName}, ${student.firstName}'),
           loading: () => const Text('Schüler-Detail'),
           error: (_, _) => const Text('Fehler'),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
+        ],
       ),
       drawer: const RBSDrawer(),
       body: studentAsync.when(
@@ -183,22 +196,22 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            // Typ-Filter
-            ...availableTypen.map((typ) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: RBSFilterChip(
-                  label: typ.label,
-                  selected: _selectedTyp == typ,
-                  color: RBSColors.dynamicRed,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedTyp = selected ? typ : null;
-                    });
-                  },
-                ),
-              );
-            }),
+              // Typ-Filter
+              ...availableTypen.map((typ) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: RBSFilterChip(
+                    label: typ.label,
+                    selected: _selectedTyp == typ,
+                    color: RBSColors.dynamicRed,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedTyp = selected ? typ : null;
+                      });
+                    },
+                  ),
+                );
+              }),
 
             // Trennstrich
             if (availableTypen.isNotEmpty && availableSubjectIds.length > 1)

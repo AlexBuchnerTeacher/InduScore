@@ -54,7 +54,13 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/klassen'),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/klassen');
+            }
+          },
         ),
         title: klasseAsync.when(
           data: (klasse) => Text('Klasse ${klasse.name}'),
@@ -62,6 +68,11 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
           error: (_, _) => const Text('Klasse'),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -85,7 +96,13 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
               Text('Fehler beim Laden: $e'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => context.go('/klassen'),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/klassen');
+                  }
+                },
                 child: const Text('Zurück zur Übersicht'),
               ),
             ],
@@ -223,19 +240,19 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            // Typ-Filter
-            ...availableTypen.map(
-              (typ) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: RBSFilterChip(
-                  label: typ.label,
-                  selected: _selectedTyp == typ,
-                  color: RBSColors.dynamicRed,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedTyp = selected ? typ : null;
-                    });
-                  },
+              // Typ-Filter
+              ...availableTypen.map(
+                (typ) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: RBSFilterChip(
+                    label: typ.label,
+                    selected: _selectedTyp == typ,
+                    color: RBSColors.dynamicRed,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedTyp = selected ? typ : null;
+                      });
+                    },
                 ),
               ),
             ),

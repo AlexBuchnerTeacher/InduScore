@@ -8,24 +8,24 @@ import '../../models/subject.dart';
 import '../../models/student.dart';
 import '../../models/grade.dart';
 import '../../models/klasse.dart';
+import '../../models/beruf.dart';
 import '../../providers/app_providers.dart';
-import '../noten/widgets/noten_matrix_view.dart';
 import '../../widgets/rbs_drawer.dart';
 
-/// Fächer-Detail Screen mit Matrix-Ansicht
+/// Fächer-Detail Screen mit Klassen-Übersicht
 /// 
-/// Zeigt alle Schüler mit ihren Noten in einem Fach.
-/// Nutzt NotenMatrixView im byKlasse-Modus mit Fach-Filter.
+/// Zeigt alle Klassen, die dieses Fach belegen.
 /// 
 /// Features:
-/// - Alle Klassen zusammen für ein Fach
-/// - Horizontal scrollbare LN-Spalten
-/// - Filter nach Klasse und LN-Typ
-/// - Inline-Editing der Noten
-/// - Fach-Durchschnitt über alle Klassen
-/// - Cross-Links zu Schüler/Klasse/LN
+/// - Liste der Klassen mit Statistiken:
+///   - Anzahl Schüler
+///   - Anzahl offene Nachschreiber
+///   - Anzahl Noten in diesem Fach
+///   - Durchschnittsnote (alle LNs dieses Fachs)
+/// - Filter nach Beruf (übernommen + änderbar)
+/// - Bei Klick auf Klasse → Klassendetailansicht
 /// 
-/// UI Guidelines: <300 Zeilen
+/// UI Guidelines: <400 Zeilen
 class FaecherDetailScreen extends ConsumerStatefulWidget {
   final String subjectId;
 
@@ -39,8 +39,8 @@ class FaecherDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
-  String? _selectedKlasseId;
-  LeistungsnachweisTyp? _selectedTyp;
+  // ignore: prefer_final_fields
+  Set<Beruf> _selectedBerufe = {};
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,13 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/faecher'),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/faecher');
+            }
+          },
         ),
         title: subjectAsync.when(
           data: (subject) => Text('Fach: ${subject.shortName ?? subject.name}'),
@@ -62,6 +68,11 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
           error: (_, _) => const Text('Fach'),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -85,7 +96,13 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
               Text('Fehler beim Laden: $e'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => context.go('/faecher'),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/faecher');
+                  }
+                },
                 child: const Text('Zurück zur Übersicht'),
               ),
             ],
@@ -125,51 +142,38 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
     required List<Leistungsnachweis> allLN,
     required List<Grade> grades,
   }) {
-    // Filter nach Zeitgruppe, dann nach diesem Fach
-    final zgFilteredLN = ref.watch(filteredLeistungsnachweiseProvider);
+    // Filter nach Zeitgruppe
     final zgFilteredKlassen = ref.watch(filteredKlassenProvider);
-    var filteredLN = zgFilteredLN.where((ln) => ln.subjectId == widget.subjectId).toList();
-
-    // Anwenden zusätzlicher Filter
-    if (_selectedKlasseId != null) {
-      filteredLN = filteredLN.where((ln) => ln.klasseId == _selectedKlasseId).toList();
-    }
-    if (_selectedTyp != null) {
-      filteredLN = filteredLN.where((ln) => ln.typ == _selectedTyp).toList();
-    }
-
-    // Filter Schüler: Nur Schüler aus ZG-gefilterten Klassen mit LNs in diesem Fach
-    final relevantKlasseIds = filteredLN.map((ln) => ln.klasseId).toSet();
-    final filteredStudents = allStudents
-        .where((s) => relevantKlasseIds.contains(s.klasseId))
+    
+    // Nur Klassen, die dieses Fach belegen (LNs vorhanden)
+    final lnsForSubject = allLN.where((ln) => ln.subjectId == widget.subjectId).toList();
+    final klasseIdsWithLN = lnsForSubject.map((ln) => ln.klasseId).toSet();
+    var filteredKlassen = zgFilteredKlassen
+        .where((k) => klasseIdsWithLN.contains(k.id))
         .toList();
 
-    // Verfügbare Klassen (nur ZG-gefilterte) und Typen für Filter
-    final lnKlasseIds = filteredLN.map((ln) => ln.klasseId).toSet();
-    final availableKlasseIds = <String>[...lnKlasseIds];
-    final availableKlassen = zgFilteredKlassen.where((k) => availableKlasseIds.contains(k.id)).toList();
-    final lnTypen = filteredLN.map((ln) => ln.typ).toSet();
-    final availableTypen = <LeistungsnachweisTyp>[...lnTypen];
-
-    if (filteredStudents.isEmpty) {
-      return _buildEmptyState(
-        icon: Icons.people_outline,
-        title: 'Keine Schüler',
-        subtitle: 'Keine Schüler in Klassen mit diesem Fach',
-      );
+    // Beruf-Filter anwenden
+    if (_selectedBerufe.isNotEmpty) {
+      filteredKlassen = filteredKlassen.where((k) => _selectedBerufe.contains(k.beruf)).toList();
     }
 
-    if (filteredLN.isEmpty) {
+    // Nach Name sortieren
+    filteredKlassen.sort((a, b) => a.name.compareTo(b.name));
+
+    // Verfügbare Berufe für Filter
+    final availableBerufe = filteredKlassen.map((k) => k.beruf).toSet().toList();
+
+    if (filteredKlassen.isEmpty) {
       return Column(
         children: [
-          _buildFilterBar(availableKlassen, availableKlasseIds, availableTypen),
+          _buildFilterBar(availableBerufe),
           Expanded(
             child: _buildEmptyState(
-              icon: Icons.assignment_outlined,
-              title: 'Keine Leistungsnachweise',
-              subtitle: _selectedKlasseId != null || _selectedTyp != null
-                  ? 'Keine LNs mit den gewählten Filtern'
-                  : 'Noch keine Leistungsnachweise für dieses Fach',
+              icon: Icons.school_outlined,
+              title: 'Keine Klassen',
+              subtitle: _selectedBerufe.isNotEmpty
+                  ? 'Keine Klassen mit den gewählten Berufen belegen dieses Fach'
+                  : 'Noch keine Klassen belegen dieses Fach',
             ),
           ),
         ],
@@ -178,25 +182,23 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
 
     return Column(
       children: [
-        // Filter Bar
-        _buildFilterBar(availableKlassen, availableKlasseIds, availableTypen),
+        // Beruf-Filter Bar
+        _buildFilterBar(availableBerufe),
         
-        // Matrix View - nutze byKlasse mode mit aggregierten Daten
+        // Klassen-Liste
         Expanded(
-          child: NotenMatrixView(
-            mode: MatrixViewMode.byKlasse,
-            klasseId: null, // null = alle Klassen
-            students: filteredStudents,
-            leistungsnachweise: filteredLN,
-            subjects: [subject],
-            grades: grades,
-            klassen: klassen,
-            onStudentTap: (studentId) {
-              context.push('/schueler/$studentId');
-            },
-            onSubjectTap: null, // Kein Subject-Tap in Fach-Detail
-            onLNTap: (lnId) {
-              context.push('/leistungsnachweis/$lnId/edit');
+          child: ListView.builder(
+            padding: const EdgeInsets.all(RBSSpacing.md),
+            itemCount: filteredKlassen.length,
+            itemBuilder: (context, index) {
+              final klasse = filteredKlassen[index];
+              return _buildKlasseCard(
+                klasse: klasse,
+                subject: subject,
+                students: allStudents,
+                lns: lnsForSubject,
+                grades: grades,
+              );
             },
           ),
         ),
@@ -204,12 +206,8 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
     );
   }
 
-  Widget _buildFilterBar(
-    List<Klasse> klassen,
-    List<String> availableKlasseIds,
-    List<LeistungsnachweisTyp> availableTypen,
-  ) {
-    final hasActiveFilter = _selectedKlasseId != null || _selectedTyp != null;
+  Widget _buildFilterBar(List<Beruf> availableBerufe) {
+    final zeitgruppen = ref.watch(zeitgruppenFilterProvider);
 
     return Container(
       padding: const EdgeInsets.all(RBSSpacing.md),
@@ -217,91 +215,209 @@ class _FaecherDetailScreenState extends ConsumerState<FaecherDetailScreen> {
         color: RBSColors.paper,
         border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // Typ-Filter
-            ...availableTypen.map(
-              (typ) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: RBSFilterChip(
-                  label: typ.label,
-                  selected: _selectedTyp == typ,
-                  color: RBSColors.dynamicRed,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedTyp = selected ? typ : null;
-                    });
-                  },
-                ),
-              ),
+      child: Wrap(
+        spacing: RBSSpacing.sm,
+        runSpacing: RBSSpacing.sm,
+        children: [
+          // Zeitgruppen-Filter (ZG1, ZG2, ZG3)
+          RBSFilterChip(
+            label: 'ZG1',
+            selected: zeitgruppen.contains(1),
+            color: RBSColors.courtGreen,
+            onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(1),
+          ),
+          RBSFilterChip(
+            label: 'ZG2',
+            selected: zeitgruppen.contains(2),
+            color: RBSColors.courtGreen,
+            onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(2),
+          ),
+          RBSFilterChip(
+            label: 'ZG3',
+            selected: zeitgruppen.contains(3),
+            color: RBSColors.courtGreen,
+            onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(3),
+          ),
+          
+          const SizedBox(width: RBSSpacing.md), // Spacer
+          
+          // Beruf-Filter (IE, EAT, EBT, EGS)
+          ...Beruf.values.map(
+            (beruf) => RBSFilterChip(
+              label: beruf.code,
+              selected: _selectedBerufe.contains(beruf),
+              color: _getBerufColor(beruf),
+              onSelected: availableBerufe.contains(beruf)
+                  ? (_) {
+                      setState(() {
+                        if (_selectedBerufe.contains(beruf)) {
+                          _selectedBerufe.remove(beruf);
+                        } else {
+                          _selectedBerufe.add(beruf);
+                        }
+                      });
+                    }
+                  : null,
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Trennstrich
-            if (availableTypen.isNotEmpty && availableKlasseIds.length > 1)
-              Container(
-                height: 24,
-                width: 1,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                color: Colors.grey[400],
-              ),
+  Widget _buildKlasseCard({
+    required Klasse klasse,
+    required Subject subject,
+    required List<Student> students,
+    required List<Leistungsnachweis> lns,
+    required List<Grade> grades,
+  }) {
+    // Statistiken für diese Klasse
+    final klasseStudents = students.where((s) => s.klasseId == klasse.id && s.isAktiv).toList();
+    final klasseLNs = lns.where((ln) => ln.klasseId == klasse.id).toList();
+    final klasseLNIds = klasseLNs.map((ln) => ln.id).toSet();
+    final klasseGrades = grades.where((g) => klasseLNIds.contains(g.leistungsnachweisId)).toList();
 
-            // Klassen-Filter
-            ...klassen
-                .where((k) => availableKlasseIds.contains(k.id))
-                .map(
-                  (klasse) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: RBSFilterChip(
-                      label: klasse.name,
-                      selected: _selectedKlasseId == klasse.id,
-                      color: RBSColors.courtGreen,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedKlasseId = selected ? klasse.id : null;
-                        });
-                      },
-                    ),
+    // Offene Nachschreiber berechnen
+    // Ein Schüler ist Nachschreiber wenn er KEINE Note für einen LN hat, aber andere haben
+    int nachschreiberCount = 0;
+    for (final ln in klasseLNs) {
+      final gradesForLN = klasseGrades.where((g) => g.leistungsnachweisId == ln.id).toList();
+      if (gradesForLN.isNotEmpty) {
+        // Es gibt bereits Noten für diesen LN
+        final studentIdsWithGrade = gradesForLN.map((g) => g.studentId).toSet();
+        nachschreiberCount += klasseStudents.where((s) => !studentIdsWithGrade.contains(s.id)).length;
+      }
+    }
+
+    // Durchschnittsnote berechnen
+    final notenValues = klasseGrades.map((g) => g.note).toList();
+    final durchschnitt = notenValues.isEmpty
+        ? null
+        : notenValues.reduce((a, b) => a + b) / notenValues.length;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: RBSSpacing.md),
+      child: InkWell(
+        onTap: () => context.push('/klassen/${klasse.id}'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(RBSSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header: Klassenname + Beruf-Badge
+              Row(
+                children: [
+                  Text(
+                    klasse.name,
+                    style: RBSTypography.h3,
                   ),
-                ),
-
-            // Reset-Button
-            if (hasActiveFilter)
-              Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedTyp = null;
-                      _selectedKlasseId = null;
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(RBSBorderRadius.small),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: RBSSpacing.sm,
-                      vertical: RBSSpacing.xs,
-                    ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(RBSBorderRadius.small),
+                      color: _getBerufColor(klasse.beruf).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: _getBerufColor(klasse.beruf)),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.clear, size: 16, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text('Alle', style: TextStyle(color: Colors.grey[600])),
-                      ],
+                    child: Text(
+                      klasse.beruf.code,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: _getBerufColor(klasse.beruf),
+                      ),
                     ),
                   ),
-                ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right, color: Colors.grey[400]),
+                ],
               ),
-          ],
+              const SizedBox(height: RBSSpacing.md),
+              
+              // Statistiken in Grid
+              Wrap(
+                spacing: RBSSpacing.lg,
+                runSpacing: RBSSpacing.sm,
+                children: [
+                  _buildStatItem(
+                    icon: Icons.people,
+                    label: 'Schüler',
+                    value: '${klasseStudents.length}',
+                    color: RBSColors.courtGreen,
+                  ),
+                  _buildStatItem(
+                    icon: Icons.assignment_late,
+                    label: 'Nachschreiber',
+                    value: '$nachschreiberCount',
+                    color: nachschreiberCount > 0 ? Colors.orange : Colors.grey,
+                  ),
+                  _buildStatItem(
+                    icon: Icons.grade,
+                    label: 'Noten',
+                    value: '${klasseGrades.length}',
+                    color: RBSColors.growingElder,
+                  ),
+                  _buildStatItem(
+                    icon: Icons.trending_up,
+                    label: 'Ø',
+                    value: durchschnitt != null ? durchschnitt.toStringAsFixed(2) : '-',
+                    color: durchschnitt != null
+                        ? (durchschnitt <= 2.5
+                            ? RBSColors.courtGreen
+                            : durchschnitt <= 3.5
+                                ? Colors.orange
+                                : Colors.red)
+                        : Colors.grey,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 4),
+        Text(
+          '$label: ',
+          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getBerufColor(Beruf beruf) {
+    switch (beruf) {
+      case Beruf.ie:
+        return RBSColors.dynamicRed;
+      case Beruf.eat:
+        return RBSColors.courtGreen;
+      case Beruf.ebt:
+        return RBSColors.growingElder;
+      case Beruf.egs:
+        return const Color(0xFF2E7BB5); // Blue
+    }
   }
 
   Widget _buildEmptyState({

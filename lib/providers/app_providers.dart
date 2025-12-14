@@ -145,16 +145,31 @@ final currentSchuljahrProvider = Provider<Schuljahr>(
 // ============ ZEITGRUPPEN FILTER ============
 
 /// Notifier für globalen Zeitgruppen-Filter
-class ZeitgruppenFilterNotifier extends Notifier<int?> {
+class ZeitgruppenFilterNotifier extends Notifier<Set<int>> {
   @override
-  int? build() => null; // Standardmäßig alle anzeigen
+  Set<int> build() => {}; // Standardmäßig leer = alle anzeigen
   
-  void setFilter(int? zeitgruppe) => state = zeitgruppe;
-  void clearFilter() => state = null;
+  void toggle(int zeitgruppe) {
+    if (state.contains(zeitgruppe)) {
+      state = {...state}..remove(zeitgruppe);
+    } else {
+      state = {...state, zeitgruppe};
+    }
+  }
+  
+  void setFilter(int? zeitgruppe) {
+    if (zeitgruppe == null) {
+      state = {};
+    } else {
+      state = {zeitgruppe};
+    }
+  }
+  
+  void clearFilter() => state = {};
 }
 
-/// Globaler Zeitgruppen-Filter (null = alle anzeigen)
-final zeitgruppenFilterProvider = NotifierProvider<ZeitgruppenFilterNotifier, int?>(
+/// Globaler Zeitgruppen-Filter (leer = alle anzeigen, Multi-Select möglich)
+final zeitgruppenFilterProvider = NotifierProvider<ZeitgruppenFilterNotifier, Set<int>>(
   ZeitgruppenFilterNotifier.new,
 );
 
@@ -168,23 +183,29 @@ int? extractZeitgruppe(String klassenName) {
 /// Gefilterte Klassen nach Zeitgruppe
 final filteredKlassenProvider = Provider<List<Klasse>>((ref) {
   final klassen = ref.watch(klassenProvider).value ?? [];
-  final zeitgruppe = ref.watch(zeitgruppenFilterProvider);
+  final zeitgruppen = ref.watch(zeitgruppenFilterProvider);
   
-  if (zeitgruppe == null) return klassen;
+  if (zeitgruppen.isEmpty) return klassen;
   
-  return klassen.where((k) => extractZeitgruppe(k.name) == zeitgruppe).toList();
+  return klassen.where((k) {
+    final zg = extractZeitgruppe(k.name);
+    return zg != null && zeitgruppen.contains(zg);
+  }).toList();
 });
 
 /// Gefilterte Leistungsnachweise nach Zeitgruppe (über Klasse)
 final filteredLeistungsnachweiseProvider = Provider<List<Leistungsnachweis>>((ref) {
   final allLN = ref.watch(leistungsnachweiseProvider).value ?? [];
-  final zeitgruppe = ref.watch(zeitgruppenFilterProvider);
+  final zeitgruppen = ref.watch(zeitgruppenFilterProvider);
   
-  if (zeitgruppe == null) return allLN;
+  if (zeitgruppen.isEmpty) return allLN;
   
   final klassen = ref.watch(klassenProvider).value ?? [];
   final klassenInZG = klassen
-      .where((k) => extractZeitgruppe(k.name) == zeitgruppe)
+      .where((k) {
+        final zg = extractZeitgruppe(k.name);
+        return zg != null && zeitgruppen.contains(zg);
+      })
       .map((k) => k.id)
       .toSet();
   
@@ -348,11 +369,14 @@ final nachschreiberProvider = Provider<List<Nachschreiber>>((ref) {
 /// Gefilterte Nachschreiber nach Zeitgruppe
 final filteredNachschreiberProvider = Provider<List<Nachschreiber>>((ref) {
   final nachschreiber = ref.watch(nachschreiberProvider);
-  final zeitgruppe = ref.watch(zeitgruppenFilterProvider);
+  final zeitgruppen = ref.watch(zeitgruppenFilterProvider);
   
-  if (zeitgruppe == null) return nachschreiber;
+  if (zeitgruppen.isEmpty) return nachschreiber;
   
-  return nachschreiber.where((n) => extractZeitgruppe(n.klasse.name) == zeitgruppe).toList();
+  return nachschreiber.where((n) {
+    final zg = extractZeitgruppe(n.klasse.name);
+    return zg != null && zeitgruppen.contains(zg);
+  }).toList();
 });
 
 // ============ APP USER PROVIDERS ============

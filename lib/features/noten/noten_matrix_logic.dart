@@ -1,6 +1,7 @@
 import '../../models/grade.dart';
 import '../../models/leistungsnachweis.dart';
 import '../../models/student.dart';
+import '../../models/tendenz.dart';
 
 /// Business Logic für NotenMatrixView
 /// 

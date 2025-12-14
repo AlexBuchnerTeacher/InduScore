@@ -21,7 +21,8 @@ class KlassenScreen extends ConsumerStatefulWidget {
 }
 
 class _KlassenScreenState extends ConsumerState<KlassenScreen> {
-  String? _selectedBeruf;
+  // ignore: prefer_final_fields
+  Set<String> _selectedBerufe = {};
   String? _selectedSchuljahr;
   bool _isImporting = false;
 
@@ -43,6 +44,11 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
         ),
         title: const Text('Klassenverwaltung'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
           // Import Button - deutlich sichtbar
           Padding(
             padding: const EdgeInsets.only(right: RBSSpacing.sm),
@@ -82,14 +88,25 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
               spacing: RBSSpacing.sm,
               runSpacing: RBSSpacing.sm,
               children: [
-                // Zeitgruppen Filter Chip (zeigt aktiven Filter)
-                if (zeitgruppenFilter != null)
-                  Chip(
-                    label: Text('ZG$zeitgruppenFilter'),
-                    deleteIcon: const Icon(Icons.close, size: 16),
-                    onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
-                    backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
-                  ),
+                // Zeitgruppen-Filter
+                RBSFilterChip(
+                  label: 'ZG1',
+                  selected: zeitgruppenFilter.contains(1),
+                  color: RBSColors.courtGreen,
+                  onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(1),
+                ),
+                RBSFilterChip(
+                  label: 'ZG2',
+                  selected: zeitgruppenFilter.contains(2),
+                  color: RBSColors.courtGreen,
+                  onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(2),
+                ),
+                RBSFilterChip(
+                  label: 'ZG3',
+                  selected: zeitgruppenFilter.contains(3),
+                  color: RBSColors.courtGreen,
+                  onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(3),
+                ),
                 // Schuljahr Filter
                 RBSFilterChip(
                   label: _selectedSchuljahr ?? currentSchuljahr.toString(),
@@ -106,11 +123,15 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
                 ...Beruf.values.map(
                   (beruf) => RBSFilterChip(
                     label: beruf.code,
-                    selected: _selectedBeruf == beruf.code,
+                    selected: _selectedBerufe.contains(beruf.code),
                     color: _getBerufColor(beruf),
-                    onSelected: (selected) {
+                    onSelected: (_) {
                       setState(() {
-                        _selectedBeruf = selected ? beruf.code : null;
+                        if (_selectedBerufe.contains(beruf.code)) {
+                          _selectedBerufe.remove(beruf.code);
+                        } else {
+                          _selectedBerufe.add(beruf.code);
+                        }
                       });
                     },
                   ),
@@ -132,9 +153,9 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
                       )
                       .toList();
                 }
-                if (_selectedBeruf != null) {
+                if (_selectedBerufe.isNotEmpty) {
                   filteredKlassen = filteredKlassen
-                      .where((k) => k.beruf.code == _selectedBeruf)
+                      .where((k) => _selectedBerufe.contains(k.beruf.code))
                       .toList();
                 }
 

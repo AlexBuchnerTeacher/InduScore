@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../models/grade.dart';
 import '../../../models/klasse.dart';
+import '../../../models/tendenz.dart';
 import '../../../models/leistungsnachweis.dart';
 import '../../../models/student.dart';
 import '../../../models/subject.dart';
@@ -24,10 +25,10 @@ enum MatrixViewMode {
 }
 
 /// Universelle Matrix-Ansicht für Noten
-/// 
+///
 /// Zentrale Komponente für alle Noten-Ansichten.
 /// Unterstützt 3 verschiedene Modi mit unterschiedlichen Layouts.
-/// 
+///
 /// Features:
 /// - Horizontal scrollbare Fächer (byKlasse, bySchueler)
 /// - Sticky left column für Schüler/Info
@@ -35,7 +36,7 @@ enum MatrixViewMode {
 /// - Fach-Durchschnitte, Klassen-Durchschnitte
 /// - Cross-Linking (Namen klickbar)
 /// - Metadata-Anzeige (updatedBy bei jeder Note)
-/// 
+///
 /// UI Guidelines: <300 Zeilen (reine Darstellung)
 class NotenMatrixView extends ConsumerStatefulWidget {
   final MatrixViewMode mode;
@@ -76,7 +77,7 @@ class NotenMatrixView extends ConsumerStatefulWidget {
 class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
   final ScrollController _horizontalScrollController = ScrollController();
   final ScrollController _verticalScrollController = ScrollController();
-  
+
   // Optimistic updates für updatedBy - zeigt Kürzel sofort an
   final Map<String, String> _optimisticUpdatedBy = {};
 
@@ -102,7 +103,9 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
   /// Matrix: Schüler (Zeilen) × Fächer/LNs (Spalten)
   Widget _buildByKlasseView() {
     final sortedStudents = NotenMatrixLogic.sortStudentsByName(widget.students);
-    final lnBySubject = NotenMatrixLogic.groupLNsBySubject(widget.leistungsnachweise);
+    final lnBySubject = NotenMatrixLogic.groupLNsBySubject(
+      widget.leistungsnachweise,
+    );
     final sortedSubjectIds = lnBySubject.keys.toList()
       ..sort((a, b) {
         final subjectA = widget.subjects.firstWhere((s) => s.id == a);
@@ -111,7 +114,8 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final fachColWidth = 160.0; // 160 - 8 (padding) = 152px für EditableNoteCell inkl. Tendenz
+    final fachColWidth =
+        170.0; // 170 - 8 (padding) = 162px für EditableNoteCell inkl. Tendenz
 
     return Column(
       children: [
@@ -122,41 +126,45 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         Expanded(
           child: SingleChildScrollView(
             controller: _verticalScrollController,
-            child: SingleChildScrollView(
+            child: Scrollbar(
               controller: _horizontalScrollController,
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Row
-                  _buildHeaderRow(
-                    leftColWidth: leftColWidth,
-                    fachColWidth: fachColWidth,
-                    sortedSubjectIds: sortedSubjectIds,
-                    lnBySubject: lnBySubject,
-                  ),
-
-                  // Student Rows
-                  ...sortedStudents.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final student = entry.value;
-                    return _buildStudentRow(
-                      student: student,
-                      index: index,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Row
+                    _buildHeaderRow(
                       leftColWidth: leftColWidth,
                       fachColWidth: fachColWidth,
                       sortedSubjectIds: sortedSubjectIds,
                       lnBySubject: lnBySubject,
-                    );
-                  }),
+                    ),
 
-                  // Footer: Klassen-Durchschnitte
-                  _buildKlassenDurchschnittFooter(
-                    leftColWidth: leftColWidth,
-                    fachColWidth: fachColWidth,
-                    sortedSubjectIds: sortedSubjectIds,
-                  ),
-                ],
+                    // Student Rows
+                    ...sortedStudents.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final student = entry.value;
+                      return _buildStudentRow(
+                        student: student,
+                        index: index,
+                        leftColWidth: leftColWidth,
+                        fachColWidth: fachColWidth,
+                        sortedSubjectIds: sortedSubjectIds,
+                        lnBySubject: lnBySubject,
+                      );
+                    }),
+
+                    // Footer: Klassen-Durchschnitte
+                    _buildKlassenDurchschnittFooter(
+                      leftColWidth: leftColWidth,
+                      fachColWidth: fachColWidth,
+                      sortedSubjectIds: sortedSubjectIds,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -190,9 +198,12 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
           // Fach-Headers
           ...sortedSubjectIds.map((subjectId) {
-            final subject = widget.subjects.firstWhere((s) => s.id == subjectId);
+            final subject = widget.subjects.firstWhere(
+              (s) => s.id == subjectId,
+            );
             final lns = lnBySubject[subjectId] ?? [];
-            final fachColor = RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen;
+            final fachColor =
+                RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen;
 
             return InkWell(
               onTap: widget.onSubjectTap != null
@@ -250,7 +261,9 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: RBSColors.paper,
-              border: Border(left: BorderSide(color: Colors.grey[400]!, width: 2)),
+              border: Border(
+                left: BorderSide(color: Colors.grey[400]!, width: 2),
+              ),
             ),
             child: const Text(
               '⌀',
@@ -324,7 +337,9 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
   Widget _buildStudentNameCell(Student student, int index, double width) {
     return InkWell(
-      onTap: widget.onStudentTap != null ? () => widget.onStudentTap!(student.id) : null,
+      onTap: widget.onStudentTap != null
+          ? () => widget.onStudentTap!(student.id)
+          : null,
       child: Container(
         width: width,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
@@ -354,7 +369,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     final kuerzel = <String>[];
     if (student.befreiungDeutsch) kuerzel.add('D');
     if (student.befreiungPuG) kuerzel.add('PuG');
-    
+
     return Tooltip(
       message: [
         if (student.befreiungDeutsch) 'Befreiung Deutsch',
@@ -386,7 +401,9 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
   }) {
     // Suche Grade - entweder aus widget.grades oder aus lokalem State
     final grade = widget.grades
-        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+        .where(
+          (g) => g.studentId == student.id && g.leistungsnachweisId == ln.id,
+        )
         .firstOrNull;
 
     return Container(
@@ -399,16 +416,22 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         leistungsnachweisId: ln.id,
         note: grade?.note,
         tendenz: grade?.tendenz ?? Tendenz.keine,
-        updatedBy: _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
+        updatedBy:
+            _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
         updatedAt: grade?.updatedAt,
         compact: false,
         onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
-        onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
+        onTendenzChanged: (tendenz) =>
+            _handleTendenzChange(student.id, ln.id, tendenz),
       ),
     );
   }
 
-  Widget _buildDurchschnittCell(double? schnitt, double width, {bool isBold = false}) {
+  Widget _buildDurchschnittCell(
+    double? schnitt,
+    double width, {
+    bool isBold = false,
+  }) {
     return Container(
       width: width,
       padding: const EdgeInsets.all(10),
@@ -446,14 +469,18 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
             ),
           ),
           ...sortedSubjectIds.map((subjectId) {
-            final lns = NotenMatrixLogic.groupLNsBySubject(widget.leistungsnachweise)[subjectId] ?? [];
+            final lns =
+                NotenMatrixLogic.groupLNsBySubject(
+                  widget.leistungsnachweise,
+                )[subjectId] ??
+                [];
             final schnitt = NotenMatrixLogic.calculateKlassenDurchschnittFach(
               subjectId: subjectId,
               students: widget.students,
               leistungsnachweise: widget.leistungsnachweise,
               grades: widget.grades,
             );
-            
+
             return Container(
               width: fachColWidth * lns.length,
               padding: const EdgeInsets.all(12),
@@ -491,7 +518,9 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     }
 
     final student = widget.students.first;
-    final lnBySubject = NotenMatrixLogic.groupLNsBySubject(widget.leistungsnachweise);
+    final lnBySubject = NotenMatrixLogic.groupLNsBySubject(
+      widget.leistungsnachweise,
+    );
     final sortedSubjectIds = lnBySubject.keys.toList()
       ..sort((a, b) {
         final subjectA = widget.subjects.firstWhere((s) => s.id == a);
@@ -500,7 +529,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final lnColWidth = 160.0; // Match byKlasse for consistency, inkl. Tendenz
+    final lnColWidth = 170.0; // Match byKlasse for consistency, inkl. Tendenz
 
     return Column(
       children: [
@@ -511,105 +540,46 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
         Expanded(
           child: SingleChildScrollView(
             controller: _verticalScrollController,
-            child: SingleChildScrollView(
+            child: Scrollbar(
               controller: _horizontalScrollController,
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Row
-                  _buildSchuelerHeaderRow(
-                    leftColWidth: leftColWidth,
-                    lnColWidth: lnColWidth,
-                    sortedSubjectIds: sortedSubjectIds,
-                    lnBySubject: lnBySubject,
-                  ),
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Fach-Rows mit LNs
+                    ...sortedSubjectIds.map((subjectId) {
+                      final subject = widget.subjects.firstWhere(
+                        (s) => s.id == subjectId,
+                      );
+                      final lns = lnBySubject[subjectId] ?? [];
+                      final sortedLNs = NotenMatrixLogic.sortLNsByDate(lns);
 
-                  // Fach-Rows mit LNs
-                  ...sortedSubjectIds.map((subjectId) {
-                    final subject = widget.subjects.firstWhere((s) => s.id == subjectId);
-                    final lns = lnBySubject[subjectId] ?? [];
-                    final sortedLNs = NotenMatrixLogic.sortLNsByDate(lns);
+                      return _buildSchuelerFachRow(
+                        subject: subject,
+                        lns: sortedLNs,
+                        student: student,
+                        leftColWidth: leftColWidth,
+                        lnColWidth: lnColWidth,
+                      );
+                    }),
 
-                    return _buildSchuelerFachRow(
-                      subject: subject,
-                      lns: sortedLNs,
-                      student: student,
+                    // Footer: Gesamt-Durchschnitt
+                    _buildSchuelerFooter(
                       leftColWidth: leftColWidth,
                       lnColWidth: lnColWidth,
-                    );
-                  }),
-
-                  // Footer: Gesamt-Durchschnitt
-                  _buildSchuelerFooter(
-                    leftColWidth: leftColWidth,
-                    lnColWidth: lnColWidth,
-                    sortedSubjectIds: sortedSubjectIds,
-                    student: student,
-                  ),
-                ],
+                      sortedSubjectIds: sortedSubjectIds,
+                      student: student,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSchuelerHeaderRow({
-    required double leftColWidth,
-    required double lnColWidth,
-    required List<String> sortedSubjectIds,
-    required Map<String, List<Leistungsnachweis>> lnBySubject,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: RBSColors.paper,
-        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: leftColWidth,
-            padding: const EdgeInsets.all(12),
-            child: const Text(
-              'Fach / Leistungsnachweis',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          ...sortedSubjectIds.map((subjectId) {
-            final subject = widget.subjects.firstWhere((s) => s.id == subjectId);
-            final lns = lnBySubject[subjectId] ?? [];
-            final fachColor = RBSColors.fromHex(subject.color) ?? RBSColors.courtGreen;
-
-            return Container(
-              width: lnColWidth * lns.length,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: fachColor.withValues(alpha: 0.1),
-                border: Border(
-                  left: BorderSide(color: fachColor, width: 2),
-                  right: BorderSide(color: Colors.grey[200]!),
-                ),
-              ),
-              child: Text(
-                subject.shortName ?? subject.name,
-                style: TextStyle(fontWeight: FontWeight.bold, color: fachColor),
-                textAlign: TextAlign.center,
-              ),
-            );
-          }),
-          Container(
-            width: 80,
-            padding: const EdgeInsets.all(12),
-            child: const Text(
-              '⌀ Fach',
-              style: TextStyle(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -639,9 +609,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
           Container(
             width: leftColWidth,
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            decoration: BoxDecoration(
-              color: fachColor.withValues(alpha: 0.05),
-            ),
+            decoration: BoxDecoration(color: fachColor.withValues(alpha: 0.05)),
             child: Text(
               subject.name,
               style: TextStyle(fontWeight: FontWeight.bold, color: fachColor),
@@ -658,7 +626,10 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                 children: [
                   Text(
                     ln.typ.label,
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     '${ln.datum.day}.${ln.datum.month}.${ln.datum.year}',
@@ -670,24 +641,44 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                     studentId: student.id,
                     leistungsnachweisId: ln.id,
                     note: widget.grades
-                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+                        .where(
+                          (g) =>
+                              g.studentId == student.id &&
+                              g.leistungsnachweisId == ln.id,
+                        )
                         .firstOrNull
                         ?.note,
-                    tendenz: widget.grades
-                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
-                        .firstOrNull
-                        ?.tendenz ?? Tendenz.keine,
+                    tendenz:
+                        widget.grades
+                            .where(
+                              (g) =>
+                                  g.studentId == student.id &&
+                                  g.leistungsnachweisId == ln.id,
+                            )
+                            .firstOrNull
+                            ?.tendenz ??
+                        Tendenz.keine,
                     updatedBy: widget.grades
-                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+                        .where(
+                          (g) =>
+                              g.studentId == student.id &&
+                              g.leistungsnachweisId == ln.id,
+                        )
                         .firstOrNull
                         ?.updatedBy,
                     updatedAt: widget.grades
-                        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+                        .where(
+                          (g) =>
+                              g.studentId == student.id &&
+                              g.leistungsnachweisId == ln.id,
+                        )
                         .firstOrNull
                         ?.updatedAt,
                     compact: false,
-                    onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
-                    onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
+                    onNoteChanged: (note) =>
+                        _handleNoteChange(student.id, ln.id, note),
+                    onTendenzChanged: (tendenz) =>
+                        _handleTendenzChange(student.id, ln.id, tendenz),
                   ),
                 ],
               ),
@@ -753,7 +744,8 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
   /// Matrix: Schüler (Zeilen) × Note (Spalte) - für einen LN
   Widget _buildByLNView() {
-    if (widget.leistungsnachweise.isEmpty || widget.leistungsnachweisId == null) {
+    if (widget.leistungsnachweise.isEmpty ||
+        widget.leistungsnachweisId == null) {
       return const Center(child: Text('Kein Leistungsnachweis ausgewählt'));
     }
 
@@ -793,7 +785,11 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     );
   }
 
-  Widget _buildLNInfoHeader(Leistungsnachweis ln, Subject? subject, Color fachColor) {
+  Widget _buildLNInfoHeader(
+    Leistungsnachweis ln,
+    Subject? subject,
+    Color fachColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -873,14 +869,16 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
 
   Widget _buildLNStudentRow(Student student, Leistungsnachweis ln, int index) {
     final grade = widget.grades
-        .where((g) => g.studentId == student.id && g.leistungsnachweisId == ln.id)
+        .where(
+          (g) => g.studentId == student.id && g.leistungsnachweisId == ln.id,
+        )
         .firstOrNull;
 
     final isEven = index % 2 == 0;
 
     return InkWell(
-      onTap: widget.onStudentTap != null 
-          ? () => widget.onStudentTap!(student.id) 
+      onTap: widget.onStudentTap != null
+          ? () => widget.onStudentTap!(student.id)
           : null,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -924,11 +922,15 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
                 leistungsnachweisId: ln.id,
                 note: grade?.note,
                 tendenz: grade?.tendenz ?? Tendenz.keine,
-                updatedBy: _optimisticUpdatedBy['${student.id}_${ln.id}'] ?? grade?.updatedBy,
+                updatedBy:
+                    _optimisticUpdatedBy['${student.id}_${ln.id}'] ??
+                    grade?.updatedBy,
                 updatedAt: grade?.updatedAt,
                 compact: false,
-                onNoteChanged: (note) => _handleNoteChange(student.id, ln.id, note),
-                onTendenzChanged: (tendenz) => _handleTendenzChange(student.id, ln.id, tendenz),
+                onNoteChanged: (note) =>
+                    _handleNoteChange(student.id, ln.id, note),
+                onTendenzChanged: (tendenz) =>
+                    _handleTendenzChange(student.id, ln.id, tendenz),
               ),
             ),
           ],
@@ -942,7 +944,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     final grades = widget.grades
         .where((g) => g.leistungsnachweisId == ln.id)
         .toList();
-    
+
     if (grades.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -984,7 +986,9 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: _getNoteColor(durchschnitt.round()).withValues(alpha: 0.2),
+                color: _getNoteColor(
+                  durchschnitt.round(),
+                ).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: _getNoteColor(durchschnitt.round()),
@@ -1010,7 +1014,8 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     String text = '';
     switch (widget.mode) {
       case MatrixViewMode.byKlasse:
-        text = '${widget.students.length} Schüler | ${widget.subjects.length} Fächer';
+        text =
+            '${widget.students.length} Schüler | ${widget.subjects.length} Fächer';
         break;
       case MatrixViewMode.bySchueler:
         text = '${widget.leistungsnachweise.length} Leistungsnachweise';
@@ -1052,7 +1057,11 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     }
   }
 
-  Future<void> _handleNoteChange(String studentId, String lnId, int? note) async {
+  Future<void> _handleNoteChange(
+    String studentId,
+    String lnId,
+    int? note,
+  ) async {
     final firestoreService = ref.read(firestoreServiceProvider);
     final userEmail = FirebaseAuth.instance.currentUser?.email;
     final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
@@ -1095,7 +1104,11 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
     }
   }
 
-  Future<void> _handleTendenzChange(String studentId, String lnId, Tendenz tendenz) async {
+  Future<void> _handleTendenzChange(
+    String studentId,
+    String lnId,
+    Tendenz tendenz,
+  ) async {
     final existingGrade = widget.grades
         .where((g) => g.studentId == studentId && g.leistungsnachweisId == lnId)
         .firstOrNull;
