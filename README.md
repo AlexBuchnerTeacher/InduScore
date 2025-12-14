@@ -4,29 +4,33 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.12.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.13.4-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
 
-## Features (v0.12.0)
+## Features (v0.13.4)
 
-### Neu in v0.12.0
+### Neu in v0.13.4
+- **Sticky Headers**: Spaltenüberschriften bleiben beim Scrollen fixiert
+- **Code-Optimierung**: 57% Reduktion in noten_uebersicht_screen.dart (2230 → 970 Zeilen)
+- **Widget-Extraktion**: 7 neue wiederverwendbare Komponenten
+- **Test-Suite**: 65 Tests mit 51.71% Coverage
+- **Bessere Wartbarkeit**: Verbesserte Code-Struktur und Testbarkeit
+
+### Neu in v0.13.0
+- **Matrix-Refactoring**: Alle 5 Detail-Screens mit Inline-Editing
+- **Optimistic Updates**: Sofortige Anzeige von Änderungen
+- **Dashboard-Refactoring**: 81% Code-Reduktion (773 → 145 Zeilen)
+
+### Weitere Features
+- **Zeitgruppen-Filter**: Globaler Filter im Drawer für ZG1/ZG2/ZG3
+- **Nachschreiber-Dashboard**: Übersicht mit 3 Eskalationsstufen
+- **LN-Befreiungen**: Schüler als "nicht relevant" markieren
+- **Benutzerverwaltung**: Admin-Bereich für Lehrer-Accounts mit Rollen
 - **Feature-based Architektur**: Saubere Code-Struktur nach Coding Guidelines
 - **NotenMatrixView**: Universelle Matrix-Komponente mit 3 Modi
-- **Klassen-Detail**: Neue horizontal scrollbare Matrix-Ansicht
 - **Inline-Editing**: Direkte Noten-Änderung in der Tabelle
-- **Befreiungs-Anzeige**: Fach-Kürzel (D, PuG) statt "B"
-
-### Neu in v0.11.3
-- **UI-Optimierungen**: Filter-Chips zentriert, verbesserter LN-Hinweis
-- **Code-Qualität**: Alle Lint-Warnungen behoben
-
-### Neu in v0.11.0
-- **Zeitgruppen-Filter (ZG-Filter)**: Globaler Filter im Drawer für ZG1/ZG2/ZG3
-- **Nachschreiber-Dashboard**: Übersicht mit 3 Eskalationsstufen (≤2d, ≤2w, >2w)
-- **LN-Befreiungen**: Schüler als "nicht relevant" markieren (Swipe-Geste)
-- **Benutzerverwaltung**: Admin-Bereich für Lehrer-Accounts mit Rollen
 
 ### Kernfunktionen
 - **Matrix-Ansicht**: Schüler-Fächer-Matrix mit Durchschnitten
