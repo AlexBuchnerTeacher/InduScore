@@ -57,6 +57,11 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
+          IconButton(
             icon: const Icon(Icons.person_add),
             onPressed: () => _showUserDialog(context),
             tooltip: 'Neuer Benutzer',

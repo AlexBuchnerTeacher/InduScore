@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/rbs_theme.dart';
-import '../../../models/grade.dart';
+import '../../../models/tendenz.dart';
 
 /// Editierbare Noten-Zelle mit Inline-Editing
 /// 

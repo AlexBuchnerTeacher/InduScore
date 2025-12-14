@@ -45,6 +45,11 @@ class _LeistungsnachweiseScreenState
         title: const Text('Leistungsnachweise'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
+          IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _showLeistungsnachweisDialog(context),
             tooltip: 'Neuer Leistungsnachweis',
@@ -61,17 +66,33 @@ class _LeistungsnachweiseScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Zeitgruppen Filter Chip
-                if (zeitgruppenFilter != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: RBSSpacing.sm),
-                    child: Chip(
-                      label: Text('ZG$zeitgruppenFilter'),
-                      deleteIcon: const Icon(Icons.close, size: 16),
-                      onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
-                      backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
-                    ),
+                // Zeitgruppen-Filter
+                Padding(
+                  padding: const EdgeInsets.only(bottom: RBSSpacing.sm),
+                  child: Wrap(
+                    spacing: 4,
+                    children: [
+                      RBSFilterChip(
+                        label: 'ZG1',
+                        selected: zeitgruppenFilter.contains(1),
+                        color: RBSColors.courtGreen,
+                        onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(1),
+                      ),
+                      RBSFilterChip(
+                        label: 'ZG2',
+                        selected: zeitgruppenFilter.contains(2),
+                        color: RBSColors.courtGreen,
+                        onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(2),
+                      ),
+                      RBSFilterChip(
+                        label: 'ZG3',
+                        selected: zeitgruppenFilter.contains(3),
+                        color: RBSColors.courtGreen,
+                        onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(3),
+                      ),
+                    ],
                   ),
+                ),
                 // Klassen-Filter
                 klassenAsync.when(
                   data: (_) => Wrap(

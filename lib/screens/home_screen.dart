@@ -73,16 +73,28 @@ class HomeScreen extends ConsumerWidget {
             Row(
               children: [
                 const RBSHeadline(text: 'Meine Klassen', level: RBSHeadlineLevel.h4),
-                if (zeitgruppenFilter != null)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Chip(
-                      label: Text('ZG$zeitgruppenFilter'),
-                      deleteIcon: const Icon(Icons.close, size: 16),
-                      onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
-                      backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
-                    ),
-                  ),
+                const Spacer(),
+                // Zeitgruppen-Filter
+                RBSFilterChip(
+                  label: 'ZG1',
+                  selected: zeitgruppenFilter.contains(1),
+                  color: RBSColors.courtGreen,
+                  onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(1),
+                ),
+                const SizedBox(width: 4),
+                RBSFilterChip(
+                  label: 'ZG2',
+                  selected: zeitgruppenFilter.contains(2),
+                  color: RBSColors.courtGreen,
+                  onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(2),
+                ),
+                const SizedBox(width: 4),
+                RBSFilterChip(
+                  label: 'ZG3',
+                  selected: zeitgruppenFilter.contains(3),
+                  color: RBSColors.courtGreen,
+                  onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(3),
+                ),
               ],
             ),
             const SizedBox(height: RBSSpacing.sm),
@@ -93,11 +105,11 @@ class HomeScreen extends ConsumerWidget {
                 if (filteredKlassen.isEmpty) {
                   return DashboardEmptyCard(
                     icon: Icons.school_outlined,
-                    title: zeitgruppenFilter != null 
-                        ? 'Keine Klassen in ZG$zeitgruppenFilter'
+                    title: zeitgruppenFilter.isNotEmpty
+                        ? 'Keine Klassen in ausgewählten Zeitgruppen'
                         : 'Noch keine Klassen',
-                    subtitle: zeitgruppenFilter != null
-                        ? 'Wähle eine andere Zeitgruppe'
+                    subtitle: zeitgruppenFilter.isNotEmpty
+                        ? 'Wähle andere Zeitgruppen'
                         : 'Erstelle deine erste Klasse',
                     onTap: () => context.go('/klassen'),
                   );

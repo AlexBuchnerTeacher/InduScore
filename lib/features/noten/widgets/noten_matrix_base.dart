@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../models/grade.dart';
+import '../../../models/tendenz.dart';
 import '../../../models/student.dart';
 import '../../../providers/app_providers.dart';
 import '../noten_matrix_logic.dart';

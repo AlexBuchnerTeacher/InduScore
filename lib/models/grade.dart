@@ -1,20 +1,5 @@
 ﻿import 'package:cloud_firestore/cloud_firestore.dart';
-
-/// Tendenz einer Note (optional, nur Info, keine Berechnung)
-enum Tendenz {
-  plus('+'),
-  minus('-'),
-  keine('');
-
-  final String symbol;
-  const Tendenz(this.symbol);
-
-  static Tendenz fromString(String? value) {
-    if (value == '+') return Tendenz.plus;
-    if (value == '-') return Tendenz.minus;
-    return Tendenz.keine;
-  }
-}
+import 'package:induscore/models/tendenz.dart';
 
 /// Note zu einem Leistungsnachweis
 /// 

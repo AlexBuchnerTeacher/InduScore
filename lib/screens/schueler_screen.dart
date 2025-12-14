@@ -21,13 +21,24 @@ class SchuelerScreen extends ConsumerStatefulWidget {
 }
 
 class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
-  String? _selectedKlasseId;
+  // ignore: prefer_final_fields
+  Set<Beruf> _selectedBerufe = {};
+  // ignore: prefer_final_fields
+  Set<String> _selectedKlassenIds = {};
   bool _showAusgetretene = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final klassenAsync = ref.watch(klassenProvider);
-    final filteredKlassen = ref.watch(filteredKlassenProvider);
+    final studentsAsync = ref.watch(studentsProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
 
     return Scaffold(
@@ -41,18 +52,20 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
         ),
         title: const Text('Schülerverwaltung'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
           // Toggle für ausgetretene Schüler
-          if (_selectedKlasseId != null)
-            IconButton(
-              icon: Icon(_showAusgetretene ? Icons.visibility : Icons.visibility_off),
-              onPressed: () => setState(() => _showAusgetretene = !_showAusgetretene),
-              tooltip: _showAusgetretene ? 'Ausgetretene ausblenden' : 'Ausgetretene anzeigen',
-            ),
+          IconButton(
+            icon: Icon(_showAusgetretene ? Icons.visibility : Icons.visibility_off),
+            onPressed: () => setState(() => _showAusgetretene = !_showAusgetretene),
+            tooltip: _showAusgetretene ? 'Ausgetretene ausblenden' : 'Ausgetretene anzeigen',
+          ),
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: _selectedKlasseId != null
-                ? () => _showStudentDialog()
-                : null,
+            onPressed: () => _showStudentDialog(),
             tooltip: 'Neuer Schüler',
           ),
         ],
@@ -60,92 +73,247 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
       drawer: const RBSDrawer(),
       body: Column(
         children: [
-          // Klassen-Filter
+          // Filter Section
           Container(
             padding: const EdgeInsets.all(RBSSpacing.md),
             color: RBSColors.paper,
-            child: klassenAsync.when(
-              data: (_) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Zeitgruppen Filter Chip
-                  if (zeitgruppenFilter != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: RBSSpacing.sm),
-                      child: Chip(
-                        label: Text('ZG$zeitgruppenFilter'),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () => ref.read(zeitgruppenFilterProvider.notifier).clearFilter(),
-                        backgroundColor: RBSColors.courtGreen.withValues(alpha: 0.2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Beruf-Filter
+                Row(
+                  children: [
+                    Text('Beruf:', style: RBSTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: RBSSpacing.sm),
+                    Expanded(
+                      child: Wrap(
+                        spacing: RBSSpacing.xs,
+                        runSpacing: RBSSpacing.xs,
+                        children: Beruf.values.map((beruf) {
+                          return RBSFilterChip(
+                            label: beruf.code,
+                            selected: _selectedBerufe.contains(beruf),
+                            color: _getBerufColor(beruf),
+                            onSelected: (_) {
+                              setState(() {
+                                if (_selectedBerufe.contains(beruf)) {
+                                  _selectedBerufe.remove(beruf);
+                                } else {
+                                  _selectedBerufe.add(beruf);
+                                }
+                                // Reset Klassen-Auswahl wenn Beruf ändert
+                                _selectedKlassenIds.clear();
+                              });
+                            },
+                          );
+                        }).toList(),
                       ),
                     ),
-                  Wrap(
-                    spacing: RBSSpacing.sm,
-                    runSpacing: RBSSpacing.sm,
-                    children: filteredKlassen.map((klasse) {
-                      return RBSFilterChip(
-                        label: klasse.name,
-                        selected: _selectedKlasseId == klasse.id,
-                        color: _getBerufColor(klasse.beruf),
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedKlasseId = selected ? klasse.id : null;
-                          });
-                        },
-                      );
-                    }).toList(),
+                  ],
+                ),
+                const SizedBox(height: RBSSpacing.sm),
+
+                // 2. Zeitgruppen-Filter
+                Row(
+                  children: [
+                    Text('Zeitgruppe:', style: RBSTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: RBSSpacing.sm),
+                    RBSFilterChip(
+                      label: 'ZG1',
+                      selected: zeitgruppenFilter.contains(1),
+                      color: RBSColors.courtGreen,
+                      onSelected: (_) {
+                        ref.read(zeitgruppenFilterProvider.notifier).toggle(1);
+                        setState(() => _selectedKlassenIds.clear());
+                      },
+                    ),
+                    const SizedBox(width: RBSSpacing.xs),
+                    RBSFilterChip(
+                      label: 'ZG2',
+                      selected: zeitgruppenFilter.contains(2),
+                      color: RBSColors.courtGreen,
+                      onSelected: (_) {
+                        ref.read(zeitgruppenFilterProvider.notifier).toggle(2);
+                        setState(() => _selectedKlassenIds.clear());
+                      },
+                    ),
+                    const SizedBox(width: RBSSpacing.xs),
+                    RBSFilterChip(
+                      label: 'ZG3',
+                      selected: zeitgruppenFilter.contains(3),
+                      color: RBSColors.courtGreen,
+                      onSelected: (_) {
+                        ref.read(zeitgruppenFilterProvider.notifier).toggle(3);
+                        setState(() => _selectedKlassenIds.clear());
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: RBSSpacing.sm),
+
+                // 3. Klassen-Filter
+                klassenAsync.when(
+                  data: (allKlassen) {
+                    // Filtere Klassen nach Beruf und Zeitgruppe
+                    var filteredKlassen = allKlassen;
+                    if (_selectedBerufe.isNotEmpty) {
+                      filteredKlassen = filteredKlassen
+                          .where((k) => _selectedBerufe.contains(k.beruf))
+                          .toList();
+                    }
+                    if (zeitgruppenFilter.isNotEmpty) {
+                      filteredKlassen = filteredKlassen
+                          .where((k) => zeitgruppenFilter.contains(k.zeitgruppe.nummer))
+                          .toList();
+                    }
+
+                    if (filteredKlassen.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Klasse:', style: RBSTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: RBSSpacing.xs),
+                        Wrap(
+                          spacing: RBSSpacing.xs,
+                          runSpacing: RBSSpacing.xs,
+                          children: filteredKlassen.map((klasse) {
+                            return RBSFilterChip(
+                              label: klasse.name,
+                              selected: _selectedKlassenIds.contains(klasse.id),
+                              color: _getBerufColor(klasse.beruf),
+                              onSelected: (_) {
+                                setState(() {
+                                  if (_selectedKlassenIds.contains(klasse.id)) {
+                                    _selectedKlassenIds.remove(klasse.id);
+                                  } else {
+                                    _selectedKlassenIds.add(klasse.id);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (e, _) => Text('Fehler: $e', style: TextStyle(color: RBSColors.error)),
+                ),
+                const SizedBox(height: RBSSpacing.sm),
+
+                // 4. Suchfeld
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Schüler suchen (Vor- oder Nachname)...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: RBSSpacing.md, vertical: RBSSpacing.sm),
                   ),
-                ],
-              ),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (e, _) => Text('Fehler: $e'),
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.toLowerCase());
+                  },
+                ),
+              ],
             ),
           ),
 
           // Schüler-Liste
           Expanded(
-            child: _selectedKlasseId == null
-                ? _buildEmptyState('Wähle eine Klasse aus')
-                : _buildStudentList(),
+            child: studentsAsync.when(
+              data: (allStudents) => _buildStudentList(allStudents, klassenAsync),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Fehler: $e')),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStudentList() {
-    final studentsAsync = ref.watch(
-      studentsByKlasseProvider(_selectedKlasseId!),
-    );
+  Widget _buildStudentList(List<Student> allStudents, AsyncValue klassenAsync) {
+    // 1. Filtere nach Aktiv/Inaktiv
+    var filtered = _showAusgetretene 
+        ? allStudents 
+        : allStudents.where((s) => s.isAktiv).toList();
 
-    return studentsAsync.when(
-      data: (students) {
-        // Filtere nach Status
-        final filtered = _showAusgetretene 
-            ? students 
-            : students.where((s) => s.isAktiv).toList();
-        
-        if (filtered.isEmpty) {
-          return _buildEmptyState(
-            students.isEmpty 
-                ? 'Keine Schüler in dieser Klasse' 
-                : 'Keine aktiven Schüler (${students.length} ausgetreten)',
-          );
-        }
+    final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(RBSSpacing.md),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final student = filtered[index];
-            return _buildStudentCard(student);
-          },
-        );
+    // 2. Filtere nach ausgewählten Klassen (wenn welche gewählt)
+    if (_selectedKlassenIds.isNotEmpty) {
+      filtered = filtered.where((s) => _selectedKlassenIds.contains(s.klasseId)).toList();
+    }
+    // Wenn keine Klassen gewählt, aber Beruf/ZG-Filter aktiv → filtere nach Klassen-Beruf/ZG
+    else if (_selectedBerufe.isNotEmpty || zeitgruppenFilter.isNotEmpty) {
+      return klassenAsync.when(
+        data: (klassen) {
+          final validKlassenIds = klassen
+              .where((k) => 
+                (_selectedBerufe.isEmpty || _selectedBerufe.contains(k.beruf)) &&
+                (zeitgruppenFilter.isEmpty || zeitgruppenFilter.contains(k.zeitgruppe)))
+              .map((k) => k.id)
+              .toSet();
+          
+          filtered = filtered.where((s) => validKlassenIds.contains(s.klasseId)).toList();
+
+          return _buildFilteredList(filtered, allStudents);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Fehler: $e')),
+      );
+    }
+
+    // 3. Filtere nach Suchbegriff (Vor- oder Nachname)
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((s) {
+        final fullName = '${s.firstName} ${s.lastName}'.toLowerCase();
+        return fullName.contains(_searchQuery);
+      }).toList();
+    }
+
+    return _buildFilteredList(filtered, allStudents);
+  }
+
+  Widget _buildFilteredList(List<Student> filtered, List<Student> allStudents) {
+    final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
+    
+    if (filtered.isEmpty) {
+      String message = 'Keine Schüler gefunden';
+      if (_searchQuery.isNotEmpty) {
+        message = 'Keine Schüler mit "$_searchQuery" gefunden';
+      } else if (_selectedKlassenIds.isEmpty && _selectedBerufe.isEmpty && zeitgruppenFilter.isEmpty) {
+        message = 'Wähle Filter oder suche nach Schülern';
+      }
+      return _buildEmptyState(message);
+    }
+
+    // Sortiere nach Nachname, dann Vorname
+    filtered.sort((a, b) {
+      final lastNameComp = a.lastName.compareTo(b.lastName);
+      return lastNameComp != 0 ? lastNameComp : a.firstName.compareTo(b.firstName);
+    });
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(RBSSpacing.md),
+      itemCount: filtered.length,
+      itemBuilder: (context, index) {
+        final student = filtered[index];
+        return _buildStudentCard(student);
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Fehler: $e')),
     );
   }
 
@@ -273,18 +441,16 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             message,
             style: RBSTypography.h3.copyWith(color: Colors.grey[600]),
           ),
-          if (_selectedKlasseId != null) ...[
-            const SizedBox(height: RBSSpacing.lg),
-            ElevatedButton.icon(
-              onPressed: () => _showStudentDialog(),
-              icon: const Icon(Icons.add),
-              label: const Text('Ersten Schüler hinzufügen'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: RBSColors.dynamicRed,
-                foregroundColor: Colors.white,
-              ),
+          const SizedBox(height: RBSSpacing.lg),
+          ElevatedButton.icon(
+            onPressed: () => _showStudentDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Neuen Schüler anlegen'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: RBSColors.dynamicRed,
+              foregroundColor: Colors.white,
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -367,16 +533,11 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                       ),
                     );
                   } else {
-                    await firestoreService.createStudent(
-                      Student(
-                        id: '',
-                        firstName: firstName,
-                        lastName: lastName,
-                        klasseId: _selectedKlasseId!,
-                        eintrittsDatum: eintrittsDatum,
-                        createdAt: DateTime.now(),
-                      ),
+                    // Wird später erweitert mit Klassen-Auswahl
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Bitte erweitere den Dialog um Klassenauswahl')),
                     );
+                    return;
                   }
                   if (context.mounted) Navigator.pop(context);
                 } catch (e) {

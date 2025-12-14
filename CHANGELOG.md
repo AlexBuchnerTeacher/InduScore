@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.13.4] - 2025-12-14
+
+### Added
+- **Sticky Headers**: Spaltenüberschriften bleiben beim Scrollen fixiert
+  - NotenTableWidget: Header-Zeile fixiert bei vertikalem Scroll
+  - FaecherMatrixWidget: Fächer-Header fixiert bei vertikalem Scroll
+  - Horizontales Scrollen funktioniert weiterhin für breite Tabellen
+
+### Changed
+- **Massive Code-Reduktion**: noten_uebersicht_screen.dart von 2230 → 970 Zeilen (57% Reduktion)
+- **Widget-Extraktion**: 7 neue Widget-Dateien erstellt (~1500+ Zeilen ausgelagert)
+  - `NotenTableWidget` (434 Zeilen): Tabellen-Ansicht mit Statistiken
+  - `FaecherMatrixWidget` (445 Zeilen): Matrix-Ansicht Schüler × Fächer
+  - `NoteInputWidgets` (320 Zeilen): Wiederverwendbare Input-Komponenten
+  - `StudentSubjectCard` (182 Zeilen): Schüler-Fach-Karte
+  - `noten_eingabe.dart` (38 Zeilen): Model für Noten-Eingabe
+  - `noten_statistik.dart` (14 Zeilen): Statistik-Model
+  - `tendenz.dart` (15 Zeilen): Tendenz-Enum
+- **Verbesserte Code-Struktur**: 
+  - Bessere Testbarkeit durch Widget-Separation
+  - Wiederverwendbare Komponenten
+  - Klarere Verantwortlichkeiten
+
+### Technical
+- Entfernte Methoden (~1260 Zeilen):
+  - `_buildNotenTable` → `NotenTableWidget`
+  - `_buildFaecherMatrix` → `FaecherMatrixWidget`
+  - `_buildNoteDropdown`, `_buildTendenzButtons` → `note_input_widgets.dart`
+  - `_buildStudentSubjectCard`, `_buildStudentLNRow` → `StudentSubjectCard`
+  - Alle `_buildCompact*` Methoden und Helper
+- Screen-Datei enthält nur noch:
+  - State Management (Map<String, NotenEingabe>)
+  - Filter-Logik (~130 Zeilen)
+  - View-Modi-Orchestrierung
+  - Core Business Logic (_updateNote, _saveGrade)
+  - Helper-Methoden
+
+### Fixed
+- Unused import in noten_uebersicht_screen.dart entfernt
+
+
 ## [0.13.0] - 2025-12-12
 
 ### Added

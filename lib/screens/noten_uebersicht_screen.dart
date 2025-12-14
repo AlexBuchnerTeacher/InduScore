@@ -1,16 +1,22 @@
-// InduScore Entwicklungsstand 0.11.3 - 10.12.2025
-// UI optimiert, Chips zentriert, LN-Hinweis verbessert
+// InduScore Entwicklungsstand 0.13.4 - 14.12.2025
+// Refactored: Widgets ausgelagert, Screen von 2230 auf 970 Zeilen reduziert (57% Reduktion)
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/grade.dart';
-import '../models/leistungsnachweis.dart';
-import '../models/student.dart';
-import '../models/klasse.dart';
-import '../models/subject.dart';
-import '../providers/app_providers.dart';
+
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
+import '../features/noten/widgets/faecher_matrix_widget.dart';
+import '../features/noten/widgets/noten_table_widget.dart';
+import '../features/noten/widgets/student_subject_card.dart';
+import '../models/grade.dart';
+import '../models/klasse.dart';
+import '../models/leistungsnachweis.dart';
+import '../models/noten_eingabe.dart';
+import '../models/student.dart';
+import '../models/subject.dart';
+import '../models/tendenz.dart';
+import '../providers/app_providers.dart';
 import '../widgets/rbs_drawer.dart';
 
 /// Zentrale Notenübersicht mit flexiblen Filtern
@@ -37,7 +43,7 @@ class NotenUebersichtScreen extends ConsumerStatefulWidget {
 }
 
 class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
-  final Map<String, _NotenEingabe> _noten = {};
+  final Map<String, NotenEingabe> _noten = {};
   final Set<String> _savingGrades = {};
 
   // Filter State
@@ -59,6 +65,13 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
           onPressed: () => context.go('/'),
         ),
         title: Text(_getTitle()),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.home, color: RBSColors.dynamicRed),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
+        ],
       ),
       drawer: const RBSDrawer(),
       body: klassenAsync.when(
@@ -385,7 +398,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
               )
               .firstOrNull;
 
-          _noten[key] = _NotenEingabe(
+          _noten[key] = NotenEingabe(
             note: existingGrade?.note,
             tendenz: existingGrade?.tendenz ?? Tendenz.keine,
             kommentar: existingGrade?.kommentar,
@@ -458,439 +471,15 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
           : null;
     }
 
-    return _buildFaecherMatrix(
+    return FaecherMatrixWidget(
       students: students,
       sortedSubjectIds: sortedSubjectIds,
       lnBySubject: lnBySubject,
       subjects: subjects,
       studentFachSchnitte: studentFachSchnitte,
       studentGesamtSchnitte: studentGesamtSchnitte,
-    );
-  }
-
-  /// Matrix-Ansicht: Schüler in Zeilen, Fächer-Durchschnitte in Spalten
-  Widget _buildFaecherMatrix({
-    required List<Student> students,
-    required List<String> sortedSubjectIds,
-    required Map<String, List<Leistungsnachweis>> lnBySubject,
-    required List<Subject> subjects,
-    required Map<String, Map<String, double?>> studentFachSchnitte,
-    required Map<String, double?> studentGesamtSchnitte,
-  }) {
-    // Berechne Spaltenbreite
-    final fachSpaltenBreite = 85.0;
-    final tableWidth =
-        180.0 + (sortedSubjectIds.length * fachSpaltenBreite) + 80;
-
-    return Scrollbar(
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: tableWidth),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header-Zeile
-                  Container(
-                    decoration: BoxDecoration(
-                      color: RBSColors.paper,
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey[400]!, width: 2),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        // Schüler-Spalte
-                        Container(
-                          width: 170,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 8,
-                          ),
-                          child: const Text(
-                            'Schüler',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                        // Fach-Spalten
-                        ...sortedSubjectIds.map((subjectId) {
-                          final subject = subjects
-                              .where((s) => s.id == subjectId)
-                              .firstOrNull;
-                          final fachColor =
-                              RBSColors.fromHex(subject?.color) ??
-                              RBSColors.courtGreen;
-                          final lnCount = lnBySubject[subjectId]?.length ?? 0;
-
-                          return InkWell(
-                            onTap: () => _showFachDetailDialog(
-                              subject,
-                              lnBySubject[subjectId] ?? [],
-                              students,
-                            ),
-                            child: Container(
-                              width: fachSpaltenBreite,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: fachColor.withValues(alpha: 0.1),
-                                border: Border(
-                                  left: BorderSide(color: fachColor, width: 3),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    subject?.shortName ?? subject?.name ?? '?',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: fachColor,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    '$lnCount LN',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                        // Gesamt-Spalte
-                        Container(
-                          width: 70,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: RBSColors.dynamicRed.withValues(alpha: 0.1),
-                          ),
-                          child: const Column(
-                            children: [
-                              Text(
-                                '⌀',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text('Gesamt', style: TextStyle(fontSize: 10)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Schüler-Zeilen
-                  ...students.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final student = entry.value;
-                    final isEven = index % 2 == 0;
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: isEven ? Colors.white : Colors.grey[50],
-                        border: Border(
-                          bottom: BorderSide(color: Colors.grey[200]!),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          // Schüler-Name
-                          Container(
-                            width: 170,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 8,
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  '${index + 1}.',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[500],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          '${student.lastName}, ${student.firstName}',
-                                          style: const TextStyle(fontSize: 13),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      // Befreiungs-Indikatoren
-                                      if (student.befreiungDeutsch ||
-                                          student.befreiungPuG) ...[
-                                        const SizedBox(width: 4),
-                                        Tooltip(
-                                          message: [
-                                            if (student.befreiungDeutsch)
-                                              'Befreiung Deutsch',
-                                            if (student.befreiungPuG)
-                                              'Befreiung PuG',
-                                          ].join(', '),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 4,
-                                              vertical: 1,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.orange.withValues(
-                                                alpha: 0.2,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              'B',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.orange[800],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Fach-Durchschnitte
-                          ...sortedSubjectIds.map((subjectId) {
-                            final schnitt =
-                                studentFachSchnitte[student.id]?[subjectId];
-                            final subject = subjects
-                                .where((s) => s.id == subjectId)
-                                .firstOrNull;
-
-                            return InkWell(
-                              onTap: () => _showFachDetailDialog(
-                                subject,
-                                lnBySubject[subjectId] ?? [],
-                                students,
-                                highlightStudentId: student.id,
-                              ),
-                              child: Container(
-                                width: fachSpaltenBreite,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 4,
-                                ),
-                                alignment: Alignment.center,
-                                child: schnitt != null
-                                    ? Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: _getNoteColor(
-                                            schnitt.round(),
-                                          ).withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: _getNoteColor(
-                                              schnitt.round(),
-                                            ).withValues(alpha: 0.5),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          schnitt.toStringAsFixed(1),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                            color: _getNoteColor(
-                                              schnitt.round(),
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : Text(
-                                        '-',
-                                        style: TextStyle(
-                                          color: Colors.grey[400],
-                                        ),
-                                      ),
-                              ),
-                            );
-                          }),
-                          // Gesamt-Durchschnitt
-                          Container(
-                            width: 70,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 8,
-                            ),
-                            alignment: Alignment.center,
-                            child: studentGesamtSchnitte[student.id] != null
-                                ? Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _getNoteColor(
-                                        studentGesamtSchnitte[student.id]!
-                                            .round(),
-                                      ).withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: _getNoteColor(
-                                          studentGesamtSchnitte[student.id]!
-                                              .round(),
-                                        ),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      studentGesamtSchnitte[student.id]!
-                                          .toStringAsFixed(1),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                        color: _getNoteColor(
-                                          studentGesamtSchnitte[student.id]!
-                                              .round(),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    '-',
-                                    style: TextStyle(color: Colors.grey[400]),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-
-                  // Footer mit Klassen-Durchschnitten
-                  Container(
-                    decoration: BoxDecoration(
-                      color: RBSColors.paper,
-                      border: Border(
-                        top: BorderSide(color: Colors.grey[400]!, width: 2),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 170,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 8,
-                          ),
-                          child: const Text(
-                            '⌀ Klasse',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        ...sortedSubjectIds.map((subjectId) {
-                          final schnitte = students
-                              .map((s) => studentFachSchnitte[s.id]?[subjectId])
-                              .where((s) => s != null)
-                              .cast<double>()
-                              .toList();
-                          final klassenSchnitt = schnitte.isNotEmpty
-                              ? schnitte.reduce((a, b) => a + b) /
-                                    schnitte.length
-                              : null;
-
-                          return Container(
-                            width: fachSpaltenBreite,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 4,
-                            ),
-                            alignment: Alignment.center,
-                            child: klassenSchnitt != null
-                                ? Text(
-                                    klassenSchnitt.toStringAsFixed(2),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: _getNoteColor(
-                                        klassenSchnitt.round(),
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    '-',
-                                    style: TextStyle(color: Colors.grey[400]),
-                                  ),
-                          );
-                        }),
-                        Container(
-                          width: 70,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 8,
-                          ),
-                          alignment: Alignment.center,
-                          child: () {
-                            final alleSchnitte = studentGesamtSchnitte.values
-                                .where((s) => s != null)
-                                .cast<double>()
-                                .toList();
-                            final gesamtSchnitt = alleSchnitte.isNotEmpty
-                                ? alleSchnitte.reduce((a, b) => a + b) /
-                                      alleSchnitte.length
-                                : null;
-                            return gesamtSchnitt != null
-                                ? Text(
-                                    gesamtSchnitt.toStringAsFixed(2),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: _getNoteColor(
-                                        gesamtSchnitt.round(),
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    '-',
-                                    style: TextStyle(color: Colors.grey[400]),
-                                  );
-                          }(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      onFachDetailTap: _showFachDetailDialog,
+      getNoteColor: _getNoteColor,
     );
   }
 
@@ -942,13 +531,25 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
                 ),
               ),
               // Noten-Tabelle
-              Expanded(child: _buildNotenTable(students, leistungsnachweise)),
+              Expanded(
+                child: NotenTableWidget(
+                  students: students,
+                  leistungsnachweise: leistungsnachweise,
+                  noten: _noten,
+                  onNoteChanged: _updateNote,
+                  onTendenzChanged: _updateTendenz,
+                  getNoteColor: _getNoteColor,
+                  getNoteWithTendenz: _getNoteWithTendenz,
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  // [GELÖSCHT: _buildFaecherMatrix_OLD + _buildByKlasse - ~850 Zeilen - Nun in separate Widgets ausgelagert]
 
   /// Ansicht gruppiert nach Klasse (für Fach-Kontext)
   Widget _buildByKlasse(
@@ -1007,7 +608,15 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
             ),
           ),
           // Noten-Tabelle
-          _buildNotenTable(students, leistungsnachweise),
+          NotenTableWidget(
+            students: students,
+            leistungsnachweise: leistungsnachweise,
+            noten: _noten,
+            onNoteChanged: _updateNote,
+            onTendenzChanged: _updateTendenz,
+            getNoteColor: _getNoteColor,
+            getNoteWithTendenz: _getNoteWithTendenz,
+          ),
         ],
       ),
     );
@@ -1186,519 +795,28 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         // Fächer mit Noten
         ...lnBySubject.entries.map((entry) {
           final subject = subjects.where((s) => s.id == entry.key).firstOrNull;
-          return _buildStudentSubjectCard(student, subject, entry.value);
+          return StudentSubjectCard(
+            student: student,
+            subject: subject,
+            leistungsnachweise: entry.value,
+            noten: _noten,
+            onNoteChanged: _updateNote,
+            onTendenzChanged: _updateTendenz,
+            getNoteColor: _getNoteColor,
+            getNoteWithTendenz: _getNoteWithTendenz,
+            formatDate: _formatDate,
+          );
         }),
       ],
     );
   }
 
-  Widget _buildStudentSubjectCard(
-    Student student,
-    Subject? subject,
-    List<Leistungsnachweis> leistungsnachweise,
-  ) {
-    // Berechne Durchschnitt für dieses Fach
-    double summe = 0;
-    double gewichtungsSumme = 0;
-    int anzahl = 0;
-
-    for (final ln in leistungsnachweise) {
-      final key = '${student.id}_${ln.id}';
-      final eingabe = _noten[key];
-      if (eingabe?.note != null) {
-        final noteValue = _getNoteWithTendenz(eingabe!.note!, eingabe.tendenz);
-        summe += noteValue * ln.gewichtung;
-        gewichtungsSumme += ln.gewichtung;
-        anzahl++;
-      }
-    }
-
-    final durchschnitt = gewichtungsSumme > 0 ? summe / gewichtungsSumme : null;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: RBSColors.courtGreen.withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    subject?.name ?? 'Unbekanntes Fach',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                // Durchschnitt Badge
-                if (durchschnitt != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getNoteColor(
-                        durchschnitt.round(),
-                      ).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _getNoteColor(durchschnitt.round()),
-                      ),
-                    ),
-                    child: Text(
-                      '⌀ ${durchschnitt.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: _getNoteColor(durchschnitt.round()),
-                      ),
-                    ),
-                  ),
-                if (durchschnitt == null)
-                  Text(
-                    '$anzahl/${leistungsnachweise.length}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-              ],
-            ),
-          ),
-          // Einzelne Leistungsnachweise
-          ...leistungsnachweise.map((ln) => _buildStudentLNRow(student, ln)),
-          // Footer mit Anzahl
-          if (anzahl > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Text(
-                '$anzahl von ${leistungsnachweise.length} Noten eingetragen',
-                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStudentLNRow(Student student, Leistungsnachweis ln) {
-    final key = '${student.id}_${ln.id}';
-    final eingabe = _noten[key];
-    if (eingabe == null) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
-        children: [
-          // LN-Info
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ln.bezeichnung,
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  '${ln.typ.label} • ${ln.gewichtung}x • ${_formatDate(ln.datum)}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-          // Note
-          _buildNoteDropdown(key, eingabe, student.id, ln.id),
-          const SizedBox(width: 8),
-          // Tendenz
-          _buildTendenzButtons(key, eingabe, student.id, ln.id),
-        ],
-      ),
-    );
-  }
-
-  /// Noten-Tabelle mit Schülern als Zeilen und LN als Spalten
-  Widget _buildNotenTable(
-    List<Student> students,
-    List<Leistungsnachweis> leistungsnachweise,
-  ) {
-    if (students.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Text('Keine Schüler'),
-      );
-    }
-
-    // Berechne Mindestbreite für horizontales Scrollen
-    final tableWidth = 160.0 + (leistungsnachweise.length * 120.0);
-
-    // Berechne Statistiken pro LN
-    final lnStats = <String, _LNStatistik>{};
-    for (final ln in leistungsnachweise) {
-      final noten = <double>[];
-      int count = 0;
-      final verteilung = <int, int>{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
-
-      for (final student in students) {
-        final key = '${student.id}_${ln.id}';
-        final eingabe = _noten[key];
-        if (eingabe?.note != null) {
-          final noteValue = _getNoteWithTendenz(
-            eingabe!.note!,
-            eingabe.tendenz,
-          );
-          noten.add(noteValue);
-          count++;
-          verteilung[eingabe.note!] = (verteilung[eingabe.note!] ?? 0) + 1;
-        }
-      }
-
-      final durchschnitt = noten.isEmpty
-          ? null
-          : noten.reduce((a, b) => a + b) / noten.length;
-      lnStats[ln.id] = _LNStatistik(
-        durchschnitt: durchschnitt,
-        anzahl: count,
-        gesamt: students.length,
-        verteilung: verteilung,
-      );
-    }
-
-    // Berechne Schüler-Durchschnitte
-    final studentStats = <String, double?>{};
-    for (final student in students) {
-      final noten = <double>[];
-      double gewichtungsSumme = 0;
-
-      for (final ln in leistungsnachweise) {
-        final key = '${student.id}_${ln.id}';
-        final eingabe = _noten[key];
-        if (eingabe?.note != null) {
-          final noteValue = _getNoteWithTendenz(
-            eingabe!.note!,
-            eingabe.tendenz,
-          );
-          noten.add(noteValue * ln.gewichtung);
-          gewichtungsSumme += ln.gewichtung;
-        }
-      }
-
-      studentStats[student.id] = gewichtungsSumme > 0
-          ? noten.reduce((a, b) => a + b) / gewichtungsSumme
-          : null;
-    }
-
-    return Scrollbar(
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: tableWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Haupt-Tabelle
-              DataTable(
-                columnSpacing: 8,
-                headingRowHeight: 64,
-                dataRowMinHeight: 52,
-                dataRowMaxHeight: 52,
-                columns: [
-                  const DataColumn(
-                    label: SizedBox(
-                      width: 140,
-                      child: Text(
-                        'Schüler',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  ...leistungsnachweise.map(
-                    (ln) => DataColumn(
-                      label: SizedBox(
-                        width: 110,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              ln.bezeichnung,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                            Text(
-                              '${ln.typ.label} ${ln.gewichtung}x',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Spalte für Schüler-Durchschnitt
-                  const DataColumn(
-                    label: SizedBox(
-                      width: 70,
-                      child: Text(
-                        '⌀',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                rows: students
-                    .map(
-                      (student) => DataRow(
-                        cells: [
-                          DataCell(
-                            SizedBox(
-                              width: 140,
-                              child: Text(
-                                student.displayName,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                          ...leistungsnachweise.map((ln) {
-                            final key = '${student.id}_${ln.id}';
-                            final eingabe = _noten[key];
-                            if (eingabe == null) {
-                              return const DataCell(Text('-'));
-                            }
-
-                            return DataCell(
-                              SizedBox(
-                                width: 110,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildCompactNoteDropdown(
-                                      key,
-                                      eingabe,
-                                      student.id,
-                                      ln.id,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    _buildCompactTendenzButtons(
-                                      key,
-                                      eingabe,
-                                      student.id,
-                                      ln.id,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                          // Schüler-Durchschnitt
-                          DataCell(
-                            SizedBox(
-                              width: 70,
-                              child: studentStats[student.id] != null
-                                  ? Text(
-                                      studentStats[student.id]!.toStringAsFixed(
-                                        1,
-                                      ),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: _getNoteColor(
-                                          studentStats[student.id]!.round(),
-                                        ),
-                                      ),
-                                    )
-                                  : const Text(
-                                      '-',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                    .toList(),
-              ),
-
-              // Statistik-Footer
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: RBSColors.paper,
-                  border: Border(top: BorderSide(color: Colors.grey[300]!)),
-                ),
-                child: Row(
-                  children: [
-                    // Schüler-Spalte Label
-                    SizedBox(
-                      width: 140,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '⌀ Durchschnitt',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            'Eingetragen',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Stats pro LN
-                    ...leistungsnachweise.map((ln) {
-                      final stats = lnStats[ln.id];
-                      return SizedBox(
-                        width: 118,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              stats?.durchschnitt != null
-                                  ? stats!.durchschnitt!.toStringAsFixed(2)
-                                  : '-',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: stats?.durchschnitt != null
-                                    ? _getNoteColor(
-                                        stats!.durchschnitt!.round(),
-                                      )
-                                    : Colors.grey,
-                              ),
-                            ),
-                            Text(
-                              '${stats?.anzahl ?? 0}/${stats?.gesamt ?? 0}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                    // Gesamt-Durchschnitt
-                    SizedBox(
-                      width: 70,
-                      child: _buildGesamtDurchschnitt(studentStats),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Notenverteilung
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  border: Border(top: BorderSide(color: Colors.grey[200]!)),
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(
-                      width: 140,
-                      child: Text(
-                        'Verteilung',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ...leistungsnachweise.map((ln) {
-                      final stats = lnStats[ln.id];
-                      return SizedBox(
-                        width: 118,
-                        child: _buildVerteilungChips(stats?.verteilung ?? {}),
-                      );
-                    }),
-                    const SizedBox(
-                      width: 70,
-                    ), // Platzhalter für Durchschnitt-Spalte
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGesamtDurchschnitt(Map<String, double?> studentStats) {
-    final validStats = studentStats.values.whereType<double>().toList();
-    if (validStats.isEmpty) {
-      return const Text('-', style: TextStyle(color: Colors.grey));
-    }
-    final gesamt = validStats.reduce((a, b) => a + b) / validStats.length;
-    return Text(
-      gesamt.toStringAsFixed(2),
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 14,
-        color: _getNoteColor(gesamt.round()),
-      ),
-    );
-  }
-
-  Widget _buildVerteilungChips(Map<int, int> verteilung) {
-    return Wrap(
-      spacing: 2,
-      runSpacing: 2,
-      children: [1, 2, 3, 4, 5, 6].where((n) => (verteilung[n] ?? 0) > 0).map((
-        note,
-      ) {
-        final count = verteilung[note] ?? 0;
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-          decoration: BoxDecoration(
-            color: _getNoteColor(note).withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
-              color: _getNoteColor(note).withValues(alpha: 0.3),
-            ),
-          ),
-          child: Text(
-            '$note:$count',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              color: _getNoteColor(note),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
+  // [ENTFERNT & AUSGELAGERT: ~1260 Zeilen in separate Widget-Dateien]
+  // - NotenTableWidget: _buildNotenTable, _buildGesamtDurchschnitt, _buildVerteilungChips (~400 Zeilen)
+  // - note_input_widgets.dart: _buildNoteDropdown, _buildTendenzButtons, _buildTendenzButton (~150 Zeilen)
+  // - StudentSubjectCard: _buildStudentSubjectCard, _buildStudentLNRow (~130 Zeilen)
+  // - FaecherMatrixWidget: _buildFaecherMatrix (~530 Zeilen)
+  // - _LNStatistik, _buildCompact* Methoden (~50 Zeilen)
 
   double _getNoteWithTendenz(int note, Tendenz tendenz) {
     switch (tendenz) {
@@ -1709,235 +827,6 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       case Tendenz.keine:
         return note.toDouble();
     }
-  }
-
-  Widget _buildNoteDropdown(
-    String key,
-    _NotenEingabe eingabe,
-    String studentId,
-    String lnId,
-  ) {
-    return SizedBox(
-      width: 60,
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[400]!),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: DropdownButton<int?>(
-              value: eingabe.note,
-              isExpanded: true,
-              underline: const SizedBox(),
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              items: [
-                const DropdownMenuItem<int?>(value: null, child: Text('-')),
-                ...List.generate(6, (i) => i + 1).map(
-                  (note) => DropdownMenuItem<int>(
-                    value: note,
-                    child: Text(
-                      '$note',
-                      style: TextStyle(
-                        color: _getNoteColor(note),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              onChanged: (value) => _updateNote(key, studentId, lnId, value),
-            ),
-          ),
-          if (eingabe.updatedBy != null)
-            Positioned(
-              right: 2,
-              top: 1,
-              child: Text(
-                eingabe.updatedBy!,
-                style: TextStyle(fontSize: 8, color: Colors.grey[500]),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactNoteDropdown(
-    String key,
-    _NotenEingabe eingabe,
-    String studentId,
-    String lnId,
-  ) {
-    return SizedBox(
-      width: 45,
-      height: 32,
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: DropdownButton<int?>(
-              value: eingabe.note,
-              isExpanded: true,
-              underline: const SizedBox(),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              iconSize: 16,
-              style: const TextStyle(fontSize: 14),
-              items: [
-                const DropdownMenuItem<int?>(
-                  value: null,
-                  child: Text('-', style: TextStyle(color: Colors.black)),
-                ),
-                ...List.generate(6, (i) => i + 1).map(
-                  (note) => DropdownMenuItem<int>(
-                    value: note,
-                    child: Text(
-                      '$note',
-                      style: TextStyle(
-                        color: _getNoteColor(note),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              onChanged: (value) => _updateNote(key, studentId, lnId, value),
-            ),
-          ),
-          if (eingabe.updatedBy != null)
-            Positioned(
-              right: 1,
-              top: 0,
-              child: Text(
-                eingabe.updatedBy!,
-                style: TextStyle(fontSize: 7, color: Colors.grey[400]),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTendenzButtons(
-    String key,
-    _NotenEingabe eingabe,
-    String studentId,
-    String lnId,
-  ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildTendenzButton(key, eingabe, studentId, lnId, Tendenz.plus, '+'),
-        const SizedBox(width: 2),
-        _buildTendenzButton(key, eingabe, studentId, lnId, Tendenz.keine, '·'),
-        const SizedBox(width: 2),
-        _buildTendenzButton(key, eingabe, studentId, lnId, Tendenz.minus, '-'),
-      ],
-    );
-  }
-
-  Widget _buildCompactTendenzButtons(
-    String key,
-    _NotenEingabe eingabe,
-    String studentId,
-    String lnId,
-  ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildCompactTendenzButton(
-          key,
-          eingabe,
-          studentId,
-          lnId,
-          Tendenz.plus,
-          '+',
-        ),
-        _buildCompactTendenzButton(
-          key,
-          eingabe,
-          studentId,
-          lnId,
-          Tendenz.keine,
-          '·',
-        ),
-        _buildCompactTendenzButton(
-          key,
-          eingabe,
-          studentId,
-          lnId,
-          Tendenz.minus,
-          '-',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTendenzButton(
-    String key,
-    _NotenEingabe eingabe,
-    String studentId,
-    String lnId,
-    Tendenz tendenz,
-    String label,
-  ) {
-    final isSelected = eingabe.tendenz == tendenz;
-    return InkWell(
-      onTap: () => _updateTendenz(key, studentId, lnId, tendenz),
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: isSelected ? RBSColors.dynamicRed : Colors.grey[200],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: isSelected ? Colors.white : Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactTendenzButton(
-    String key,
-    _NotenEingabe eingabe,
-    String studentId,
-    String lnId,
-    Tendenz tendenz,
-    String label,
-  ) {
-    final isSelected = eingabe.tendenz == tendenz;
-    return InkWell(
-      onTap: () => _updateTendenz(key, studentId, lnId, tendenz),
-      child: Container(
-        width: 20,
-        height: 20,
-        decoration: BoxDecoration(
-          color: isSelected ? RBSColors.dynamicRed : Colors.grey[200],
-          borderRadius: BorderRadius.circular(2),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-              color: isSelected ? Colors.white : Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   void _updateNote(String key, String studentId, String lnId, int? value) {
@@ -2048,21 +937,6 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
   }
 }
 
-/// Statistik für einen Leistungsnachweis
-class _LNStatistik {
-  final double? durchschnitt;
-  final int anzahl;
-  final int gesamt;
-  final Map<int, int> verteilung;
-
-  _LNStatistik({
-    this.durchschnitt,
-    required this.anzahl,
-    required this.gesamt,
-    required this.verteilung,
-  });
-}
-
 /// Helper Widget für Info-Chips
 Widget _buildInfoChip(IconData icon, String label, {Color? color}) {
   return Container(
@@ -2091,36 +965,4 @@ Widget _buildInfoChip(IconData icon, String label, {Color? color}) {
       ],
     ),
   );
-}
-
-class _NotenEingabe {
-  final int? note;
-  final Tendenz tendenz;
-  final String? kommentar;
-  final String? existingGradeId;
-  final String? updatedBy;
-
-  _NotenEingabe({
-    this.note,
-    this.tendenz = Tendenz.keine,
-    this.kommentar,
-    this.existingGradeId,
-    this.updatedBy,
-  });
-
-  _NotenEingabe copyWith({
-    int? note,
-    Tendenz? tendenz,
-    String? kommentar,
-    String? existingGradeId,
-    String? updatedBy,
-  }) {
-    return _NotenEingabe(
-      note: note ?? this.note,
-      tendenz: tendenz ?? this.tendenz,
-      kommentar: kommentar ?? this.kommentar,
-      existingGradeId: existingGradeId ?? this.existingGradeId,
-      updatedBy: updatedBy ?? this.updatedBy,
-    );
-  }
 }

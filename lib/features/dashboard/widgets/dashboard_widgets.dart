@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/app_providers.dart';
+import '../../../core/widgets/rbs_components.dart';
+import '../../../core/theme/rbs_theme.dart';
 
-/// Zeitgruppen-Filter (Segmented Button)
+/// Zeitgruppen-Filter (Filter Chips ohne "Alle")
+/// Deaktivieren aller Chips = Alle anzeigen
 class ZeitgruppenFilterButton extends ConsumerWidget {
   const ZeitgruppenFilterButton({super.key});
 
@@ -10,24 +13,28 @@ class ZeitgruppenFilterButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentFilter = ref.watch(zeitgruppenFilterProvider);
     
-    return SegmentedButton<int?>(
-      showSelectedIcon: false,
-      style: ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(horizontal: 12),
+    return Wrap(
+      spacing: 8,
+      children: [
+        RBSFilterChip(
+          label: 'ZG1',
+          selected: currentFilter.contains(1),
+          color: RBSColors.courtGreen,
+          onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(1),
         ),
-      ),
-      segments: const [
-        ButtonSegment(value: null, label: Text('Alle')),
-        ButtonSegment(value: 1, label: Text('ZG1')),
-        ButtonSegment(value: 2, label: Text('ZG2')),
-        ButtonSegment(value: 3, label: Text('ZG3')),
+        RBSFilterChip(
+          label: 'ZG2',
+          selected: currentFilter.contains(2),
+          color: RBSColors.courtGreen,
+          onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(2),
+        ),
+        RBSFilterChip(
+          label: 'ZG3',
+          selected: currentFilter.contains(3),
+          color: RBSColors.courtGreen,
+          onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(3),
+        ),
       ],
-      selected: {currentFilter},
-      onSelectionChanged: (selected) {
-        ref.read(zeitgruppenFilterProvider.notifier).setFilter(selected.first);
-      },
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
+import '../core/widgets/rbs_components.dart';
 import '../providers/app_providers.dart';
 
 class RBSDrawer extends ConsumerWidget {
@@ -212,27 +213,28 @@ class RBSDrawer extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: RBSSpacing.xs),
-          SizedBox(
-            width: double.infinity,
-            child: SegmentedButton<int?>(
-              showSelectedIcon: false,
-              style: ButtonStyle(
-                visualDensity: VisualDensity.compact,
-                textStyle: WidgetStatePropertyAll(RBSTypography.bodySmall),
+          Wrap(
+            spacing: 8,
+            children: [
+              RBSFilterChip(
+                label: 'ZG1',
+                selected: selectedZG.contains(1),
+                color: RBSColors.courtGreen,
+                onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(1),
               ),
-              segments: const [
-                ButtonSegment<int?>(value: null, label: Text('Alle')),
-                ButtonSegment<int?>(value: 1, label: Text('ZG1')),
-                ButtonSegment<int?>(value: 2, label: Text('ZG2')),
-                ButtonSegment<int?>(value: 3, label: Text('ZG3')),
-              ],
-              selected: {selectedZG},
-              onSelectionChanged: (selection) {
-                ref
-                    .read(zeitgruppenFilterProvider.notifier)
-                    .setFilter(selection.first);
-              },
-            ),
+              RBSFilterChip(
+                label: 'ZG2',
+                selected: selectedZG.contains(2),
+                color: RBSColors.courtGreen,
+                onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(2),
+              ),
+              RBSFilterChip(
+                label: 'ZG3',
+                selected: selectedZG.contains(3),
+                color: RBSColors.courtGreen,
+                onSelected: (_) => ref.read(zeitgruppenFilterProvider.notifier).toggle(3),
+              ),
+            ],
           ),
         ],
       ),
