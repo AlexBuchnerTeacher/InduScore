@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<zeugnsnoten-import Schuljahr="2025/26" Schemaversion="1.0" Generierungsdatum="2025-12-17">
+    <Schueler>
+        <Stammdaten>
+            <ID>test123</ID>
+            <Name>Mustermann</Name>
+            <Vorname>Max</Vorname>
+        </Stammdaten>
+        <Faecher>
+            <Fach>
+                <Kurzform>M</Kurzform>
+                <Name>Mathematik</Name>
+                <Leistung>
+                    <Schnitt_Gesamt>2.50</Schnitt_Gesamt>
+                    <Zeugnisnote>3</Zeugnisnote>
+                </Leistung>
+            </Fach>
+        </Faecher>
+    </Schueler>
+</zeugnsnoten-import>
