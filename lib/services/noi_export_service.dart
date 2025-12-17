@@ -32,11 +32,11 @@ class NoiExportService {
     final now = DateTime.now();
     final dateFormat = DateFormat('yyyy-MM-dd');
     
-    // XML Header
+    // XML Header nach ASV-Spezifikation
+    // Das Root-Element heißt 'zeugnsnoten-import' (kein Klassen-Attribut am Root!)
     buffer.writeln('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
-    buffer.writeln('<NotenImport_Berufsschule');
+    buffer.writeln('<zeugnsnoten-import');
     buffer.writeln('    Schuljahr="${klasse.schuljahr}"');
-    buffer.writeln('    Klasse="${klasse.name}"');
     buffer.writeln('    Schemaversion="1.0"');
     buffer.writeln('    Generierungsdatum="${dateFormat.format(now)}">');
     
@@ -51,6 +51,7 @@ class NoiExportService {
       buffer.writeln('            <ID>${_escapeXml(student.id)}</ID>');
       buffer.writeln('            <Name>${_escapeXml(student.lastName)}</Name>');
       buffer.writeln('            <Vorname>${_escapeXml(student.firstName)}</Vorname>');
+      buffer.writeln('            <Klasse>${_escapeXml(klasse.name)}</Klasse>');
       buffer.writeln('        </Stammdaten>');
       
       // Noten des Schülers
@@ -152,7 +153,7 @@ class NoiExportService {
       buffer.writeln('    </Schueler>');
     }
     
-    buffer.writeln('</NotenImport_Berufsschule>');
+    buffer.writeln('</zeugnsnoten-import>');
     
     return buffer.toString();
   }
