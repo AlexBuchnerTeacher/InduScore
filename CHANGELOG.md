@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.13.5] - 2025-12-17
+
+### Fixed
+- **ASV NOI-Export**: Kritischer Fehler beim Import in ASV behoben
+  - Root-Element von `<NotenImport_Berufsschule>` zu `<zeugnsnoten-import>` korrigiert
+  - ASV-Fehlermeldung: "Root-Element <zeugnsnoten-import> erwartet" behoben
+  - Klasse-Attribut vom Root-Element in Schüler-Stammdaten verschoben
+  - Struktur an ASV-Anforderungen angepasst
+
+### Added
+- **NOI-Export-Validator**: PowerShell-Script zur Qualitätssicherung
+  - Prüft XML-Struktur auf ASV-Konformität
+  - Validiert Root-Element und Pflichtattribute
+  - Überprüft Schüler-Stammdaten
+  - Script: `validate-noi-export.ps1`
+- **Dokumentation**: Umfassende NOI-Export-Dokumentation
+  - `docs/ASV_NOI_EXPORT_FIX.md`: Fehlerbehebung und Workflow
+  - Beispiel-XML für Berufsschulen: `docs/noi-schema/test-berufsschule.xml`
+  - Qualitätssicherungs-Prozess vor Weitergabe an Kollegen
+
+### Technical Notes
+- Offizielle NOI-Schemas (v3.23.4) sind nur für Gymnasien (G8/G9) verfügbar
+- Kein offizielles NOI-Schema für Berufsschulen vorhanden
+- Export-Format basiert auf ASV-Fehlermeldung und Best Practices
+- Weitere Tests mit ASV erforderlich zur vollständigen Validierung
+
 ## [0.13.4] - 2025-12-14
 
 ### Added
