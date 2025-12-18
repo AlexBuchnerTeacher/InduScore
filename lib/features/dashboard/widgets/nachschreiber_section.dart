@@ -55,7 +55,7 @@ class NachschreiberSection extends ConsumerWidget {
           ...stufe3.take(5).map((n) => _NachschreiberCard(nachschreiber: n, color: Colors.red)),
           if (stufe3.length > 5)
             TextButton(
-              onPressed: () {}, // TODO: Alle anzeigen
+              onPressed: () => context.go('/leistungsnachweise'),
               child: Text('+ ${stufe3.length - 5} weitere'),
             ),
         ],

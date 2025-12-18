@@ -29,6 +29,7 @@ class Leistungsnachweis {
   final DateTime datum;
   final double gewichtung; // 1, 1.5 oder 2
   final String? beschreibung;
+  final String? createdBy; // User-ID des Erstellers (für Permissions)
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -41,6 +42,7 @@ class Leistungsnachweis {
     required this.datum,
     required this.gewichtung,
     this.beschreibung,
+    this.createdBy,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -57,6 +59,7 @@ class Leistungsnachweis {
       datum: (data['datum'] as Timestamp).toDate(),
       gewichtung: (data['gewichtung'] as num?)?.toDouble() ?? 1.0,
       beschreibung: data['beschreibung'] as String?,
+      createdBy: data['createdBy'] as String?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -71,6 +74,7 @@ class Leistungsnachweis {
       'datum': Timestamp.fromDate(datum),
       'gewichtung': gewichtung,
       'beschreibung': beschreibung,
+      'createdBy': createdBy,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -85,6 +89,7 @@ class Leistungsnachweis {
     DateTime? datum,
     double? gewichtung,
     String? beschreibung,
+    String? createdBy,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -97,6 +102,7 @@ class Leistungsnachweis {
       datum: datum ?? this.datum,
       gewichtung: gewichtung ?? this.gewichtung,
       beschreibung: beschreibung ?? this.beschreibung,
+      createdBy: createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

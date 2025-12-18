@@ -8,6 +8,7 @@ import '../models/student.dart';
 import '../models/beruf.dart';
 import '../providers/app_providers.dart';
 import '../widgets/rbs_drawer.dart';
+import '../providers/permissions_providers.dart';
 
 /// Schülerverwaltung Screen
 /// - Listet alle Schüler mit Filter nach Klasse
@@ -40,6 +41,44 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
     final klassenAsync = ref.watch(klassenProvider);
     final studentsAsync = ref.watch(studentsProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
+    final canManageData = ref.watch(canManageDataProvider);
+    
+    // Permission Check
+    if (!canManageData) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              tooltip: 'Menü',
+            ),
+          ),
+          title: const Text('Schülerverwaltung'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.home),
+              onPressed: () => context.go('/'),
+              tooltip: 'Zum Dashboard',
+            ),
+          ],
+        ),
+        drawer: const RBSDrawer(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
+              const SizedBox(height: 16),
+              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const SizedBox(height: 8),
+              Text('Sie haben keine Berechtigung zur Schülerverwaltung.',
+                   style: RBSTypography.bodyMedium),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -63,10 +102,17 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             onPressed: () => setState(() => _showAusgetretene = !_showAusgetretene),
             tooltip: _showAusgetretene ? 'Ausgetretene ausblenden' : 'Ausgetretene anzeigen',
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showStudentDialog(),
-            tooltip: 'Neuer Schüler',
+          // Neuer Schüler Button - nur für Admin
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateDataProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _showStudentDialog(),
+                tooltip: 'Neuer Schüler',
+              );
+            },
           ),
         ],
       ),

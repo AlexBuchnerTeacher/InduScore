@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../providers/app_providers.dart';
+import '../models/app_user.dart';
 
 /// Login Screen - RBS Cover-Ebene Design
 ///
@@ -49,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Wenn Kürzel (2-4 Buchstaben ohne @), konvertiere zu Email
       final email = input.contains('@')
           ? input
-          : '${input.toLowerCase()}@induscore.de';
+          : '${input.toUpperCase()}@induscore.de';
 
       await authService.signInWithEmailPassword(
         email: email,
@@ -96,6 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: Icons.email_outlined,
+                textCapitalization: TextCapitalization.characters,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Bitte E-Mail oder Kürzel eingeben';
@@ -122,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Kürzel-Konvertierung wie beim Login
                   final email = input.contains('@')
                       ? input
-                      : '${input.toLowerCase()}@induscore.de';
+                      : '${input.toUpperCase()}@induscore.de';
 
                   await authService.sendPasswordResetEmail(email);
 
@@ -155,6 +157,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  /// DEBUG: Admin-User manuell anlegen
+  Future<void> _createAdminUser(BuildContext context, WidgetRef ref) async {
+    try {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      
+      // Admin-User erstellen
+      final admin = AppUser(
+        id: 'bu-admin',
+        email: 'alexander.buchner@bs-ie.muenchen.musin.de',
+        name: 'Alexander Buchner',
+        kuerzel: 'BU',
+        rolle: UserRole.admin,
+        status: UserStatus.aktiv,
+        favoriteKlassenIds: [],
+        createdAt: DateTime.now(),
+        lastLoginAt: null,
+      );
+      
+      await firestoreService.createAppUserWithId(admin.id, admin);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Admin-User angelegt!\n'
+                'E-Mail: alexander.buchner@bs-ie.muenchen.musin.de\n'
+                'WICHTIG: Firebase Auth User muss noch manuell erstellt werden!'),
+            duration: Duration(seconds: 10),
+            backgroundColor: RBSColors.courtGreen,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Fehler: $e'),
+            backgroundColor: RBSColors.dynamicRed,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _showRegisterDialog() async {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -175,6 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: Icons.person_outlined,
+              textCapitalization: TextCapitalization.characters,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Bitte E-Mail oder Kürzel eingeben';
@@ -233,7 +279,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // Wenn Kürzel (2-4 Buchstaben ohne @), konvertiere zu Email
               final email = input.contains('@')
                   ? input
-                  : '${input.toLowerCase()}@induscore.de';
+                  : '${input.toUpperCase()}@induscore.de';
 
               await authService.registerWithEmailPassword(
                 email: email,
@@ -380,6 +426,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               prefixIcon: Icons.person_outlined,
+                              textCapitalization: TextCapitalization.characters,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Bitte E-Mail oder Kürzel eingeben';
@@ -488,6 +535,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
 
                     const SizedBox(height: RBSSpacing.lg),
+
+                    // DEBUG: Admin-Erstell-Button (TODO: Entfernen nach Setup)
+                    Center(
+                      child: TextButton(
+                        onPressed: () => _createAdminUser(context, ref),
+                        style: TextButton.styleFrom(
+                          foregroundColor: RBSColors.textOnRed.withValues(alpha: 0.6),
+                        ),
+                        child: const Text('🔧 Admin-User anlegen (DEBUG)'),
+                      ),
+                    ),
+
+                    const SizedBox(height: RBSSpacing.sm),
 
                     // Info-Text (weiß)
                     Center(

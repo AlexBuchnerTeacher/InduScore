@@ -6,6 +6,7 @@ import '../core/widgets/rbs_components.dart';
 import '../widgets/rbs_drawer.dart';
 import '../models/app_user.dart';
 import '../providers/app_providers.dart';
+import '../providers/permissions_providers.dart';
 
 /// Benutzerverwaltung - nur für Admins
 class UserVerwaltungScreen extends ConsumerStatefulWidget {
@@ -22,11 +23,11 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    final canManage = ref.watch(canManageUsersProvider);
     final usersAsync = ref.watch(appUsersProvider);
 
     // Nur Admins dürfen diese Seite sehen
-    if (!isAdmin) {
+    if (!canManage) {
       return Scaffold(
         appBar: AppBar(title: const Text('Benutzerverwaltung')),
         drawer: const RBSDrawer(),
@@ -334,6 +335,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
     final formKey = GlobalKey<FormState>();
     
     UserRole selectedRole = user?.rolle ?? UserRole.lehrer;
+    List<String> selectedKlassenIds = List.from(user?.favoriteKlassenIds ?? []);
     String? kuerzelError;
 
     showDialog(
@@ -358,15 +360,18 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
                 ),
                 const SizedBox(height: RBSSpacing.md),
                 
-                // Email
+                // Email (immer editierbar)
                 TextFormField(
                   controller: emailController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email *',
                     hintText: 'z.B. mustermann@schule.de',
+                    helperText: isEdit 
+                        ? '⚠️ Email-Änderung erfordert Login-Update!' 
+                        : null,
+                    helperStyle: TextStyle(color: RBSColors.dynamicRed),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  enabled: !isEdit, // Email kann nicht geändert werden
                   validator: (v) {
                     if (v?.isEmpty ?? true) return 'Email erforderlich';
                     if (!v!.contains('@')) return 'Ungültige Email';
@@ -404,18 +409,69 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
                 // Rolle
                 Text('Rolle *', style: RBSTypography.label),
                 const SizedBox(height: RBSSpacing.xs),
-                SegmentedButton<UserRole>(
-                  segments: UserRole.values.map((role) => ButtonSegment(
-                    value: role,
-                    label: Text(role.label),
-                    icon: Icon(role == UserRole.admin ? Icons.admin_panel_settings : Icons.person),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: UserRole.values.map((role) => ChoiceChip(
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          role == UserRole.admin 
+                              ? Icons.admin_panel_settings 
+                              : role == UserRole.schueler
+                                  ? Icons.school
+                                  : Icons.person,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(role.label),
+                      ],
+                    ),
+                    selected: selectedRole == role,
+                    onSelected: (selected) {
+                      if (selected) setDialogState(() => selectedRole = role);
+                    },
                   )).toList(),
-                  selected: {selectedRole},
-                  onSelectionChanged: (roles) {
-                    setDialogState(() => selectedRole = roles.first);
-                  },
                 ),
                 const SizedBox(height: RBSSpacing.md),
+                
+                // Favoriten-Klassen (nur für Lehrer/Ausbilder)
+                if (selectedRole == UserRole.lehrer || selectedRole == UserRole.ausbilder) ...[
+                  Text('Favoriten-Klassen (optional)', style: RBSTypography.label),
+                  const SizedBox(height: RBSSpacing.xs),
+                  Consumer(builder: (context, ref, _) {
+                    final klassenAsync = ref.watch(klassenProvider);
+                    return klassenAsync.when(
+                      data: (klassen) {
+                        if (klassen.isEmpty) {
+                          return Text('Keine Klassen vorhanden', 
+                                     style: RBSTypography.bodySmall);
+                        }
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: klassen.map((klasse) => FilterChip(
+                            label: Text(klasse.name),
+                            selected: selectedKlassenIds.contains(klasse.id),
+                            onSelected: (selected) {
+                              setDialogState(() {
+                                if (selected) {
+                                  selectedKlassenIds.add(klasse.id);
+                                } else {
+                                  selectedKlassenIds.remove(klasse.id);
+                                }
+                              });
+                            },
+                          )).toList(),
+                        );
+                      },
+                      loading: () => const CircularProgressIndicator(),
+                      error: (e, _) => Text('Fehler: $e'),
+                    );
+                  }),
+                  const SizedBox(height: RBSSpacing.md),
+                ],
                 
                 // Passwort (nur bei Neuanlage)
                 if (!isEdit) ...[
@@ -451,6 +507,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
                     email: emailController.text.trim().toLowerCase(),
                     kuerzel: kuerzelController.text.trim().toUpperCase(),
                     rolle: selectedRole,
+                    favoriteKlassenIds: selectedKlassenIds,
                     password: isEdit ? null : passwordController.text,
                   );
                 }
@@ -470,6 +527,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
     required String email,
     required String kuerzel,
     required UserRole rolle,
+    required List<String> favoriteKlassenIds,
     String? password,
   }) async {
     final firestoreService = ref.read(firestoreServiceProvider);
@@ -480,8 +538,10 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
         // Bearbeiten
         final updated = user.copyWith(
           name: name,
+          email: email, // Email ist jetzt editierbar
           kuerzel: kuerzel,
           rolle: rolle,
+          favoriteKlassenIds: favoriteKlassenIds,
         );
         await firestoreService.updateAppUser(updated);
       } else {
@@ -498,6 +558,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
           name: name,
           kuerzel: kuerzel,
           rolle: rolle,
+          favoriteKlassenIds: favoriteKlassenIds,
           createdAt: DateTime.now(),
         );
         await firestoreService.createAppUserWithId(userCredential.user!.uid, newUser);

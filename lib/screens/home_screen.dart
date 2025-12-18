@@ -74,6 +74,28 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 const RBSHeadline(text: 'Meine Klassen', level: RBSHeadlineLevel.h4),
                 const Spacer(),
+                // Favoriten-Toggle (für Lehrer/Ausbilder)
+                Consumer(
+                  builder: (context, ref, _) {
+                    final currentUser = ref.watch(currentAppUserProvider).value;
+                    if (currentUser == null || currentUser.favoriteKlassenIds.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    final favoritenFilter = ref.watch(favoritenFilterProvider);
+                    return Row(
+                      children: [
+                        RBSFilterChip(
+                          label: favoritenFilter ? 'Favoriten' : 'Alle',
+                          icon: favoritenFilter ? Icons.star : Icons.star_border,
+                          selected: favoritenFilter,
+                          color: RBSColors.dynamicRed,
+                          onSelected: (_) => ref.read(favoritenFilterProvider.notifier).toggle(),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    );
+                  },
+                ),
                 // Zeitgruppen-Filter
                 RBSFilterChip(
                   label: 'ZG1',

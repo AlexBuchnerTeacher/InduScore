@@ -6,19 +6,86 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.14.0] - 2025-12-18
+
+### Added
+- **Berechtigungssystem erweitert (Issue #39)** ✅
+  - 4 Benutzerrollen: Admin, Lehrer, Ausbilder*, Schüler* 
+    (*Ausbilder/Schüler: Reserviert für separate App, aktuell nicht aktiv genutzt)
+  - Permission Provider für alle Operationen (`permissions_providers.dart`)
+  - Permission Guards in allen relevanten Screens (Buttons, Menü-Einträge)
+  - Favoriten-Klassen System für Lehrer/Ausbilder
+  - Dashboard Favoriten-Toggle (⭐) mit Auto-Filter
+  - Ownership-Tracking für Leistungsnachweise (`createdBy` Feld)
+
+### Changed
+- **Benutzerverwaltung komplett überarbeitet**
+  - Email-Adresse jetzt bearbeitbar (mit Warnung)
+  - Alle 4 Rollen auswählbar
+  - Favoriten-Klassen Multiselect (für Lehrer/Ausbilder)
+  - `canManageUsersProvider` statt `isCurrentUserAdminProvider`
+- **AppUser Model erweitert**
+  - `klassenIds` → `favoriteKlassenIds` (mit Migration-Fallback)
+  - Kürzel jetzt immer uppercase gespeichert
+  - 2 neue Rollen: Ausbilder, Schüler
+- **Kürzel Case-Insensitivity**
+  - Login funktioniert mit "mu", "MU", "Mu"
+  - Anzeige immer uppercase
+  - `TextCapitalization.characters` auf allen Kürzel-Inputs
+- **Screen-Zugriff eingeschränkt**
+  - CSV Import: Nur Admin
+  - Klassen/Fächer/Schüler anlegen/bearbeiten/löschen: Nur Admin
+  - Leistungsnachweise anlegen: Admin + Lehrer + Ausbilder
+  - Leistungsnachweise bearbeiten/löschen: Nur eigene (Admin kann alle)
+  - Benutzerverwaltung: Nur Admin
+- **Dashboard optimiert**
+  - Favoriten-Filter für Lehrer/Ausbilder (Default: aktiv)
+  - Admin sieht standardmäßig alle Klassen
+  - Kombination mit Zeitgruppen-Filter möglich
+- **Drawer-Menü rollenbasiert**
+  - CSV Import nur für Admin sichtbar
+  - Benutzerverwaltung nur für Admin sichtbar
+  - Alle anderen Menüs: Admin + Lehrer + Ausbilder
+
+### Fixed
+- Alle Linter-Warnungen behoben (TODOs, relative imports, avoid_print)
+- Permission Guards in allen Create/Edit/Delete Buttons
+
+### Technical Notes
+- Neue Permission Providers (lib/providers/permissions_providers.dart):
+  - `canManageUsersProvider` - Nur Admin (Benutzerverwaltung)
+  - `canImportCSVProvider` - Nur Admin (CSV Import)
+  - `canManageDataProvider` - Admin + Lehrer + Ausbilder (Lesen von Daten)
+  - `canCreateDataProvider` - Nur Admin (Anlegen von Klassen, Fächern, Schülern)
+  - `canCreateLeistungsnachweisProvider` - Admin + Lehrer + Ausbilder
+  - `canEditLeistungsnachweisProvider(LN)` - Admin (alle) + Lehrer/Ausbilder (nur eigene)
+- Migration-Fallbacks in Code (keine Datenbank-Migration erforderlich)
+- Script: `scripts/create_admin.dart` zum Anlegen von Admin-Usern
+  - `canEditLeistungsnachweisProvider(ln)` - Admin=alle, Lehrer/Ausbilder=eigene
+- `FavoritenFilterNotifier` für Dashboard-Filter
+- Automatische Migration durch Fallbacks (keine manuelle Migration nötig)
+- Migrationsdokumentation: `docs/MIGRATION_0.14.0.md`
+
+### Security
+- Berechtigungen werden serverseitig validiert (Permission Provider)
+- Screens zeigen "Zugriff verweigert" bei fehlenden Berechtigungen
+- Lehrer/Ausbilder können nur eigene Leistungsnachweise bearbeiten
+
 ## [0.13.7] - 2025-12-18
 
 ### Fixed
 - **Benutzerverwaltung**: Zugriffsproblem für ersten Admin behoben
-  - Automatischer Admin-Zugriff wenn keine AppUsers in Firestore existieren
+  - Automatische AppUser-Erstellung beim ersten Login
+  - Erster User wird automatisch als Admin angelegt
   - Löst "Zugriff verweigert" beim initialen Setup
-  - Erster eingeloggter Firebase-Auth-User wird als Admin behandelt
-  - Nach Login kann dieser Admin weitere Benutzer in der Benutzerverwaltung anlegen
+  - Weitere User werden als Lehrer angelegt (Admin kann Rolle dann ändern)
 
 ### Technical Notes
-- Fallback-Logik in `isCurrentUserAdminProvider`
-- Ermöglicht Setup ohne vorhandene Firestore-Benutzerdaten
-- Prüfung: `allUsers.isEmpty && firebaseUser != null → isAdmin = true`
+- Auto-AppUser-Erstellung in `currentAppUserProvider`
+- Erster User erhält automatisch `UserRole.admin`
+- Weitere User erhalten `UserRole.lehrer` (Standard)
+- Verbesserte Fallback-Logik in `isCurrentUserAdminProvider` mit `hasValue`-Checks
+- Kürzel wird automatisch aus E-Mail extrahiert (z.B. "MU" aus "mu@induscore.de")
 
 ## [0.13.5] - 2025-12-17
 

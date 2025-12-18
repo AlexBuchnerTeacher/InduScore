@@ -10,6 +10,7 @@ import '../models/klasse.dart';
 import '../models/beruf.dart';
 import '../models/subject.dart';
 import '../providers/app_providers.dart';
+import '../providers/permissions_providers.dart';
 
 class LeistungsnachweiseScreen extends ConsumerStatefulWidget {
   const LeistungsnachweiseScreen({super.key});
@@ -49,10 +50,17 @@ class _LeistungsnachweiseScreenState
             onPressed: () => context.go('/'),
             tooltip: 'Zum Dashboard',
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showLeistungsnachweisDialog(context),
-            tooltip: 'Neuer Leistungsnachweis',
+          // Nur anzeigen wenn Berechtigung zum Erstellen
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateLeistungsnachweisProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _showLeistungsnachweisDialog(context),
+                tooltip: 'Neuer Leistungsnachweis',
+              );
+            },
           ),
         ],
       ),
@@ -271,53 +279,65 @@ class _LeistungsnachweiseScreenState
                       ],
                     ),
                   ),
-                  // Actions - nur Icons auf kleinen Screens
-                  if (!isSmallScreen) ...[
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined, size: 20),
-                      onPressed: () => _showLeistungsnachweisDialog(context, leistungsnachweis: ln),
-                      tooltip: 'Bearbeiten',
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 20),
-                      onPressed: () => _confirmDelete(context, ln),
-                      tooltip: 'Löschen',
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ] else
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, size: 20),
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          _showLeistungsnachweisDialog(context, leistungsnachweis: ln);
-                        } else if (value == 'delete') {
-                          _confirmDelete(context, ln);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit_outlined, size: 20),
-                              SizedBox(width: 8),
-                              Text('Bearbeiten'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Löschen', style: TextStyle(color: Colors.red)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  // Actions - nur Icons auf kleinen Screens (mit Permission Check)
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final canEdit = ref.watch(canEditLeistungsnachweisProvider(ln));
+                      if (!canEdit) return const SizedBox.shrink();
+                      
+                      if (!isSmallScreen) {
+                        return Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined, size: 20),
+                              onPressed: () => _showLeistungsnachweisDialog(context, leistungsnachweis: ln),
+                              tooltip: 'Bearbeiten',
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, size: 20),
+                              onPressed: () => _confirmDelete(context, ln),
+                              tooltip: 'Löschen',
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ],
+                        );
+                      } else {
+                        return PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert, size: 20),
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _showLeistungsnachweisDialog(context, leistungsnachweis: ln);
+                            } else if (value == 'delete') {
+                              _confirmDelete(context, ln);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit_outlined, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Bearbeiten'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Text('Löschen', style: TextStyle(color: Colors.red)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: RBSSpacing.sm),

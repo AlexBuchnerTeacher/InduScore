@@ -11,8 +11,9 @@ import '../providers/app_providers.dart';
 import '../services/csv_import_service.dart';
 import '../services/asv_import_service.dart';
 import '../models/student.dart';
+import '../providers/permissions_providers.dart';
 
-/// CSV Import Screen - Schülerlisten importieren
+/// CSV Import Screen - Schülerlisten importieren (nur Admin)
 class CsvImportScreen extends ConsumerStatefulWidget {
   const CsvImportScreen({super.key});
 
@@ -43,6 +44,36 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final canImport = ref.watch(canImportCSVProvider);
+    
+    // Permission Check
+    if (!canImport) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: const Text('CSV Import'),
+          backgroundColor: RBSColors.dynamicRed,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
+              const SizedBox(height: 16),
+              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const SizedBox(height: 8),
+              Text('Nur Administratoren können CSV-Daten importieren.',
+                   style: RBSTypography.bodyMedium),
+            ],
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -778,20 +809,12 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
             child: const Text('Abbrechen'),
           ),
           ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.trim().isEmpty) return;
-              
+            onPressed: () {
               Navigator.pop(ctx);
-              
-              // TODO: Implementiere Klassen-Erstellung
-              // Für jetzt zeigen wir eine Meldung
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Bitte legen Sie die Klasse im Klassen-Menü an.'),
-                ),
-              );
+              // Zur Klassenverwaltung navigieren wo User die Klasse vollständig anlegen kann
+              context.go('/klassen');
             },
-            child: const Text('Anlegen'),
+            child: const Text('Zur Klassenverwaltung'),
           ),
         ],
       ),

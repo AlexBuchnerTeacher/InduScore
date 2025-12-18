@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Benutzerrolle im System
+/// 
+/// Hinweis: 'ausbilder' und 'schueler' sind für eine separate App reserviert
+/// und werden in dieser Anwendung aktuell nicht aktiv genutzt.
 enum UserRole {
   admin('Admin'),
-  lehrer('Lehrer');
-  // schueler('Schüler'); // Später
+  lehrer('Lehrer'),
+  ausbilder('Ausbilder'),      // Reserviert für separate App
+  schueler('Schüler');         // Reserviert für separate App
 
   final String label;
   const UserRole(this.label);
@@ -44,7 +48,7 @@ class AppUser {
   final String kuerzel; // Fest vergeben (z.B. "MU")
   final UserRole rolle;
   final UserStatus status;
-  final List<String> klassenIds; // Zugeordnete Klassen (später)
+  final List<String> favoriteKlassenIds; // Favoriten-Klassen für Dashboard
   final DateTime createdAt;
   final DateTime? lastLoginAt;
 
@@ -52,13 +56,13 @@ class AppUser {
     required this.id,
     required this.email,
     required this.name,
-    required this.kuerzel,
+    required String kuerzel,
     required this.rolle,
     this.status = UserStatus.aktiv,
-    this.klassenIds = const [],
+    this.favoriteKlassenIds = const [],
     required this.createdAt,
     this.lastLoginAt,
-  });
+  }) : kuerzel = kuerzel.toUpperCase(); // Kürzel immer uppercase
 
   /// Erstellt AppUser aus Firestore-Dokument
   factory AppUser.fromFirestore(DocumentSnapshot doc) {
@@ -67,10 +71,14 @@ class AppUser {
       id: doc.id,
       email: data['email'] as String? ?? '',
       name: data['name'] as String? ?? '',
-      kuerzel: data['kuerzel'] as String? ?? '',
+      kuerzel: (data['kuerzel'] as String? ?? '').toUpperCase(),
       rolle: UserRole.fromString(data['rolle'] as String?),
       status: UserStatus.fromString(data['status'] as String?),
-      klassenIds: (data['klassenIds'] as List<dynamic>?)
+      favoriteKlassenIds: (data['favoriteKlassenIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          // Migration: Alte klassenIds fallback
+          (data['klassenIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
@@ -87,7 +95,7 @@ class AppUser {
       'kuerzel': kuerzel,
       'rolle': rolle.name,
       'status': status.name,
-      'klassenIds': klassenIds,
+      'favoriteKlassenIds': favoriteKlassenIds,
       'createdAt': Timestamp.fromDate(createdAt),
       'lastLoginAt': lastLoginAt != null 
           ? Timestamp.fromDate(lastLoginAt!) 
@@ -103,7 +111,7 @@ class AppUser {
     String? kuerzel,
     UserRole? rolle,
     UserStatus? status,
-    List<String>? klassenIds,
+    List<String>? favoriteKlassenIds,
     DateTime? createdAt,
     DateTime? lastLoginAt,
   }) {
@@ -114,7 +122,7 @@ class AppUser {
       kuerzel: kuerzel ?? this.kuerzel,
       rolle: rolle ?? this.rolle,
       status: status ?? this.status,
-      klassenIds: klassenIds ?? this.klassenIds,
+      favoriteKlassenIds: favoriteKlassenIds ?? this.favoriteKlassenIds,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );

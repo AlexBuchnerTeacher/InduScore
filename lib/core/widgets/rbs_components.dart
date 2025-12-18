@@ -188,6 +188,7 @@ class RBSInput extends StatelessWidget {
   final void Function(String)? onSubmitted;
   final IconData? prefixIcon;
   final int? maxLines;
+  final TextCapitalization textCapitalization;
 
   const RBSInput({
     super.key,
@@ -201,6 +202,7 @@ class RBSInput extends StatelessWidget {
     this.onSubmitted,
     this.prefixIcon,
     this.maxLines = 1,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -213,6 +215,7 @@ class RBSInput extends StatelessWidget {
       onChanged: onChanged,
       onFieldSubmitted: onSubmitted,
       maxLines: maxLines,
+      textCapitalization: textCapitalization,
       style: RBSTypography.bodyMedium,
       decoration: InputDecoration(
         labelText: label,

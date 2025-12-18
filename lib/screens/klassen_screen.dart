@@ -12,6 +12,7 @@ import '../models/beruf.dart';
 import '../models/student.dart';
 import '../providers/app_providers.dart';
 import '../services/pdf_import_service.dart';
+import '../providers/permissions_providers.dart';
 
 class KlassenScreen extends ConsumerStatefulWidget {
   const KlassenScreen({super.key});
@@ -32,6 +33,44 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
     final filteredByZG = ref.watch(filteredKlassenProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final currentSchuljahr = ref.watch(currentSchuljahrProvider);
+    final canManageData = ref.watch(canManageDataProvider);
+    
+    // Permission Check
+    if (!canManageData) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              tooltip: 'Menü',
+            ),
+          ),
+          title: const Text('Klassenverwaltung'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.home),
+              onPressed: () => context.go('/'),
+              tooltip: 'Zum Dashboard',
+            ),
+          ],
+        ),
+        drawer: const RBSDrawer(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
+              const SizedBox(height: 16),
+              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const SizedBox(height: 8),
+              Text('Sie haben keine Berechtigung zur Klassenverwaltung.',
+                   style: RBSTypography.bodyMedium),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -49,31 +88,45 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
             onPressed: () => context.go('/'),
             tooltip: 'Zum Dashboard',
           ),
-          // Import Button - deutlich sichtbar
-          Padding(
-            padding: const EdgeInsets.only(right: RBSSpacing.sm),
-            child: _isImporting
-                ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : TextButton.icon(
-                    onPressed: _handlePdfImport,
-                    icon: const Icon(Icons.upload_file, color: Colors.white),
-                    label: const Text(
-                      'PDF Import',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+          // Import Button - nur für Admin
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateDataProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              
+              return Padding(
+                padding: const EdgeInsets.only(right: RBSSpacing.sm),
+                child: _isImporting
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : TextButton.icon(
+                        onPressed: _handlePdfImport,
+                        icon: const Icon(Icons.upload_file, color: Colors.white),
+                        label: const Text(
+                          'PDF Import',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+              );
+            },
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showKlasseDialog(context),
-            tooltip: 'Neue Klasse',
+          // Neue Klasse Button - nur für Admin
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateDataProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _showKlasseDialog(context),
+                tooltip: 'Neue Klasse',
+              );
+            },
           ),
         ],
       ),
@@ -177,10 +230,16 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
                           ),
                         ),
                         const SizedBox(height: RBSSpacing.sm),
-                        RBSButton(
-                          label: 'Erste Klasse erstellen',
-                          icon: Icons.add,
-                          onPressed: () => _showKlasseDialog(context),
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final canCreate = ref.watch(canCreateDataProvider);
+                            if (!canCreate) return const SizedBox.shrink();
+                            return RBSButton(
+                              label: 'Erste Klasse erstellen',
+                              icon: Icons.add,
+                              onPressed: () => _showKlasseDialog(context),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -221,20 +280,26 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
         ),
         title: Text(klasse.name, style: RBSTypography.h4),
         subtitle: Text(klasse.beruf.name, style: RBSTypography.bodySmall),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () => _showKlasseDialog(context, klasse: klasse),
-              tooltip: 'Bearbeiten',
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _confirmDelete(context, klasse),
-              tooltip: 'Löschen',
-            ),
-          ],
+        trailing: Consumer(
+          builder: (context, ref, _) {
+            final canCreate = ref.watch(canCreateDataProvider);
+            if (!canCreate) return const SizedBox.shrink();
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => _showKlasseDialog(context, klasse: klasse),
+                  tooltip: 'Bearbeiten',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => _confirmDelete(context, klasse),
+                  tooltip: 'Löschen',
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
