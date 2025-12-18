@@ -50,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Wenn Kürzel (2-4 Buchstaben ohne @), konvertiere zu Email
       final email = input.contains('@')
           ? input
-          : '${input.toLowerCase()}@induscore.de';
+          : '${input.toUpperCase()}@induscore.de';
 
       await authService.signInWithEmailPassword(
         email: email,
@@ -97,6 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: Icons.email_outlined,
+                textCapitalization: TextCapitalization.characters,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Bitte E-Mail oder Kürzel eingeben';
@@ -123,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Kürzel-Konvertierung wie beim Login
                   final email = input.contains('@')
                       ? input
-                      : '${input.toLowerCase()}@induscore.de';
+                      : '${input.toUpperCase()}@induscore.de';
 
                   await authService.sendPasswordResetEmail(email);
 
@@ -219,6 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: Icons.person_outlined,
+              textCapitalization: TextCapitalization.characters,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Bitte E-Mail oder Kürzel eingeben';
@@ -277,7 +279,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // Wenn Kürzel (2-4 Buchstaben ohne @), konvertiere zu Email
               final email = input.contains('@')
                   ? input
-                  : '${input.toLowerCase()}@induscore.de';
+                  : '${input.toUpperCase()}@induscore.de';
 
               await authService.registerWithEmailPassword(
                 email: email,
@@ -424,6 +426,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               prefixIcon: Icons.person_outlined,
+                              textCapitalization: TextCapitalization.characters,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Bitte E-Mail oder Kürzel eingeben';

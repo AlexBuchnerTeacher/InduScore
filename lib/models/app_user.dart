@@ -53,13 +53,13 @@ class AppUser {
     required this.id,
     required this.email,
     required this.name,
-    required this.kuerzel,
+    required String kuerzel,
     required this.rolle,
     this.status = UserStatus.aktiv,
     this.favoriteKlassenIds = const [],
     required this.createdAt,
     this.lastLoginAt,
-  });
+  }) : kuerzel = kuerzel.toUpperCase(); // Kürzel immer uppercase
 
   /// Erstellt AppUser aus Firestore-Dokument
   factory AppUser.fromFirestore(DocumentSnapshot doc) {
@@ -68,7 +68,7 @@ class AppUser {
       id: doc.id,
       email: data['email'] as String? ?? '',
       name: data['name'] as String? ?? '',
-      kuerzel: data['kuerzel'] as String? ?? '',
+      kuerzel: (data['kuerzel'] as String? ?? '').toUpperCase(),
       rolle: UserRole.fromString(data['rolle'] as String?),
       status: UserStatus.fromString(data['status'] as String?),
       favoriteKlassenIds: (data['favoriteKlassenIds'] as List<dynamic>?)
