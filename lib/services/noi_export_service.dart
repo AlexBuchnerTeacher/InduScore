@@ -33,9 +33,9 @@ class NoiExportService {
     final dateFormat = DateFormat('yyyy-MM-dd');
     
     // XML Header nach ASV-Spezifikation
-    // Das Root-Element heißt 'zeugnsnoten-import' (kein Klassen-Attribut am Root!)
+    // Das Root-Element heißt 'zeugnisnoten-import' (mit i!)
     buffer.writeln('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
-    buffer.writeln('<zeugnsnoten-import');
+    buffer.writeln('<zeugnisnoten-import');
     buffer.writeln('    Schuljahr="${klasse.schuljahr}"');
     buffer.writeln('    Schemaversion="1.0"');
     buffer.writeln('    Generierungsdatum="${dateFormat.format(now)}">');
@@ -153,7 +153,7 @@ class NoiExportService {
       buffer.writeln('    </Schueler>');
     }
     
-    buffer.writeln('</zeugnsnoten-import>');
+    buffer.writeln('</zeugnisnoten-import>');
     
     return buffer.toString();
   }

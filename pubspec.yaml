@@ -3,7 +3,7 @@ name: induscore
 description: "InduScore - Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München"
 publish_to: 'none'
 
-version: 0.13.5 # ASV NOI Export Fix: Root-Element korrigiert, Klasse in Stammdaten, Validator hinzugefügt
+version: 0.13.6 # ASV NOI Export Hotfix: Rechtschreibfehler - zeugnisnoten statt zeugnsnoten (mit i)
 
 environment:
   sdk: ^3.10.0
