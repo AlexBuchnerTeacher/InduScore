@@ -12,6 +12,7 @@ import '../models/beruf.dart';
 import '../models/student.dart';
 import '../providers/app_providers.dart';
 import '../services/pdf_import_service.dart';
+import '../providers/permissions_providers.dart';
 
 class KlassenScreen extends ConsumerStatefulWidget {
   const KlassenScreen({super.key});
@@ -32,6 +33,44 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
     final filteredByZG = ref.watch(filteredKlassenProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final currentSchuljahr = ref.watch(currentSchuljahrProvider);
+    final canManageData = ref.watch(canManageDataProvider);
+    
+    // Permission Check
+    if (!canManageData) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              tooltip: 'Menü',
+            ),
+          ),
+          title: const Text('Klassenverwaltung'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.home),
+              onPressed: () => context.go('/'),
+              tooltip: 'Zum Dashboard',
+            ),
+          ],
+        ),
+        drawer: const RBSDrawer(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
+              const SizedBox(height: 16),
+              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const SizedBox(height: 8),
+              Text('Sie haben keine Berechtigung zur Klassenverwaltung.',
+                   style: RBSTypography.bodyMedium),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

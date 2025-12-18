@@ -6,6 +6,7 @@ import '../core/widgets/rbs_components.dart';
 import '../widgets/rbs_drawer.dart';
 import '../models/app_user.dart';
 import '../providers/app_providers.dart';
+import '../providers/permissions_providers.dart';
 
 /// Benutzerverwaltung - nur für Admins
 class UserVerwaltungScreen extends ConsumerStatefulWidget {
@@ -22,11 +23,11 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    final canManage = ref.watch(canManageUsersProvider);
     final usersAsync = ref.watch(appUsersProvider);
 
     // Nur Admins dürfen diese Seite sehen
-    if (!isAdmin) {
+    if (!canManage) {
       return Scaffold(
         appBar: AppBar(title: const Text('Benutzerverwaltung')),
         drawer: const RBSDrawer(),
