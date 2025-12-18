@@ -3,7 +3,7 @@ name: induscore
 description: "InduScore - Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München"
 publish_to: 'none'
 
-version: 0.13.6 # ASV NOI Export Hotfix: Rechtschreibfehler - zeugnisnoten statt zeugnsnoten (mit i)
+version: 0.13.7 # User-Admin-Fallback: Erster User wird automatisch Admin wenn keine AppUsers existieren
 
 environment:
   sdk: ^3.10.0

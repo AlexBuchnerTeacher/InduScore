@@ -397,7 +397,22 @@ final currentAppUserProvider = FutureProvider<AppUser?>((ref) async {
 });
 
 /// Prüft ob der aktuelle Benutzer Admin ist
+/// Fallback: Wenn keine AppUsers existieren, ist der erste Firebase-Auth-User automatisch Admin
 final isCurrentUserAdminProvider = Provider<bool>((ref) {
   final appUser = ref.watch(currentAppUserProvider).value;
-  return appUser?.isAdmin ?? false;
+  final allUsers = ref.watch(appUsersProvider).value ?? [];
+  
+  // Wenn AppUser existiert, dessen Rolle verwenden
+  if (appUser != null) {
+    return appUser.isAdmin;
+  }
+  
+  // Fallback: Wenn keine AppUsers existieren, ist der eingeloggte User automatisch Admin
+  // (Erster User beim Setup = Admin)
+  final firebaseUser = ref.watch(currentUserProvider);
+  if (firebaseUser != null && allUsers.isEmpty) {
+    return true;
+  }
+  
+  return false;
 });
