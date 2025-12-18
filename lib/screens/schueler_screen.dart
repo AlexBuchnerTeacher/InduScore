@@ -102,10 +102,17 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             onPressed: () => setState(() => _showAusgetretene = !_showAusgetretene),
             tooltip: _showAusgetretene ? 'Ausgetretene ausblenden' : 'Ausgetretene anzeigen',
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showStudentDialog(),
-            tooltip: 'Neuer Schüler',
+          // Neuer Schüler Button - nur für Admin
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateDataProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _showStudentDialog(),
+                tooltip: 'Neuer Schüler',
+              );
+            },
           ),
         ],
       ),

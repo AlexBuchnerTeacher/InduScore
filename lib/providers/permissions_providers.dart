@@ -82,3 +82,15 @@ final canImportCSVProvider = Provider<bool>((ref) {
     orElse: () => false,
   );
 });
+
+/// **Stammdaten erstellen** (Issue #39)
+///
+/// Nur Admin darf neue Klassen, Fächer, Schüler erstellen
+/// Lehrer/Ausbilder können nur bestehende Daten bearbeiten
+final canCreateDataProvider = Provider<bool>((ref) {
+  final currentUser = ref.watch(currentAppUserProvider);
+  return currentUser.maybeWhen(
+    data: (user) => user?.rolle == UserRole.admin,
+    orElse: () => false,
+  );
+});

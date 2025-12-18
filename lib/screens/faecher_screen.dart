@@ -88,10 +88,17 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
             onPressed: () => context.go('/'),
             tooltip: 'Zum Dashboard',
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showSubjectDialog(),
-            tooltip: 'Neues Fach',
+          // Neues Fach Button - nur für Admin
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateDataProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _showSubjectDialog(),
+                tooltip: 'Neues Fach',
+              );
+            },
           ),
         ],
       ),

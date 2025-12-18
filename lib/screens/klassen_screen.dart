@@ -88,26 +88,33 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
             onPressed: () => context.go('/'),
             tooltip: 'Zum Dashboard',
           ),
-          // Import Button - deutlich sichtbar
-          Padding(
-            padding: const EdgeInsets.only(right: RBSSpacing.sm),
-            child: _isImporting
-                ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : TextButton.icon(
-                    onPressed: _handlePdfImport,
-                    icon: const Icon(Icons.upload_file, color: Colors.white),
-                    label: const Text(
-                      'PDF Import',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+          // Import Button - nur für Admin
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateDataProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              
+              return Padding(
+                padding: const EdgeInsets.only(right: RBSSpacing.sm),
+                child: _isImporting
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : TextButton.icon(
+                        onPressed: _handlePdfImport,
+                        icon: const Icon(Icons.upload_file, color: Colors.white),
+                        label: const Text(
+                          'PDF Import',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.add),
