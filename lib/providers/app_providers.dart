@@ -173,6 +173,25 @@ final zeitgruppenFilterProvider = NotifierProvider<ZeitgruppenFilterNotifier, Se
   ZeitgruppenFilterNotifier.new,
 );
 
+/// Favoriten-Filter für Dashboard (nur favoriteKlassenIds anzeigen)
+class FavoritenFilterNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    // Default: Lehrer/Ausbilder sehen nur Favoriten, Admin sieht alle
+    final currentUser = ref.watch(currentAppUserProvider).value;
+    if (currentUser == null) return false;
+    return currentUser.rolle == UserRole.lehrer || currentUser.rolle == UserRole.ausbilder;
+  }
+  
+  void toggle() => state = !state;
+  void setFilter(bool active) => state = active;
+}
+
+/// Favoriten-Filter Provider
+final favoritenFilterProvider = NotifierProvider<FavoritenFilterNotifier, bool>(
+  FavoritenFilterNotifier.new,
+);
+
 /// Extrahiert die Zeitgruppe aus einem Klassennamen (vorletzte Ziffer)
 int? extractZeitgruppe(String klassenName) {
   if (klassenName.length < 2) return null;
@@ -180,14 +199,23 @@ int? extractZeitgruppe(String klassenName) {
   return int.tryParse(vorletzteZiffer);
 }
 
-/// Gefilterte Klassen nach Zeitgruppe
+/// Gefilterte Klassen nach Zeitgruppe UND Favoriten
 final filteredKlassenProvider = Provider<List<Klasse>>((ref) {
   final klassen = ref.watch(klassenProvider).value ?? [];
   final zeitgruppen = ref.watch(zeitgruppenFilterProvider);
+  final favoritenFilter = ref.watch(favoritenFilterProvider);
+  final currentUser = ref.watch(currentAppUserProvider).value;
   
-  if (zeitgruppen.isEmpty) return klassen;
+  // Schritt 1: Nach Favoriten filtern (wenn aktiv)
+  var filtered = klassen;
+  if (favoritenFilter && currentUser != null && currentUser.favoriteKlassenIds.isNotEmpty) {
+    filtered = filtered.where((k) => currentUser.favoriteKlassenIds.contains(k.id)).toList();
+  }
   
-  return klassen.where((k) {
+  // Schritt 2: Nach Zeitgruppe filtern (wenn aktiv)
+  if (zeitgruppen.isEmpty) return filtered;
+  
+  return filtered.where((k) {
     final zg = extractZeitgruppe(k.name);
     return zg != null && zeitgruppen.contains(zg);
   }).toList();
