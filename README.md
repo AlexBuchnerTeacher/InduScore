@@ -4,10 +4,21 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.13.4-blue.svg)
+![Version](https://img.shields.io/badge/version-0.14.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
+
+## Features (v0.14.0)
+
+### Neu in v0.14.0
+- **Berechtigungssystem**: 4 Benutzerrollen (Admin, Lehrer, Ausbilder, Schüler)
+- **Permission Guards**: Alle Screens mit rollenbasierter Zugriffskontrolle
+- **Favoriten-Klassen**: Lehrer können Klassen als Favoriten markieren
+- **Dashboard-Filter**: Automatische Filterung nach Favoriten-Klassen
+- **Kürzel Case-Insensitivity**: Login funktioniert unabhängig von Groß-/Kleinschreibung
+- **Leistungsnachweis-Ownership**: Tracking wer welchen LN erstellt hat
+- **Erweiterte Benutzerverwaltung**: Email-Bearbeitung, Favoriten-Auswahl
 
 ## Features (v0.13.4)
 
@@ -27,7 +38,8 @@ Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, 
 - **Zeitgruppen-Filter**: Globaler Filter im Drawer für ZG1/ZG2/ZG3
 - **Nachschreiber-Dashboard**: Übersicht mit 3 Eskalationsstufen
 - **LN-Befreiungen**: Schüler als "nicht relevant" markieren
-- **Benutzerverwaltung**: Admin-Bereich für Lehrer-Accounts mit Rollen
+- **Rollenbasierte Berechtigungen**: Admin, Lehrer, Ausbilder, Schüler
+- **Permission Guards**: Zugriffskontrolle auf Screen- und Feature-Ebene
 - **Feature-based Architektur**: Saubere Code-Struktur nach Coding Guidelines
 - **NotenMatrixView**: Universelle Matrix-Komponente mit 3 Modi
 - **Inline-Editing**: Direkte Noten-Änderung in der Tabelle
@@ -81,16 +93,18 @@ https://induscore-notentool.web.app/
 │   │   ├── theme/rbs_theme.dart       # RBS Design System
 │   │   └── widgets/rbs_components.dart# RBS UI Components
 │   ├── models/
-│   │   ├── app_user.dart              # Benutzer-Model (Admin/Lehrer)
+│   │   ├── app_user.dart              # Benutzer-Model (4 Rollen, Favoriten)
 │   │   ├── beruf.dart                 # Beruf, Schuljahr, Zeitgruppe
 │   │   ├── grade.dart                 # Noten-Model
 │   │   ├── klasse.dart                # Klassen-Model
-│   │   ├── leistungsnachweis.dart     # Leistungsnachweise
+│   │   ├── leistungsnachweis.dart     # Leistungsnachweise (mit createdBy)
 │   │   ├── ln_exemption.dart          # LN-Befreiungen
 │   │   ├── student.dart               # Schüler-Model
 │   │   ├── subject.dart               # Fächer-Model
 │   │   └── zeugnisnote.dart           # Zeugnisnoten-Berechnung
-│   ├── providers/app_providers.dart   # Riverpod State Provider
+│   ├── providers/
+│   │   ├── app_providers.dart         # Riverpod State Provider
+│   │   └── permissions_providers.dart # Permission Guards (6 Provider)
 │   ├── screens/
 │   │   ├── home_screen.dart           # Dashboard mit Nachschreiber
 │   │   ├── login_screen.dart          # Login/Auth
@@ -121,13 +135,31 @@ flutterfire configure
 - In Firebase Console: Auth (Email/Password) und Cloud Firestore aktivieren
 - Rules konfigurieren (Beispiel siehe unten)
 
-3) Firestore Security Rules (Beispiel)
+3) Admin-User anlegen
+```bash
+# 1. Firestore-User anlegen
+dart run scripts/create_admin.dart
+
+# 2. Firebase Auth User erstellen (Firebase Console)
+# Email: alex.buchner@gmx.de
+# Passwort: [selbst wählen]
+```
+
+4) Firestore Security Rules
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Alle Dokumente: Nur authentifizierte User
     match /{document=**} {
       allow read, write: if request.auth != null;
+    }
+    
+    // Optional: User-Verwaltung nur für Admins
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null 
+                   && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rolle == 'admin';
     }
   }
 }

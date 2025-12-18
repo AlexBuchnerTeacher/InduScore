@@ -6,14 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.14.0] - 2025-01-XX
+## [0.14.0] - 2025-12-18
 
 ### Added
-- **Berechtigungssystem erweitert (Issue #39)**
+- **Berechtigungssystem erweitert (Issue #39)** ✅
   - 4 Benutzerrollen: Admin, Lehrer, Ausbilder*, Schüler* 
     (*Ausbilder/Schüler: Reserviert für separate App, aktuell nicht aktiv genutzt)
   - Permission Provider für alle Operationen (`permissions_providers.dart`)
-  - Permission Guards in allen relevanten Screens
+  - Permission Guards in allen relevanten Screens (Buttons, Menü-Einträge)
   - Favoriten-Klassen System für Lehrer/Ausbilder
   - Dashboard Favoriten-Toggle (⭐) mit Auto-Filter
   - Ownership-Tracking für Leistungsnachweise (`createdBy` Feld)
@@ -34,20 +34,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `TextCapitalization.characters` auf allen Kürzel-Inputs
 - **Screen-Zugriff eingeschränkt**
   - CSV Import: Nur Admin
-  - Klassen/Fächer/Schüler: Admin + Lehrer + Ausbilder
-  - Leistungsnachweise: Bearbeiten nur wenn berechtigt
+  - Klassen/Fächer/Schüler anlegen/bearbeiten/löschen: Nur Admin
+  - Leistungsnachweise anlegen: Admin + Lehrer + Ausbilder
+  - Leistungsnachweise bearbeiten/löschen: Nur eigene (Admin kann alle)
   - Benutzerverwaltung: Nur Admin
 - **Dashboard optimiert**
   - Favoriten-Filter für Lehrer/Ausbilder (Default: aktiv)
   - Admin sieht standardmäßig alle Klassen
   - Kombination mit Zeitgruppen-Filter möglich
+- **Drawer-Menü rollenbasiert**
+  - CSV Import nur für Admin sichtbar
+  - Benutzerverwaltung nur für Admin sichtbar
+  - Alle anderen Menüs: Admin + Lehrer + Ausbilder
+
+### Fixed
+- Alle Linter-Warnungen behoben (TODOs, relative imports, avoid_print)
+- Permission Guards in allen Create/Edit/Delete Buttons
 
 ### Technical Notes
-- Neue Permission Providers:
-  - `canManageUsersProvider` - Nur Admin
-  - `canImportCSVProvider` - Nur Admin
-  - `canManageDataProvider` - Admin + Lehrer + Ausbilder
+- Neue Permission Providers (lib/providers/permissions_providers.dart):
+  - `canManageUsersProvider` - Nur Admin (Benutzerverwaltung)
+  - `canImportCSVProvider` - Nur Admin (CSV Import)
+  - `canManageDataProvider` - Admin + Lehrer + Ausbilder (Lesen von Daten)
+  - `canCreateDataProvider` - Nur Admin (Anlegen von Klassen, Fächern, Schülern)
   - `canCreateLeistungsnachweisProvider` - Admin + Lehrer + Ausbilder
+  - `canEditLeistungsnachweisProvider(LN)` - Admin (alle) + Lehrer/Ausbilder (nur eigene)
+- Migration-Fallbacks in Code (keine Datenbank-Migration erforderlich)
+- Script: `scripts/create_admin.dart` zum Anlegen von Admin-Usern
   - `canEditLeistungsnachweisProvider(ln)` - Admin=alle, Lehrer/Ausbilder=eigene
 - `FavoritenFilterNotifier` für Dashboard-Filter
 - Automatische Migration durch Fallbacks (keine manuelle Migration nötig)
