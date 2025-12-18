@@ -223,10 +223,16 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
                           ),
                         ),
                         const SizedBox(height: RBSSpacing.sm),
-                        RBSButton(
-                          label: 'Erste Klasse erstellen',
-                          icon: Icons.add,
-                          onPressed: () => _showKlasseDialog(context),
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final canCreate = ref.watch(canCreateDataProvider);
+                            if (!canCreate) return const SizedBox.shrink();
+                            return RBSButton(
+                              label: 'Erste Klasse erstellen',
+                              icon: Icons.add,
+                              onPressed: () => _showKlasseDialog(context),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -267,20 +273,26 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
         ),
         title: Text(klasse.name, style: RBSTypography.h4),
         subtitle: Text(klasse.beruf.name, style: RBSTypography.bodySmall),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () => _showKlasseDialog(context, klasse: klasse),
-              tooltip: 'Bearbeiten',
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _confirmDelete(context, klasse),
-              tooltip: 'Löschen',
-            ),
-          ],
+        trailing: Consumer(
+          builder: (context, ref, _) {
+            final canCreate = ref.watch(canCreateDataProvider);
+            if (!canCreate) return const SizedBox.shrink();
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => _showKlasseDialog(context, klasse: klasse),
+                  tooltip: 'Bearbeiten',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => _confirmDelete(context, klasse),
+                  tooltip: 'Löschen',
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
