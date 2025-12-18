@@ -809,20 +809,12 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
             child: const Text('Abbrechen'),
           ),
           ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.trim().isEmpty) return;
-              
+            onPressed: () {
               Navigator.pop(ctx);
-              
-              // TODO: Implementiere Klassen-Erstellung
-              // Für jetzt zeigen wir eine Meldung
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Bitte legen Sie die Klasse im Klassen-Menü an.'),
-                ),
-              );
+              // Zur Klassenverwaltung navigieren wo User die Klasse vollständig anlegen kann
+              context.go('/klassen');
             },
-            child: const Text('Anlegen'),
+            child: const Text('Zur Klassenverwaltung'),
           ),
         ],
       ),

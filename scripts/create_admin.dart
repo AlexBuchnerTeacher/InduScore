@@ -1,7 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import '../lib/firebase_options.dart';
-import '../lib/models/app_user.dart';
+import 'package:induscore/firebase_options.dart';
+import 'package:induscore/models/app_user.dart';
 
 /// Script zum manuellen Anlegen eines Admin-Users
 /// 
