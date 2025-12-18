@@ -116,10 +116,17 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showKlasseDialog(context),
-            tooltip: 'Neue Klasse',
+          // Neue Klasse Button - nur für Admin
+          Consumer(
+            builder: (context, ref, _) {
+              final canCreate = ref.watch(canCreateDataProvider);
+              if (!canCreate) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _showKlasseDialog(context),
+                tooltip: 'Neue Klasse',
+              );
+            },
           ),
         ],
       ),
