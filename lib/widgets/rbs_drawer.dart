@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../providers/app_providers.dart';
+import '../providers/permissions_providers.dart';
 
 class RBSDrawer extends ConsumerWidget {
   const RBSDrawer({super.key});
@@ -47,69 +48,83 @@ class RBSDrawer extends ConsumerWidget {
 
           // Navigation Items
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.home_outlined,
-                  title: 'Dashboard',
-                  route: '/',
-                ),
-                const Divider(),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.school_outlined,
-                  title: 'Klassen',
-                  route: '/klassen',
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.person_outline,
-                  title: 'Schüler',
-                  route: '/schueler',
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.book_outlined,
-                  title: 'Fächer',
-                  route: '/faecher',
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.assignment_outlined,
-                  title: 'Leistungsnachweise',
-                  route: '/leistungsnachweise',
-                ),
-                const Divider(),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.upload_file_outlined,
-                  title: 'CSV Import',
-                  route: '/import',
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.download_outlined,
-                  title: 'Daten Export',
-                  route: '/export',
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.analytics_outlined,
-                  title: 'Statistiken',
-                  route: '/statistiken',
-                  disabled: true,
-                ),
-                const Divider(),
-                // Admin-Bereich
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.people_outlined,
-                  title: 'Benutzerverwaltung',
-                  route: '/einstellungen/benutzer',
-                ),
-              ],
+            child: Consumer(
+              builder: (context, ref, _) {
+                final canManageData = ref.watch(canManageDataProvider);
+                final canImportCSV = ref.watch(canImportCSVProvider);
+                final canManageUsers = ref.watch(canManageUsersProvider);
+                
+                return ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.home_outlined,
+                      title: 'Dashboard',
+                      route: '/',
+                    ),
+                    const Divider(),
+                    // Datenverwaltung (Admin + Lehrer + Ausbilder)
+                    if (canManageData) ...[
+                      _buildDrawerItem(
+                        context,
+                        icon: Icons.school_outlined,
+                        title: 'Klassen',
+                        route: '/klassen',
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        icon: Icons.person_outline,
+                        title: 'Schüler',
+                        route: '/schueler',
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        icon: Icons.book_outlined,
+                        title: 'Fächer',
+                        route: '/faecher',
+                      ),
+                    ],
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.assignment_outlined,
+                      title: 'Leistungsnachweise',
+                      route: '/leistungsnachweise',
+                    ),
+                    const Divider(),
+                    // CSV Import (nur Admin)
+                    if (canImportCSV)
+                      _buildDrawerItem(
+                        context,
+                        icon: Icons.upload_file_outlined,
+                        title: 'CSV Import',
+                        route: '/import',
+                      ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.download_outlined,
+                      title: 'Daten Export',
+                      route: '/export',
+                    ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.analytics_outlined,
+                      title: 'Statistiken',
+                      route: '/statistiken',
+                      disabled: true,
+                    ),
+                    const Divider(),
+                    // Benutzerverwaltung (nur Admin)
+                    if (canManageUsers)
+                      _buildDrawerItem(
+                        context,
+                        icon: Icons.people_outlined,
+                        title: 'Benutzerverwaltung',
+                        route: '/einstellungen/benutzer',
+                      ),
+                  ],
+                );
+              },
             ),
           ),
 
