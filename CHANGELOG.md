@@ -10,15 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Benutzerverwaltung**: Zugriffsproblem für ersten Admin behoben
-  - Automatischer Admin-Zugriff wenn keine AppUsers in Firestore existieren
+  - Automatische AppUser-Erstellung beim ersten Login
+  - Erster User wird automatisch als Admin angelegt
   - Löst "Zugriff verweigert" beim initialen Setup
-  - Erster eingeloggter Firebase-Auth-User wird als Admin behandelt
-  - Nach Login kann dieser Admin weitere Benutzer in der Benutzerverwaltung anlegen
+  - Weitere User werden als Lehrer angelegt (Admin kann Rolle dann ändern)
 
 ### Technical Notes
-- Fallback-Logik in `isCurrentUserAdminProvider`
-- Ermöglicht Setup ohne vorhandene Firestore-Benutzerdaten
-- Prüfung: `allUsers.isEmpty && firebaseUser != null → isAdmin = true`
+- Auto-AppUser-Erstellung in `currentAppUserProvider`
+- Erster User erhält automatisch `UserRole.admin`
+- Weitere User erhalten `UserRole.lehrer` (Standard)
+- Verbesserte Fallback-Logik in `isCurrentUserAdminProvider` mit `hasValue`-Checks
+- Kürzel wird automatisch aus E-Mail extrahiert (z.B. "MU" aus "mu@induscore.de")
 
 ## [0.13.5] - 2025-12-17
 

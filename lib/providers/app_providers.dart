@@ -388,31 +388,85 @@ final appUsersProvider = StreamProvider<List<AppUser>>((ref) {
 });
 
 /// Aktueller eingeloggter AppUser (mit Profildaten aus Firestore)
+/// Erstellt automatisch einen AppUser beim ersten Login
 final currentAppUserProvider = FutureProvider<AppUser?>((ref) async {
   final firebaseUser = ref.watch(currentUserProvider);
   if (firebaseUser == null) return null;
   
   final firestoreService = ref.read(firestoreServiceProvider);
-  return firestoreService.getAppUserByEmail(firebaseUser.email ?? '');
+  
+  // Versuche AppUser aus Firestore zu laden
+  var appUser = await firestoreService.getAppUserByEmail(firebaseUser.email ?? '');
+  
+  // Wenn kein AppUser existiert, erstelle einen (First-Run Setup)
+  if (appUser == null) {
+    final allUsers = await ref.read(appUsersProvider.future);
+    
+    // Erster User wird automatisch Admin
+    final isFirstUser = allUsers.isEmpty;
+    
+    final newAppUser = AppUser(
+      id: firebaseUser.uid,
+      email: firebaseUser.email ?? '',
+      name: firebaseUser.displayName ?? firebaseUser.email ?? 'Unbekannt',
+      kuerzel: _extractKuerzelFromEmail(firebaseUser.email ?? ''),
+      rolle: isFirstUser ? UserRole.admin : UserRole.lehrer,
+      status: UserStatus.aktiv,
+      klassenIds: [],
+      createdAt: DateTime.now(),
+      lastLoginAt: DateTime.now(),
+    );
+    
+    // In Firestore speichern
+    await firestoreService.createAppUserWithId(firebaseUser.uid, newAppUser);
+    
+    return newAppUser;
+  }
+  
+  // Letzten Login aktualisieren
+  await firestoreService.updateLastLogin(appUser.id);
+  
+  return appUser;
 });
+
+/// Extrahiert Kürzel aus E-Mail (z.B. "MU" aus "mu@induscore.de")
+String _extractKuerzelFromEmail(String email) {
+  if (email.isEmpty) return 'XX';
+  final parts = email.split('@');
+  if (parts.isEmpty) return 'XX';
+  final username = parts[0].toUpperCase();
+  return username.length <= 4 ? username : username.substring(0, 4);
+}
 
 /// Prüft ob der aktuelle Benutzer Admin ist
 /// Fallback: Wenn keine AppUsers existieren, ist der erste Firebase-Auth-User automatisch Admin
 final isCurrentUserAdminProvider = Provider<bool>((ref) {
-  final appUser = ref.watch(currentAppUserProvider).value;
-  final allUsers = ref.watch(appUsersProvider).value ?? [];
+  final firebaseUser = ref.watch(currentUserProvider);
+  
+  // Nicht eingeloggt = kein Admin
+  if (firebaseUser == null) {
+    return false;
+  }
+  
+  // AppUser-Daten aus Firestore laden
+  final appUserAsync = ref.watch(currentAppUserProvider);
+  final allUsersAsync = ref.watch(appUsersProvider);
   
   // Wenn AppUser existiert, dessen Rolle verwenden
-  if (appUser != null) {
-    return appUser.isAdmin;
+  if (appUserAsync.hasValue && appUserAsync.value != null) {
+    return appUserAsync.value!.isAdmin;
   }
   
-  // Fallback: Wenn keine AppUsers existieren, ist der eingeloggte User automatisch Admin
-  // (Erster User beim Setup = Admin)
-  final firebaseUser = ref.watch(currentUserProvider);
-  if (firebaseUser != null && allUsers.isEmpty) {
-    return true;
+  // Fallback für First-Run: Wenn Firebase Auth User existiert, 
+  // aber noch keine AppUsers in Firestore angelegt sind,
+  // ist der erste User automatisch Admin
+  if (allUsersAsync.hasValue) {
+    final allUsers = allUsersAsync.value ?? [];
+    if (allUsers.isEmpty) {
+      return true; // Erster User = Admin
+    }
   }
   
+  // Während Daten laden: Zugriff verweigern (sicherer Default)
   return false;
 });
