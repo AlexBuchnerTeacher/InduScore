@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Benutzerrolle im System
+/// 
+/// Hinweis: 'ausbilder' und 'schueler' sind für eine separate App reserviert
+/// und werden in dieser Anwendung aktuell nicht aktiv genutzt.
 enum UserRole {
   admin('Admin'),
   lehrer('Lehrer'),
-  ausbilder('Ausbilder'),
-  schueler('Schüler');
+  ausbilder('Ausbilder'),      // Reserviert für separate App
+  schueler('Schüler');         // Reserviert für separate App
 
   final String label;
   const UserRole(this.label);

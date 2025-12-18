@@ -19,7 +19,7 @@ final canManageUsersProvider = Provider<bool>((ref) {
 ///
 /// Admin: Alle Klassen, Fächer, Schüler bearbeiten
 /// Lehrer: Nur favorisierte Klassen und deren Schüler/Fächer
-/// Ausbilder: Nur favorisierte Klassen und deren Schüler/Fächer
+/// Ausbilder: Reserviert für separate App (aktuell wie Lehrer)
 final canManageDataProvider = Provider<bool>((ref) {
   final currentUser = ref.watch(currentAppUserProvider);
   return currentUser.maybeWhen(

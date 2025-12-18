@@ -35,8 +35,10 @@ favoriteKlassenIds: data['favoriteKlassenIds'] ?? data['klassenIds'] ?? []
 
 ## Berechtigungen (Permissions)
 
+> **Hinweis:** Die Rollen 'Ausbilder' und 'Schüler' sind für eine separate Anwendung reserviert und werden in dieser App aktuell nicht aktiv verwendet.
+
 ### Übersicht
-| Berechtigung | Admin | Lehrer | Ausbilder | Schüler |
+| Berechtigung | Admin | Lehrer | Ausbilder* | Schüler* |
 |--------------|-------|--------|-----------|---------|
 | Benutzerverwaltung | ✅ | ❌ | ❌ | ❌ |
 | CSV Import | ✅ | ❌ | ❌ | ❌ |
@@ -44,6 +46,8 @@ favoriteKlassenIds: data['favoriteKlassenIds'] ?? data['klassenIds'] ?? []
 | Leistungsnachweise erstellen | ✅ | ✅ | ✅ | ❌ |
 | Eigene LN bearbeiten | ✅ | ✅ | ✅ | ❌ |
 | Fremde LN bearbeiten | ✅ | ❌ | ❌ | ❌ |
+
+*Ausbilder und Schüler: Reserviert für separate Anwendung
 
 ### Permission Providers
 Neue Provider in `lib/providers/permissions_providers.dart`:

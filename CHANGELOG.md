@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Berechtigungssystem erweitert (Issue #39)**
-  - 4 Benutzerrollen: Admin, Lehrer, Ausbilder, Schüler
+  - 4 Benutzerrollen: Admin, Lehrer, Ausbilder*, Schüler* 
+    (*Ausbilder/Schüler: Reserviert für separate App, aktuell nicht aktiv genutzt)
   - Permission Provider für alle Operationen (`permissions_providers.dart`)
   - Permission Guards in allen relevanten Screens
   - Favoriten-Klassen System für Lehrer/Ausbilder
