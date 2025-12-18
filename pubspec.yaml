@@ -3,7 +3,7 @@ name: induscore
 description: "InduScore - Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München"
 publish_to: 'none'
 
-version: 0.13.7 # User-Admin-Fallback: Erster User wird automatisch Admin wenn keine AppUsers existieren
+version: 0.14.0 # Berechtigungssystem erweitert: 4 Rollen, Permission Provider, Favoriten-Klassen (Issue #39)
 
 environment:
   sdk: ^3.10.0

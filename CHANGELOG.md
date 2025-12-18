@@ -6,6 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.14.0] - 2025-01-XX
+
+### Added
+- **Berechtigungssystem erweitert (Issue #39)**
+  - 4 Benutzerrollen: Admin, Lehrer, Ausbilder, Schüler
+  - Permission Provider für alle Operationen (`permissions_providers.dart`)
+  - Permission Guards in allen relevanten Screens
+  - Favoriten-Klassen System für Lehrer/Ausbilder
+  - Dashboard Favoriten-Toggle (⭐) mit Auto-Filter
+  - Ownership-Tracking für Leistungsnachweise (`createdBy` Feld)
+
+### Changed
+- **Benutzerverwaltung komplett überarbeitet**
+  - Email-Adresse jetzt bearbeitbar (mit Warnung)
+  - Alle 4 Rollen auswählbar
+  - Favoriten-Klassen Multiselect (für Lehrer/Ausbilder)
+  - `canManageUsersProvider` statt `isCurrentUserAdminProvider`
+- **AppUser Model erweitert**
+  - `klassenIds` → `favoriteKlassenIds` (mit Migration-Fallback)
+  - Kürzel jetzt immer uppercase gespeichert
+  - 2 neue Rollen: Ausbilder, Schüler
+- **Kürzel Case-Insensitivity**
+  - Login funktioniert mit "mu", "MU", "Mu"
+  - Anzeige immer uppercase
+  - `TextCapitalization.characters` auf allen Kürzel-Inputs
+- **Screen-Zugriff eingeschränkt**
+  - CSV Import: Nur Admin
+  - Klassen/Fächer/Schüler: Admin + Lehrer + Ausbilder
+  - Leistungsnachweise: Bearbeiten nur wenn berechtigt
+  - Benutzerverwaltung: Nur Admin
+- **Dashboard optimiert**
+  - Favoriten-Filter für Lehrer/Ausbilder (Default: aktiv)
+  - Admin sieht standardmäßig alle Klassen
+  - Kombination mit Zeitgruppen-Filter möglich
+
+### Technical Notes
+- Neue Permission Providers:
+  - `canManageUsersProvider` - Nur Admin
+  - `canImportCSVProvider` - Nur Admin
+  - `canManageDataProvider` - Admin + Lehrer + Ausbilder
+  - `canCreateLeistungsnachweisProvider` - Admin + Lehrer + Ausbilder
+  - `canEditLeistungsnachweisProvider(ln)` - Admin=alle, Lehrer/Ausbilder=eigene
+- `FavoritenFilterNotifier` für Dashboard-Filter
+- Automatische Migration durch Fallbacks (keine manuelle Migration nötig)
+- Migrationsdokumentation: `docs/MIGRATION_0.14.0.md`
+
+### Security
+- Berechtigungen werden serverseitig validiert (Permission Provider)
+- Screens zeigen "Zugriff verweigert" bei fehlenden Berechtigungen
+- Lehrer/Ausbilder können nur eigene Leistungsnachweise bearbeiten
+
 ## [0.13.7] - 2025-12-18
 
 ### Fixed
