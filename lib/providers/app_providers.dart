@@ -412,7 +412,7 @@ final currentAppUserProvider = FutureProvider<AppUser?>((ref) async {
       kuerzel: _extractKuerzelFromEmail(firebaseUser.email ?? ''),
       rolle: isFirstUser ? UserRole.admin : UserRole.lehrer,
       status: UserStatus.aktiv,
-      klassenIds: [],
+      favoriteKlassenIds: [],
       createdAt: DateTime.now(),
       lastLoginAt: DateTime.now(),
     );

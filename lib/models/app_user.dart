@@ -3,8 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Benutzerrolle im System
 enum UserRole {
   admin('Admin'),
-  lehrer('Lehrer');
-  // schueler('Schüler'); // Später
+  lehrer('Lehrer'),
+  ausbilder('Ausbilder'),
+  schueler('Schüler');
 
   final String label;
   const UserRole(this.label);
@@ -44,7 +45,7 @@ class AppUser {
   final String kuerzel; // Fest vergeben (z.B. "MU")
   final UserRole rolle;
   final UserStatus status;
-  final List<String> klassenIds; // Zugeordnete Klassen (später)
+  final List<String> favoriteKlassenIds; // Favoriten-Klassen für Dashboard
   final DateTime createdAt;
   final DateTime? lastLoginAt;
 
@@ -55,7 +56,7 @@ class AppUser {
     required this.kuerzel,
     required this.rolle,
     this.status = UserStatus.aktiv,
-    this.klassenIds = const [],
+    this.favoriteKlassenIds = const [],
     required this.createdAt,
     this.lastLoginAt,
   });
@@ -70,7 +71,11 @@ class AppUser {
       kuerzel: data['kuerzel'] as String? ?? '',
       rolle: UserRole.fromString(data['rolle'] as String?),
       status: UserStatus.fromString(data['status'] as String?),
-      klassenIds: (data['klassenIds'] as List<dynamic>?)
+      favoriteKlassenIds: (data['favoriteKlassenIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          // Migration: Alte klassenIds fallback
+          (data['klassenIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
@@ -87,7 +92,7 @@ class AppUser {
       'kuerzel': kuerzel,
       'rolle': rolle.name,
       'status': status.name,
-      'klassenIds': klassenIds,
+      'favoriteKlassenIds': favoriteKlassenIds,
       'createdAt': Timestamp.fromDate(createdAt),
       'lastLoginAt': lastLoginAt != null 
           ? Timestamp.fromDate(lastLoginAt!) 
@@ -103,7 +108,7 @@ class AppUser {
     String? kuerzel,
     UserRole? rolle,
     UserStatus? status,
-    List<String>? klassenIds,
+    List<String>? favoriteKlassenIds,
     DateTime? createdAt,
     DateTime? lastLoginAt,
   }) {
@@ -114,7 +119,7 @@ class AppUser {
       kuerzel: kuerzel ?? this.kuerzel,
       rolle: rolle ?? this.rolle,
       status: status ?? this.status,
-      klassenIds: klassenIds ?? this.klassenIds,
+      favoriteKlassenIds: favoriteKlassenIds ?? this.favoriteKlassenIds,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );

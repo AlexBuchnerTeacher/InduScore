@@ -169,7 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         kuerzel: 'BU',
         rolle: UserRole.admin,
         status: UserStatus.aktiv,
-        klassenIds: [],
+        favoriteKlassenIds: [],
         createdAt: DateTime.now(),
         lastLoginAt: null,
       );
