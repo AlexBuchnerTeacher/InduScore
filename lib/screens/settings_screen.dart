@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/beruf.dart';
 import '../models/subject.dart';
-import '../services/firestore_service.dart';
 import '../providers/app_providers.dart';
 import '../core/theme/rbs_theme.dart';
 

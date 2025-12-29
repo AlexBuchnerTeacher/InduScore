@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../providers/app_providers.dart';
-import '../models/app_user.dart';
 
 /// Login Screen - RBS Cover-Ebene Design
 ///
