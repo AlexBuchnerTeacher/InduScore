@@ -114,6 +114,13 @@ class RBSDrawer extends ConsumerWidget {
                       disabled: true,
                     ),
                     const Divider(),
+                    // Einstellungen (Berufe & Fächer)
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.settings_outlined,
+                      title: 'Einstellungen',
+                      route: '/einstellungen',
+                    ),
                     // Benutzerverwaltung (nur Admin)
                     if (canManageUsers)
                       _buildDrawerItem(
