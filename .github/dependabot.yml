@@ -1,0 +1,29 @@
+# Dependabot configuration for automated dependency updates
+# Issue #51 Finding F12
+version: 2
+updates:
+  # Enable version updates for Dart/Flutter packages
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    # Limit to 5 open PRs at a time to avoid noise
+    open-pull-requests-limit: 5
+    # Add labels for easy filtering
+    labels:
+      - "dependencies"
+      - "dart"
+    # Group minor and patch updates
+    groups:
+      flutter-packages:
+        patterns:
+          - "flutter*"
+          - "firebase*"
+          - "cloud_firestore*"
+      development-packages:
+        patterns:
+          - "*_test"
+          - "mockito"
+          - "build_runner"
