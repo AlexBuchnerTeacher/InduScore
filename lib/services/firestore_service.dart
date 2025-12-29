@@ -793,16 +793,6 @@ class FirestoreService {
     return Student.fromFirestore(snapshot.docs.first);
   }
 
-  /// Lehrer nach Kürzel suchen
-  Future<AppUser?> getAppUserByKuerzel(String kuerzel) async {
-    final snapshot = await _appUsers
-        .where('kuerzel', isEqualTo: kuerzel.toUpperCase())
-        .limit(1)
-        .get();
-    if (snapshot.docs.isEmpty) return null;
-    return AppUser.fromFirestore(snapshot.docs.first);
-  }
-
   /// Fach nach Kürzel suchen
   Future<Subject?> getSubjectByKuerzel(String kuerzel) async {
     final snapshot = await _subjects

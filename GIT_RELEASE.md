@@ -151,7 +151,7 @@ flutter run -d chrome
 
 Siehe [INSTALL.md](INSTALL.md) für detaillierte Anweisungen.
 
-## 🚀 Nächste Schritte (v1.0.0)
+## 🚀 Nächste Schritte (v0.15.0)
 
 - [ ] Schülerverwaltung mit CSV-Import & Pseudonymisierung (#9)
 - [ ] Fächerverwaltung mit Beruf-Zuordnung (#8)
@@ -180,7 +180,7 @@ Berufsschule für Industrieelektronik
 ## 🔄 Nach dem Release
 
 ```bash
-# Branch für v1.0.0 vorbereiten
+# Branch für v0.15.0 vorbereiten
 git checkout -b feature/schueler-verwaltung
 
 # Oder direkt auf main weiterarbeiten

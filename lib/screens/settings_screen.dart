@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/beruf.dart';
 import '../models/subject.dart';
 import '../services/firestore_service.dart';
+import '../providers/app_providers.dart';
 import '../core/theme/rbs_theme.dart';
 
 /// Settings-Screen für globale Verwaltung von Berufen und Fächern
@@ -56,10 +57,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _BerufeTab(),
-          _FaecherTab(),
-        ],
+        children: const [_BerufeTab(), _FaecherTab()],
       ),
     );
   }
@@ -78,9 +76,9 @@ class _BerufeTab extends ConsumerWidget {
         children: [
           // Info Card
           Card(
-            elevation: RBSElevation.level1,
+            elevation: 1.0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(RBSRadius.medium),
+              borderRadius: BorderRadius.circular(RBSBorderRadius.medium),
             ),
             child: Padding(
               padding: const EdgeInsets.all(RBSSpacing.md),
@@ -123,10 +121,10 @@ class _BerufeTab extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final beruf = Beruf.values[index];
                 return Card(
-                  elevation: RBSElevation.level1,
+                  elevation: 1.0,
                   margin: const EdgeInsets.only(bottom: RBSSpacing.sm),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(RBSRadius.medium),
+                    borderRadius: BorderRadius.circular(RBSBorderRadius.medium),
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
@@ -173,7 +171,7 @@ class _FaecherTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final firestoreService = ref.watch(firestoreServiceProvider);
-    
+
     return Padding(
       padding: const EdgeInsets.all(RBSSpacing.md),
       child: Column(
@@ -200,7 +198,7 @@ class _FaecherTab extends ConsumerWidget {
                   backgroundColor: RBSColors.dynamicRed,
                   foregroundColor: RBSColors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(RBSRadius.small),
+                    borderRadius: BorderRadius.circular(RBSBorderRadius.small),
                   ),
                 ),
               ),
@@ -257,10 +255,12 @@ class _FaecherTab extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final subject = subjects[index];
                     return Card(
-                      elevation: RBSElevation.level1,
+                      elevation: 1.0,
                       margin: const EdgeInsets.only(bottom: RBSSpacing.sm),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(RBSRadius.medium),
+                        borderRadius: BorderRadius.circular(
+                          RBSBorderRadius.medium,
+                        ),
                       ),
                       child: ListTile(
                         leading: CircleAvatar(
@@ -298,17 +298,19 @@ class _FaecherTab extends ConsumerWidget {
                               Wrap(
                                 spacing: 4,
                                 children: subject.berufe
-                                    .map((beruf) => Chip(
-                                          label: Text(
-                                            beruf.code,
-                                            style: const TextStyle(fontSize: 10),
-                                          ),
-                                          backgroundColor: RBSColors.dynamicRed
-                                              .withOpacity(0.1),
-                                          padding: EdgeInsets.zero,
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                        ))
+                                    .map(
+                                      (beruf) => Chip(
+                                        label: Text(
+                                          beruf.code,
+                                          style: const TextStyle(fontSize: 10),
+                                        ),
+                                        backgroundColor: RBSColors.dynamicRed
+                                            .withOpacity(0.1),
+                                        padding: EdgeInsets.zero,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                    )
                                     .toList(),
                               ),
                           ],
@@ -324,7 +326,8 @@ class _FaecherTab extends ConsumerWidget {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               color: RBSColors.error,
-                              onPressed: () => _deleteFach(context, ref, subject),
+                              onPressed: () =>
+                                  _deleteFach(context, ref, subject),
                             ),
                           ],
                         ),
@@ -348,7 +351,10 @@ class _FaecherTab extends ConsumerWidget {
   }
 
   void _showEditFachDialog(
-      BuildContext context, WidgetRef ref, Subject subject) {
+    BuildContext context,
+    WidgetRef ref,
+    Subject subject,
+  ) {
     showDialog(
       context: context,
       builder: (context) => _FachDialog(ref: ref, subject: subject),
@@ -423,7 +429,7 @@ class _FachDialogState extends State<_FachDialog> {
   late TextEditingController _shortNameController;
   late TextEditingController _wochenstundenController;
   late TextEditingController _creditsController;
-  
+
   FachTyp _selectedTyp = FachTyp.beruflich;
   Set<Beruf> _selectedBerufe = {};
   bool _isLoading = false;
@@ -432,7 +438,9 @@ class _FachDialogState extends State<_FachDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.subject?.name ?? '');
-    _shortNameController = TextEditingController(text: widget.subject?.shortName ?? '');
+    _shortNameController = TextEditingController(
+      text: widget.subject?.shortName ?? '',
+    );
     _wochenstundenController = TextEditingController(
       text: widget.subject?.wochenstunden.toString() ?? '2',
     );
@@ -485,10 +493,10 @@ class _FachDialogState extends State<_FachDialog> {
               value: _selectedTyp,
               decoration: const InputDecoration(labelText: 'Fachtyp'),
               items: FachTyp.values
-                  .map((typ) => DropdownMenuItem(
-                        value: typ,
-                        child: Text(typ.name),
-                      ))
+                  .map(
+                    (typ) =>
+                        DropdownMenuItem(value: typ, child: Text(typ.name)),
+                  )
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -499,18 +507,16 @@ class _FachDialogState extends State<_FachDialog> {
             const SizedBox(height: RBSSpacing.md),
             TextField(
               controller: _wochenstundenController,
-              decoration: const InputDecoration(
-                labelText: 'Wochenstunden',
-              ),
+              decoration: const InputDecoration(labelText: 'Wochenstunden'),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: RBSSpacing.sm),
             TextField(
               controller: _creditsController,
-              decoration: const InputDecoration(
-                labelText: 'Credits',
+              decoration: const InputDecoration(labelText: 'Credits'),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: RBSSpacing.md),
             const Text(
@@ -518,19 +524,21 @@ class _FachDialogState extends State<_FachDialog> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: RBSSpacing.sm),
-            ...Beruf.values.map((beruf) => CheckboxListTile(
-                  title: Text('${beruf.code} - ${beruf.name}'),
-                  value: _selectedBerufe.contains(beruf),
-                  onChanged: (checked) {
-                    setState(() {
-                      if (checked == true) {
-                        _selectedBerufe.add(beruf);
-                      } else {
-                        _selectedBerufe.remove(beruf);
-                      }
-                    });
-                  },
-                )),
+            ...Beruf.values.map(
+              (beruf) => CheckboxListTile(
+                title: Text('${beruf.code} - ${beruf.name}'),
+                value: _selectedBerufe.contains(beruf),
+                onChanged: (checked) {
+                  setState(() {
+                    if (checked == true) {
+                      _selectedBerufe.add(beruf);
+                    } else {
+                      _selectedBerufe.remove(beruf);
+                    }
+                  });
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -573,7 +581,7 @@ class _FachDialogState extends State<_FachDialog> {
 
     try {
       final firestoreService = widget.ref.read(firestoreServiceProvider);
-      
+
       final subject = Subject(
         id: widget.subject?.id ?? '',
         name: name,
@@ -597,9 +605,11 @@ class _FachDialogState extends State<_FachDialog> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.subject == null
-                ? 'Fach wurde hinzugefügt'
-                : 'Fach wurde aktualisiert'),
+            content: Text(
+              widget.subject == null
+                  ? 'Fach wurde hinzugefügt'
+                  : 'Fach wurde aktualisiert',
+            ),
             backgroundColor: RBSColors.courtGreen,
           ),
         );
