@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **csv_import_screen.dart UI Widget Extraction** (Issue #54 F-003 Phase 1) - 11% LOC Reduction ✅
+  - Created `lib/screens/widgets/csv_import_widgets.dart` (246 LOC) with 5 reusable UI components:
+    - `buildStepCard()` - Step indicator with completion states (active/complete/inactive)
+    - `buildColumnMappingChip()` - CSV column assignment chip with mapping indicator
+    - `buildPreviewTable()` - 5-row data preview table with column mapping
+    - `buildStatChip()` - Statistics display chip (students, classes, teachers, subjects)
+    - `KlasseDropdownWidget` - Riverpod-integrated class selector with auto-selection
+  - Reduced csv_import_screen.dart from 1068→954 LOC (11% reduction)
+  - Business logic remains in screen (tightly coupled to widget state)
+  - Future Phase 2: Migrate to Riverpod StateNotifier for further LOC reduction
+  - All 203 tests passing, backward compatible
+
 - **noten_matrix_view.dart Widget Extraction** (Issue #54 F-002) - 91% LOC Reduction ✅
   - Split monolithic noten_matrix_view.dart into 4 specialized widget files:
     - `lib/features/noten/widgets/klassen_matrix_widget.dart` (412 LOC) - Schüler × Fächer/LNs Matrix
