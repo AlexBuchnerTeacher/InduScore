@@ -12,6 +12,7 @@ import '../services/csv_import_service.dart';
 import '../services/asv_import_service.dart';
 import '../models/student.dart';
 import '../providers/permissions_providers.dart';
+import 'widgets/csv_import_widgets.dart';
 
 /// CSV Import Screen - Schülerlisten importieren (nur Admin)
 class CsvImportScreen extends ConsumerStatefulWidget {
@@ -23,20 +24,20 @@ class CsvImportScreen extends ConsumerStatefulWidget {
 
 class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
   final CsvImportService _importService = CsvImportService();
-  
+
   CsvAnalysisResult? _analysisResult;
   CsvImportResult? _importResult;
   Map<int, CsvColumn> _columnMapping = {};
   String? _selectedKlasseId;
   bool _isLoading = false;
   String? _fileName;
-  
+
   // Import-Status
   bool _importing = false;
   int _importedCount = 0;
   String? _importError;
   bool _importComplete = false;
-  
+
   // ASV-Import
   bool _isAsvFormat = false;
   AsvParseResult? _asvParseResult;
@@ -45,7 +46,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
   @override
   Widget build(BuildContext context) {
     final canImport = ref.watch(canImportCSVProvider);
-    
+
     // Permission Check
     if (!canImport) {
       return Scaffold(
@@ -66,14 +67,16 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
               const SizedBox(height: 16),
               const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              const Text('Nur Administratoren können CSV-Daten importieren.',
-                   style: RBSTypography.bodyMedium),
+              const Text(
+                'Nur Administratoren können CSV-Daten importieren.',
+                style: RBSTypography.bodyMedium,
+              ),
             ],
           ),
         ),
       );
     }
-    
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -102,7 +105,11 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, color: RBSColors.dynamicRed, size: 28),
+                    const Icon(
+                      Icons.info_outline,
+                      color: RBSColors.dynamicRed,
+                      size: 28,
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -110,9 +117,8 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                         children: [
                           Text(
                             'Schülerlisten importieren',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -140,7 +146,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: _isLoading ? null : _selectFile,
-                    icon: _isLoading 
+                    icon: _isLoading
                         ? const SizedBox(
                             width: 16,
                             height: 16,
@@ -151,14 +157,20 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: RBSColors.dynamicRed,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                   if (_analysisResult != null) ...[
                     const SizedBox(height: 12),
                     Text(
                       '✓ ${_analysisResult!.rowCount} Zeilen erkannt (Delimiter: ${_analysisResult!.delimiter})',
-                      style: const TextStyle(color: RBSColors.courtGreen, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        color: RBSColors.courtGreen,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                   if (_asvParseResult != null && _asvParseResult!.isValid) ...[
@@ -177,7 +189,10 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                           Expanded(
                             child: Text(
                               'ASV-Format erkannt! ${_asvParseResult!.rowCount} Schüler gefunden.',
-                              style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                color: Colors.blue.shade900,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ],
@@ -189,7 +204,9 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
             ),
 
             // ASV-Import Flow
-            if (_isAsvFormat && _asvParseResult != null && _asvParseResult!.isValid) ...[
+            if (_isAsvFormat &&
+                _asvParseResult != null &&
+                _asvParseResult!.isValid) ...[
               const SizedBox(height: 16),
               _buildAsvImportSection(),
             ],
@@ -210,19 +227,26 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Spalten-Mapping
                     Wrap(
                       spacing: 16,
                       runSpacing: 12,
                       children: [
-                        for (var i = 0; i < _analysisResult!.headers.length; i++)
-                          _buildColumnMappingChip(i, _analysisResult!.headers[i]),
+                        for (
+                          var i = 0;
+                          i < _analysisResult!.headers.length;
+                          i++
+                        )
+                          _buildColumnMappingChip(
+                            i,
+                            _analysisResult!.headers[i],
+                          ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Pflichtfelder-Check
                     if (!_hasRequiredFields)
                       Container(
@@ -234,7 +258,10 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning_amber, color: Colors.orange.shade700),
+                            Icon(
+                              Icons.warning_amber,
+                              color: Colors.orange.shade700,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -245,17 +272,20 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                           ],
                         ),
                       ),
-                    
+
                     // Preview
                     if (_hasRequiredFields) ...[
                       const SizedBox(height: 16),
                       const Divider(),
                       const SizedBox(height: 12),
-                      Text('Vorschau:', style: Theme.of(context).textTheme.titleSmall),
+                      Text(
+                        'Vorschau:',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                       const SizedBox(height: 8),
                       _buildPreviewTable(),
                     ],
-                    
+
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: _hasRequiredFields ? _processImport : null,
@@ -301,33 +331,47 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                         style: TextStyle(color: Colors.orange.shade700),
                       ),
                       for (final error in _importResult!.errors.take(3))
-                        Text('• $error', style: TextStyle(color: Colors.orange.shade600, fontSize: 12)),
+                        Text(
+                          '• $error',
+                          style: TextStyle(
+                            color: Colors.orange.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
                     ],
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Klassen-Auswahl
                     _buildKlasseDropdown(),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Import-Buttons
                     Row(
                       children: [
                         ElevatedButton.icon(
-                          onPressed: (_selectedKlasseId != null && !_importing && !_importComplete)
+                          onPressed:
+                              (_selectedKlasseId != null &&
+                                  !_importing &&
+                                  !_importComplete)
                               ? _importToKlasse
                               : null,
                           icon: _importing
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
                                 )
                               : const Icon(Icons.cloud_upload),
-                          label: Text(_importing 
-                              ? 'Importiere... ($_importedCount/${_importResult!.students.length})'
-                              : 'In Klasse importieren'),
+                          label: Text(
+                            _importing
+                                ? 'Importiere... ($_importedCount/${_importResult!.students.length})'
+                                : 'In Klasse importieren',
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: RBSColors.dynamicRed,
                             foregroundColor: Colors.white,
@@ -341,7 +385,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                         ),
                       ],
                     ),
-                    
+
                     if (_importError != null) ...[
                       const SizedBox(height: 12),
                       Text(
@@ -349,7 +393,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                         style: TextStyle(color: Colors.red.shade700),
                       ),
                     ],
-                    
+
                     if (_importComplete) ...[
                       const SizedBox(height: 12),
                       Container(
@@ -361,7 +405,10 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.check_circle, color: RBSColors.courtGreen),
+                            const Icon(
+                              Icons.check_circle,
+                              color: RBSColors.courtGreen,
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               '$_importedCount Schüler erfolgreich importiert!',
@@ -378,7 +425,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 24),
           ],
         ),
@@ -386,6 +433,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
     );
   }
 
+  // Step Card Helper - delegiert an CsvImportWidgets
   Widget _buildStepCard({
     required int step,
     required String title,
@@ -393,91 +441,23 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
     required bool isComplete,
     required Widget child,
   }) {
-    return RBSCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: isComplete
-                  ? RBSColors.courtGreen.withValues(alpha: 0.1)
-                  : isActive
-                      ? RBSColors.dynamicRed.withValues(alpha: 0.1)
-                      : Colors.grey.shade100,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 14,
-                  backgroundColor: isComplete
-                      ? RBSColors.courtGreen
-                      : isActive
-                          ? RBSColors.dynamicRed
-                          : Colors.grey.shade400,
-                  child: isComplete
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : Text(
-                          '$step',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isComplete
-                        ? RBSColors.courtGreen
-                        : isActive
-                            ? RBSColors.dynamicRed
-                            : Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
-        ],
-      ),
+    return CsvImportWidgets.buildStepCard(
+      context: context,
+      step: step,
+      title: title,
+      isActive: isActive,
+      isComplete: isComplete,
+      child: child,
     );
   }
 
   Widget _buildColumnMappingChip(int index, String header) {
     final mapping = _columnMapping[index];
-    return InputChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(header, style: const TextStyle(fontSize: 12)),
-          const SizedBox(width: 8),
-          Icon(Icons.arrow_forward, size: 14, color: Colors.grey.shade600),
-          const SizedBox(width: 8),
-          Text(
-            mapping?.label ?? 'Ignorieren',
-            style: TextStyle(
-              fontSize: 12,
-              color: mapping != null ? RBSColors.dynamicRed : Colors.grey,
-              fontWeight: mapping != null ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
+    return CsvImportWidgets.buildColumnMappingChip(
+      index: index,
+      header: header,
+      mapping: mapping,
       onPressed: () => _showColumnMappingDialog(index, header),
-      backgroundColor: mapping != null 
-          ? RBSColors.dynamicRed.withValues(alpha: 0.1) 
-          : Colors.grey.shade100,
     );
   }
 
@@ -493,10 +473,12 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
               children: [
                 ListTile(
                   leading: Icon(
-                    _columnMapping[index] == null 
-                        ? Icons.radio_button_checked 
+                    _columnMapping[index] == null
+                        ? Icons.radio_button_checked
                         : Icons.radio_button_unchecked,
-                    color: _columnMapping[index] == null ? RBSColors.dynamicRed : null,
+                    color: _columnMapping[index] == null
+                        ? RBSColors.dynamicRed
+                        : null,
                   ),
                   title: const Text('Ignorieren'),
                   onTap: () {
@@ -507,10 +489,12 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                 for (final col in CsvColumn.values)
                   ListTile(
                     leading: Icon(
-                      _columnMapping[index] == col 
-                          ? Icons.radio_button_checked 
+                      _columnMapping[index] == col
+                          ? Icons.radio_button_checked
                           : Icons.radio_button_unchecked,
-                      color: _columnMapping[index] == col ? RBSColors.dynamicRed : null,
+                      color: _columnMapping[index] == col
+                          ? RBSColors.dynamicRed
+                          : null,
                     ),
                     title: Text(col.label),
                     onTap: () {
@@ -527,103 +511,39 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
   }
 
   Widget _buildPreviewTable() {
-    final rows = _analysisResult!.rows.take(5).toList();
-    final lastNameIdx = _columnMapping.entries
-        .where((e) => e.value == CsvColumn.lastName)
-        .map((e) => e.key)
-        .firstOrNull;
-    final firstNameIdx = _columnMapping.entries
-        .where((e) => e.value == CsvColumn.firstName)
-        .map((e) => e.key)
-        .firstOrNull;
-    final classIdx = _columnMapping.entries
-        .where((e) => e.value == CsvColumn.className)
-        .map((e) => e.key)
-        .firstOrNull;
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          headingRowColor: WidgetStatePropertyAll(Colors.grey.shade100),
-          columns: const [
-            DataColumn(label: Text('Vorname')),
-            DataColumn(label: Text('Nachname')),
-            DataColumn(label: Text('Klasse')),
-          ],
-          rows: rows.map((row) {
-            return DataRow(cells: [
-              DataCell(Text(firstNameIdx != null && firstNameIdx < row.length 
-                  ? row[firstNameIdx] : '-')),
-              DataCell(Text(lastNameIdx != null && lastNameIdx < row.length 
-                  ? row[lastNameIdx] : '-')),
-              DataCell(Text(classIdx != null && classIdx < row.length 
-                  ? row[classIdx] : '-')),
-            ]);
-          }).toList(),
-        ),
-      ),
+    return CsvImportWidgets.buildPreviewTable(
+      analysisResult: _analysisResult!,
+      columnMapping: _columnMapping,
     );
   }
 
   Widget _buildKlasseDropdown() {
-    final klassenAsync = ref.watch(klassenProvider);
-    
-    return klassenAsync.when(
-      loading: () => const CircularProgressIndicator(),
-      error: (err, _) => Text('Fehler: $err'),
-      data: (klassen) {
-        // Wenn erkannter Klassenname passt, vorauswählen
-        if (_selectedKlasseId == null && _importResult?.detectedClassName != null) {
-          for (final klasse in klassen) {
-            if (klasse.name == _importResult!.detectedClassName) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) setState(() => _selectedKlasseId = klasse.id);
-              });
-              break;
-            }
-          }
-        }
-        
-        return DropdownButtonFormField<String>(
-          decoration: const InputDecoration(
-            labelText: 'Klasse auswählen',
-            border: OutlineInputBorder(),
-          ),
-          initialValue: _selectedKlasseId,
-          items: klassen.map((k) => DropdownMenuItem(
-            value: k.id,
-            child: Text(k.name),
-          )).toList(),
-          onChanged: (v) => setState(() => _selectedKlasseId = v),
-        );
-      },
+    return KlasseDropdownWidget(
+      selectedKlasseId: _selectedKlasseId,
+      detectedClassName: _importResult?.detectedClassName,
+      onChanged: (v) => setState(() => _selectedKlasseId = v),
     );
   }
 
   bool get _hasRequiredFields {
     return _columnMapping.values.contains(CsvColumn.lastName) &&
-           _columnMapping.values.contains(CsvColumn.firstName);
+        _columnMapping.values.contains(CsvColumn.firstName);
   }
 
   Future<void> _selectFile() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // File-Input erstellen
       final input = web.document.createElement('input') as web.HTMLInputElement;
       input.type = 'file';
       input.accept = '.csv,.txt';
-      
+
       // Event-Handler für Dateiauswahl (sync wrapper für async Logik)
       input.onchange = ((web.Event event) {
         _handleFileSelection(input);
       }).toJS;
-      
+
       input.click();
     } catch (e) {
       setState(() {
@@ -638,7 +558,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
     if (files != null && files.length > 0) {
       final file = files.item(0)!;
       final reader = web.FileReader();
-      
+
       reader.onload = ((web.Event e) {
         final result = reader.result;
         if (result != null) {
@@ -646,14 +566,14 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
           _analyzeFile(bytes, file.name);
         }
       }).toJS;
-      
+
       reader.onerror = ((web.Event e) {
         setState(() {
           _isLoading = false;
           _importError = 'Fehler beim Lesen der Datei';
         });
       }).toJS;
-      
+
       reader.readAsArrayBuffer(file);
     } else {
       setState(() => _isLoading = false);
@@ -676,11 +596,14 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
       } catch (_) {
         content = latin1.decode(bytes);
       }
-      final lines = content.split('\n').where((l) => l.trim().isNotEmpty).toList();
-      
+      final lines = content
+          .split('\n')
+          .where((l) => l.trim().isNotEmpty)
+          .toList();
+
       if (lines.isNotEmpty) {
         final headers = AsvImportService.parseAsvLine(lines.first);
-        
+
         // Prüfe ob ASV-Format
         if (AsvImportService.isAsvFormat(headers)) {
           final asvResult = AsvImportService.parseAsvCsv(content);
@@ -697,7 +620,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
           return;
         }
       }
-      
+
       // Standard CSV-Analyse
       final analysis = _importService.analyzeCSV(bytes);
       setState(() {
@@ -720,8 +643,11 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
 
   void _processImport() {
     if (_analysisResult == null) return;
-    
-    final result = _importService.importStudents(_analysisResult!, _columnMapping);
+
+    final result = _importService.importStudents(
+      _analysisResult!,
+      _columnMapping,
+    );
     setState(() {
       _importResult = result;
       _importComplete = false;
@@ -731,15 +657,15 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
 
   Future<void> _importToKlasse() async {
     if (_importResult == null || _selectedKlasseId == null) return;
-    
+
     setState(() {
       _importing = true;
       _importedCount = 0;
       _importError = null;
     });
-    
+
     final firestoreService = ref.read(firestoreServiceProvider);
-    
+
     try {
       for (final imported in _importResult!.students) {
         final student = Student(
@@ -750,20 +676,19 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
           eintrittsDatum: DateTime.now(),
           createdAt: DateTime.now(),
         );
-        
+
         await firestoreService.createStudent(student);
-        
+
         setState(() => _importedCount++);
       }
-      
+
       setState(() {
         _importing = false;
         _importComplete = true;
       });
-      
+
       // Provider invalidieren für Refresh
       ref.invalidate(studentsByKlasseProvider(_selectedKlasseId!));
-      
     } catch (e) {
       setState(() {
         _importing = false;
@@ -777,7 +702,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
     final nameController = TextEditingController(
       text: _importResult?.detectedClassName ?? '',
     );
-    
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -825,12 +750,12 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
 
   Widget _buildAsvImportSection() {
     final rows = _asvParseResult!.rows!;
-    
+
     // Statistiken berechnen
     final klassen = rows.map((r) => r.klasse).toSet();
     final lehrerKuerzel = <String>{};
     final faecher = <String>{};
-    
+
     for (final row in rows) {
       final kuerzelMap = AsvImportService.parseLehrerKuerzel(row.lehrerFaecher);
       lehrerKuerzel.addAll(kuerzelMap.keys);
@@ -838,7 +763,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
         faecher.addAll(fachSet);
       }
     }
-    
+
     return _buildStepCard(
       step: 2,
       title: 'ASV-Daten prüfen & importieren',
@@ -853,24 +778,30 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 12),
-          
+
           Wrap(
             spacing: 16,
             runSpacing: 8,
             children: [
               _buildStatChip(Icons.people, '${rows.length} Schüler'),
-              _buildStatChip(Icons.class_, '${klassen.length} Klasse(n): ${klassen.join(", ")}'),
+              _buildStatChip(
+                Icons.class_,
+                '${klassen.length} Klasse(n): ${klassen.join(", ")}',
+              ),
               _buildStatChip(Icons.person, '${lehrerKuerzel.length} Lehrer'),
               _buildStatChip(Icons.book, '${faecher.length} Fächer'),
             ],
           ),
-          
+
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 12),
-          
+
           // Schüler-Vorschau
-          Text('Schüler-Vorschau:', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            'Schüler-Vorschau:',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
@@ -892,14 +823,20 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                   final befreiungen = <String>[];
                   if (row.befreiungDeutsch) befreiungen.add('D');
                   if (row.befreiungPuG) befreiungen.add('PuG');
-                  
-                  return DataRow(cells: [
-                    DataCell(Text(row.nachname)),
-                    DataCell(Text(row.vorname)),
-                    DataCell(Text(row.klasse)),
-                    DataCell(Text(row.religion)),
-                    DataCell(Text(befreiungen.isEmpty ? '-' : befreiungen.join(', '))),
-                  ]);
+
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(row.nachname)),
+                      DataCell(Text(row.vorname)),
+                      DataCell(Text(row.klasse)),
+                      DataCell(Text(row.religion)),
+                      DataCell(
+                        Text(
+                          befreiungen.isEmpty ? '-' : befreiungen.join(', '),
+                        ),
+                      ),
+                    ],
+                  );
                 }).toList(),
               ),
             ),
@@ -912,39 +849,53 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
             ),
-          
+
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 12),
-          
+
           // Lehrer-Vorschau
-          Text('Erkannte Lehrer:', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            'Erkannte Lehrer:',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 4,
-            children: lehrerKuerzel.map((k) => Chip(
-              label: Text(k),
-              backgroundColor: Colors.blue.shade50,
-            )).toList(),
+            children: lehrerKuerzel
+                .map(
+                  (k) => Chip(
+                    label: Text(k),
+                    backgroundColor: Colors.blue.shade50,
+                  ),
+                )
+                .toList(),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Fächer-Vorschau
-          Text('Erkannte Fächer:', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            'Erkannte Fächer:',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 4,
-            children: faecher.map((f) => Chip(
-              label: Text(f),
-              backgroundColor: Colors.green.shade50,
-            )).toList(),
+            children: faecher
+                .map(
+                  (f) => Chip(
+                    label: Text(f),
+                    backgroundColor: Colors.green.shade50,
+                  ),
+                )
+                .toList(),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Import-Button
           if (_asvImportResult == null) ...[
             ElevatedButton.icon(
@@ -953,18 +904,24 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Icon(Icons.cloud_upload),
               label: Text(_importing ? 'Importiere...' : 'Jetzt importieren'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: RBSColors.dynamicRed,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
               ),
             ),
           ],
-          
+
           // Import-Ergebnis
           if (_asvImportResult != null) ...[
             if (_asvImportResult!.isSuccess) ...[
@@ -1028,13 +985,10 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
               ),
             ],
           ],
-          
+
           if (_importError != null) ...[
             const SizedBox(height: 12),
-            Text(
-              _importError!,
-              style: TextStyle(color: Colors.red.shade700),
-            ),
+            Text(_importError!, style: TextStyle(color: Colors.red.shade700)),
           ],
         ],
       ),
@@ -1042,42 +996,28 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
   }
 
   Widget _buildStatChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: Colors.grey.shade700),
-          const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: Colors.grey.shade700)),
-        ],
-      ),
-    );
+    return CsvImportWidgets.buildStatChip(icon, label);
   }
 
   Future<void> _runAsvImport() async {
     if (_asvParseResult == null) return;
-    
+
     setState(() {
       _importing = true;
       _importError = null;
     });
-    
+
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
       final asvImportService = AsvImportService(firestoreService);
-      
+
       final result = await asvImportService.importAsvData(_asvParseResult!);
-      
+
       setState(() {
         _asvImportResult = result;
         _importing = false;
       });
-      
+
       if (result.isSuccess) {
         // Provider invalidieren für Refresh
         ref.invalidate(klassenProvider);
