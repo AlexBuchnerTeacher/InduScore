@@ -46,7 +46,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         bottom: TabBar(
           controller: _tabController,
           labelColor: RBSColors.white,
-          unselectedLabelColor: RBSColors.white.withOpacity(0.7),
+          unselectedLabelColor: RBSColors.white.withValues(alpha: 0.7),
           indicatorColor: RBSColors.white,
           tabs: const [
             Tab(text: 'Berufe'),
@@ -127,7 +127,9 @@ class _BerufeTab extends ConsumerWidget {
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: RBSColors.dynamicRed.withOpacity(0.1),
+                      backgroundColor: RBSColors.dynamicRed.withValues(
+                        alpha: 0.1,
+                      ),
                       child: Text(
                         beruf.code,
                         style: TextStyle(
@@ -149,7 +151,7 @@ class _BerufeTab extends ConsumerWidget {
                       style: TextStyle(
                         fontFamily: 'OpenSans',
                         fontSize: 12,
-                        color: RBSColors.textOnLight.withOpacity(0.7),
+                        color: RBSColors.textOnLight.withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -233,7 +235,7 @@ class _FaecherTab extends ConsumerWidget {
                         Icon(
                           Icons.school_outlined,
                           size: 64,
-                          color: RBSColors.textOnLight.withOpacity(0.3),
+                          color: RBSColors.textOnLight.withValues(alpha: 0.3),
                         ),
                         const SizedBox(height: RBSSpacing.md),
                         Text(
@@ -241,7 +243,7 @@ class _FaecherTab extends ConsumerWidget {
                           style: TextStyle(
                             fontFamily: 'OpenSans',
                             fontSize: 16,
-                            color: RBSColors.textOnLight.withOpacity(0.5),
+                            color: RBSColors.textOnLight.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -265,7 +267,7 @@ class _FaecherTab extends ConsumerWidget {
                         leading: CircleAvatar(
                           backgroundColor: subject.color != null
                               ? Color(int.parse('0xFF${subject.color}'))
-                              : RBSColors.courtGreen.withOpacity(0.2),
+                              : RBSColors.courtGreen.withValues(alpha: 0.2),
                           child: Text(
                             subject.shortName ?? subject.name[0],
                             style: TextStyle(
@@ -290,7 +292,9 @@ class _FaecherTab extends ConsumerWidget {
                               style: TextStyle(
                                 fontFamily: 'OpenSans',
                                 fontSize: 12,
-                                color: RBSColors.textOnLight.withOpacity(0.7),
+                                color: RBSColors.textOnLight.withValues(
+                                  alpha: 0.7,
+                                ),
                               ),
                             ),
                             if (subject.berufe.isNotEmpty)
@@ -304,7 +308,7 @@ class _FaecherTab extends ConsumerWidget {
                                           style: const TextStyle(fontSize: 10),
                                         ),
                                         backgroundColor: RBSColors.dynamicRed
-                                            .withOpacity(0.1),
+                                            .withValues(alpha: 0.1),
                                         padding: EdgeInsets.zero,
                                         materialTapTargetSize:
                                             MaterialTapTargetSize.shrinkWrap,
@@ -489,7 +493,7 @@ class _FachDialogState extends State<_FachDialog> {
             ),
             const SizedBox(height: RBSSpacing.md),
             DropdownButtonFormField<FachTyp>(
-              value: _selectedTyp,
+              initialValue: _selectedTyp,
               decoration: const InputDecoration(labelText: 'Fachtyp'),
               items: FachTyp.values
                   .map(
