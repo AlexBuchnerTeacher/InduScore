@@ -793,18 +793,18 @@ packages:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: e17dcc7a1d0701e84d0a83c0040503cdcc6c72e44db0d733ab4c706dd5b8b9f8
+      sha256: "9553fd29354cdacdd063ba7d6a39e0be9b3350b9345b1bcc2e4ab29a7439b11b"
       url: "https://pub.dev"
     source: hosted
-    version: "25.2.7"
+    version: "32.1.20"
   syncfusion_flutter_pdf:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_pdf
-      sha256: "9c201a65c5e680d8af9324aba88fa0f7d9248d6085eb7fb23dd8521d714a997f"
+      sha256: a82ebd626f3478495dbc5d4b71cf78f883abe1fd5c9e4a3ade65b127621a0604
       url: "https://pub.dev"
     source: hosted
-    version: "25.2.7"
+    version: "32.1.20"
   term_glyph:
     dependency: transitive
     description:
