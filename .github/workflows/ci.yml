@@ -38,5 +38,16 @@ jobs:
       - name: Test
         run: flutter test --coverage
 
+      - name: Check Coverage Threshold
+        run: |
+          # Install very_good_coverage for coverage threshold checking
+          dart pub global activate very_good_coverage
+          # Check minimum 50% coverage (Issue #51 F07)
+          # Exclude generated files (.g.dart, .freezed.dart)
+          dart pub global run very_good_coverage:very_good_coverage \
+            --min-coverage 50 \
+            --exclude '**/*.g.dart' \
+            --exclude '**/*.freezed.dart'
+
       # Version check removed - now using package_info_plus
       # which reads version directly from pubspec.yaml (single source of truth)

@@ -449,3 +449,57 @@ class RBSSection extends StatelessWidget {
     );
   }
 }
+
+/// SnackBar Type for RBSSnackBar
+enum RBSSnackBarType { success, error, info, warning }
+
+/// RBS SnackBar - Centralized SnackBar Helper
+///
+/// Usage: All user-feedback messages (success, error, info, warning)
+///
+/// Eliminates 56x duplicated ScaffoldMessenger.showSnackBar calls
+/// as per Issue #51 Finding F05 (Quick Win)
+class RBSSnackBar {
+  /// Shows a SnackBar with typed styling
+  ///
+  /// Parameters:
+  /// - [context]: BuildContext for ScaffoldMessenger
+  /// - [message]: Message to display (German, user-facing)
+  /// - [type]: Type of message (success, error, info, warning)
+  /// - [duration]: Display duration (default: 3 seconds)
+  static void show(
+    BuildContext context,
+    String message, {
+    RBSSnackBarType type = RBSSnackBarType.info,
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    final color = switch (type) {
+      RBSSnackBarType.success => RBSColors.success,
+      RBSSnackBarType.error => RBSColors.error,
+      RBSSnackBarType.warning => RBSColors.warning,
+      RBSSnackBarType.info => RBSColors.info,
+    };
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: RBSColors.textOnDark),
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        duration: duration,
+        action: type == RBSSnackBarType.error
+            ? SnackBarAction(
+                label: 'OK',
+                textColor: RBSColors.textOnDark,
+                onPressed: () {
+                  // Dismiss the SnackBar when OK is pressed
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              )
+            : null,
+      ),
+    );
+  }
+}

@@ -48,3 +48,13 @@ app.*.map.json
 scripts/firebase-admin-key.json
 **/firebase-admin-key.json
 scripts/node_modules/
+
+# Issue #51 Finding F19: Exclude project management files
+# These should be in GitHub Issues, not version control
+issues.json
+issues_export.json
+milestones.json
+
+# VS Code workspace files
+*.wsuo
+.vs/
