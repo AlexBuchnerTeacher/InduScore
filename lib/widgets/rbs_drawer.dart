@@ -114,14 +114,21 @@ class RBSDrawer extends ConsumerWidget {
                       disabled: true,
                     ),
                     const Divider(),
-                    // Benutzerverwaltung (nur Admin)
-                    if (canManageUsers)
+                    // Admin-Bereich (nur für Admins)
+                    if (canManageUsers) ...[
+                      _buildDrawerItem(
+                        context,
+                        icon: Icons.settings_outlined,
+                        title: 'Admin Einstellungen',
+                        route: '/einstellungen',
+                      ),
                       _buildDrawerItem(
                         context,
                         icon: Icons.people_outlined,
                         title: 'Benutzerverwaltung',
                         route: '/einstellungen/benutzer',
                       ),
+                    ],
                   ],
                 );
               },

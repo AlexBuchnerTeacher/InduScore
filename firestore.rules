@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // App Users Collection - Kürzel-Login ermöglichen
+    match /app_users/{userId} {
+      // Lesezugriff für Kürzel-zu-Email-Lookup (vor Login erlaubt!)
+      // ODER für eingeloggte User (eigene Daten oder Admin)
+      allow read: if request.auth == null  // Wichtig für Kürzel-Login!
+                  || request.auth.uid == userId 
+                  || (request.auth != null && get(/databases/$(database)/documents/app_users/$(request.auth.uid)).data.rolle == 'admin');
+      
+      // Schreibzugriff nur für Admins
+      allow create, update, delete: if request.auth != null 
+                                    && get(/databases/$(database)/documents/app_users/$(request.auth.uid)).data.rolle == 'admin';
+    }
+    
+    // Subjects Collection
+    match /subjects/{subjectId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null 
+                   && get(/databases/$(database)/documents/app_users/$(request.auth.uid)).data.rolle == 'admin';
+    }
+    
+    // Klassen Collection
+    match /klassen/{klasseId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Grades Collection
+    match /grades/{gradeId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Leistungsnachweise Collection
+    match /leistungsnachweise/{lnId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Alle anderen Collections - nur für eingeloggte User
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

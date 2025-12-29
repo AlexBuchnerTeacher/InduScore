@@ -20,6 +20,7 @@ import 'screens/noten_uebersicht_screen.dart';
 import 'screens/noi_export_screen.dart';
 import 'screens/csv_import_screen.dart';
 import 'screens/user_verwaltung_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/test_matrix_screen.dart';
 import 'features/klassen/klassen_detail_screen.dart';
 import 'features/schueler/schueler_detail_screen.dart';
@@ -168,6 +169,11 @@ final _router = GoRouter(
     GoRoute(
       path: '/einstellungen/benutzer',
       builder: (context, state) => const UserVerwaltungScreen(),
+    ),
+    // Admin Einstellungen (nur Admins) - Berufe & Fächer
+    GoRoute(
+      path: '/einstellungen',
+      builder: (context, state) => const SettingsScreen(),
     ),
     // TEST: Matrix View (Development only)
     GoRoute(

@@ -6,6 +6,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased] - v0.15.0 MVP Vorbereitung
+
+### Added
+- **Unit-Tests für Zeugnisnoten-Berechnung** (Issue #11) - ABGESCHLOSSEN ✅
+  - 24 Tests für `Zeugnisnote.berechneSchnitt()`
+  - Tests für `Zeugnisnote.rundeNote()` (Rundungsregel < 0.6 abrunden, ≥ 0.6 aufrunden)
+  - Tests für `Zeugnisnote.berechneZeugnisnote()` (End-to-End)
+  - Tests für `formatSchnitt()` und `getTendenz()`
+  - Alle 89 Tests bestehen
+- **Settings-Screen** (Issue #14) - ABGESCHLOSSEN ✅
+  - Tab-basierte UI für Berufe (readonly) und Fächer (CRUD)
+  - Fächer-Verwaltung: Erstellen, Bearbeiten, Löschen
+  - Zuordnung von Fächern zu Berufen
+  - Fachtyp, Wochenstunden, Credits konfigurierbar
+  - RBS-konformes Design (Cards, Dialoge, Farben)
+  - Route `/einstellungen` im Navigation-Drawer (nur für Admins!)
+  - Firestore-Persistenz für alle Operationen
+- **Flexibler Login mit Kürzel und Email** - NEU ✅
+  - Login unterstützt jetzt BEIDE Eingabearten: Kürzel (z.B. "BU") UND vollständige Email-Adresse
+  - Groß-/Kleinschreibung bei Kürzeln irrelevant (automatische Konvertierung)
+  - Automatische Kürzel-zu-Email-Auflösung über Firestore `app_users` Collection
+  - Neue Methode `FirestoreService.getAppUserByKuerzel()` für Kürzel-Lookup
+  - Fallback auf alte `@induscore.de` Konvention wenn Kürzel nicht in Firestore gefunden
+  - Script `create_both_users.js` zum Erstellen von appUser-Dokumenten für existierende Auth-User
+  - Script `check_kuerzel.js` zum Testen der Kürzel-Firestore-Abfragen
+- **Firestore Security Rules** - NEU ✅
+  - Pre-Login Lesezugriff auf `app_users` Collection für Kürzel-Lookup
+  - Schreibschutz für `app_users` und `subjects` (nur Admins)
+  - Granulare Rules für alle Collections (klassen, grades, leistungsnachweise)
+  - Deployed über Firebase CLI (`firestore.rules` + `firebase.json`)
+
+### Changed
+- Version auf 0.15.0 für v0.15.0 MVP Vorbereitung
+- Versionsnummern-Notation durchgehend auf v0.15.0 vereinheitlicht (statt v1.0.0)
+- **Admin Einstellungen nur für Admins** (Issue #49) - ABGESCHLOSSEN ✅
+  - Settings Screen in Navigation nur für Admins sichtbar
+  - Screen-Titel von "Einstellungen" zu "Admin Einstellungen" geändert
+  - Benutzerverwaltung und Admin Einstellungen zusammengefasst im Admin-Bereich
+
+### Fixed
+- **Settings Screen Bugs** (Issue #49) - ABGESCHLOSSEN ✅
+  - Farbparsing-Fehler behoben: Hex-Farben mit `#` werden jetzt korrekt geparst
+  - Screen-Titel korrigiert: "Admin Einstellungen" statt "Einstellungen"
+- **Login-Problem behoben**: Eingabe von Kürzeln funktioniert jetzt mit echten Email-Domains (@bs-ie.muenchen.musin.de, @gmx.de), nicht nur mit gehardcodeten @induscore.de
+- **Firestore Permission Denied beim Kürzel-Login behoben**: Security Rules erlauben jetzt Pre-Login Lesezugriff
+- **DEBUG-Code entfernt**: Admin-User-Erstellungs-Button wurde aus Login-Screen entfernt
+- **DEBUG print-Statements entfernt**: Alle print()-Aufrufe aus login_screen.dart entfernt (Lint-Warnungen behoben)
+
+---
+
 ## [0.14.0] - 2025-12-18
 
 ### Added
