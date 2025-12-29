@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- Next release content goes here -->
+
+## [0.17.0] - 2025-12-29 - Phase 1: Code Quality & Refactoring
+
 ### Added
 - **Common Dialog Library** (Issue #54 F-011/F-012) - Dialog Consolidation ✅
   - Created `lib/widgets/dialogs/common_dialogs.dart` (253 LOC) with 6 reusable dialog builders:
@@ -52,7 +56,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - RBS Styleguide 1.2 compliance maintained
   - Backward compatible (same public API)
 
-## [0.17.0] - 2025-12-29 - Widget Extraction & Code Quality
+- **klassen_screen.dart Widget Extraction** (Issue #54 F-001) - 50% LOC Reduction ✅
+  - Extracted 4 reusable widgets from klassen_screen.dart:
+    - `lib/widgets/klassen/klassen_filter_section.dart` (115 LOC) - Zeitgruppen/Beruf/Schuljahr filters
+    - `lib/widgets/klassen/klasse_card.dart` (87 LOC) - Color-coded class cards
+    - `lib/widgets/dialogs/klasse_edit_dialog.dart` (233 LOC) - Create/edit with Klassenname validation
+    - `lib/widgets/dialogs/klasse_delete_dialog.dart` (67 LOC) - Cascade deletion confirmation
+  - Reduced klassen_screen.dart from 608→304 LOC (99% of <300 target)
+  - Removed duplicate _getBerufColor method (appeared 3 times)
+  - All widgets maintain RBS Styleguide 1.2 compliance
+  - Callback pattern preserves Riverpod integration
+
+- **Lint Rules Enhancement** (Issue #54 F-015) - Strict Lint Rules ✅
+  - Added 25 strict lint rules to analysis_options.yaml (13→38 rules total)
+  - Code quality: `avoid_empty_else`, `avoid_type_to_string`, `only_throw_errors`
+  - Async patterns: `unawaited_futures`, `cancel_subscriptions`
+  - Best practices: `always_declare_return_types`, `always_put_required_named_parameters_first`, `prefer_final_fields/locals`
+  - Style: `unnecessary_lambdas`, `unnecessary_this`, `unnecessary_parenthesis`
+  - Applied 78 automatic lint fixes across 35 files
+  - Result: 164 lint infos → 0 (100% clean codebase) ✅
+
+### Added
+- **Model Unit Tests** (Issue #54 F-006) - 63 new tests ✅
+  - `test/models/student_test.dart` (24 tests) - fromFirestore, toFirestore, copyWith, equality
+  - `test/models/subject_test.dart` (15 tests) - Model conversion, edge cases
+  - `test/models/klasse_test.dart` (15 tests) - Class model validation
+  - `test/models/leistungsnachweis_test.dart` (9 tests) - Assessment model
+  - Coverage: >80% per model
+  - Total tests: 140→203 (+63), all passing ✅
 
 ### Fixed
 - **Dependency Updates** - Cloud Firestore 6.1.1, go_router 17.0.1, file_picker 10.3.8, syncfusion_flutter_pdf 32.1.20, google_fonts 6.3.3
