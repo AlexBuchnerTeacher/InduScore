@@ -26,7 +26,7 @@ void main() {
     };
 
     test('fromFirestore should correctly parse all fields', () {
-      final mockDoc = _MockDocumentSnapshot('student1', testData);
+      final mockDoc = _FakeDocumentSnapshot('student1', testData);
       final student = Student.fromFirestore(mockDoc);
 
       expect(student.id, 'student1');
@@ -53,7 +53,7 @@ void main() {
         'klasseId': 'EIT221',
         'createdAt': Timestamp.fromDate(testDate),
       };
-      final mockDoc = _MockDocumentSnapshot('student2', minimalData);
+      final mockDoc = _FakeDocumentSnapshot('student2', minimalData);
       final student = Student.fromFirestore(mockDoc);
 
       expect(student.firstName, 'Anna');
@@ -77,7 +77,7 @@ void main() {
         'status': 'ausgetreten',
         'austrittsDatum': Timestamp.fromDate(austrittDate),
       };
-      final mockDoc = _MockDocumentSnapshot('student3', dataWithAustritt);
+      final mockDoc = _FakeDocumentSnapshot('student3', dataWithAustritt);
       final student = Student.fromFirestore(mockDoc);
 
       expect(student.status, StudentStatus.ausgetreten);
@@ -239,7 +239,7 @@ void main() {
     });
 
     test('roundtrip fromFirestore/toFirestore should preserve data', () {
-      final mockDoc = _MockDocumentSnapshot('student1', testData);
+      final mockDoc = _FakeDocumentSnapshot('student1', testData);
       final student = Student.fromFirestore(mockDoc);
       final firestoreData = student.toFirestore();
 
@@ -260,7 +260,7 @@ void main() {
 }
 
 // Fake DocumentSnapshot for testing
-class _FakeDocumentSnapshot implements DocumentSnapshot<Map<String, dynamic>> {
+class _FakeDocumentSnapshot extends Fake implements DocumentSnapshot<Map<String, dynamic>> {
   @override
   final String id;
 
@@ -270,7 +270,4 @@ class _FakeDocumentSnapshot implements DocumentSnapshot<Map<String, dynamic>> {
 
   @override
   Map<String, dynamic>? data() => _data;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

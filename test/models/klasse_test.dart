@@ -20,7 +20,7 @@ void main() {
     };
 
     test('fromFirestore should correctly parse all fields', () {
-      final mockDoc = _MockDocumentSnapshot('klasse1', testData);
+      final mockDoc = _FakeDocumentSnapshot('klasse1', testData);
       final klasse = Klasse.fromFirestore(mockDoc);
 
       expect(klasse.id, 'klasse1');
@@ -35,7 +35,7 @@ void main() {
 
     test('fromFirestore should handle invalid schuljahr gracefully', () {
       final dataWithInvalidSchuljahr = {...testData, 'schuljahr': 'invalid'};
-      final mockDoc = _MockDocumentSnapshot('klasse1', dataWithInvalidSchuljahr);
+      final mockDoc = _FakeDocumentSnapshot('klasse1', dataWithInvalidSchuljahr);
       final klasse = Klasse.fromFirestore(mockDoc);
 
       // Should default to current Schuljahr
@@ -49,19 +49,19 @@ void main() {
       final egsData = {...testData, 'beruf': 'EGS'};
 
       expect(
-        Klasse.fromFirestore(_MockDocumentSnapshot('k1', ieData)).beruf.code,
+        Klasse.fromFirestore(_FakeDocumentSnapshot('k1', ieData)).beruf.code,
         'IE',
       );
       expect(
-        Klasse.fromFirestore(_MockDocumentSnapshot('k2', eatData)).beruf.code,
+        Klasse.fromFirestore(_FakeDocumentSnapshot('k2', eatData)).beruf.code,
         'EAT',
       );
       expect(
-        Klasse.fromFirestore(_MockDocumentSnapshot('k3', ebtData)).beruf.code,
+        Klasse.fromFirestore(_FakeDocumentSnapshot('k3', ebtData)).beruf.code,
         'EBT',
       );
       expect(
-        Klasse.fromFirestore(_MockDocumentSnapshot('k4', egsData)).beruf.code,
+        Klasse.fromFirestore(_FakeDocumentSnapshot('k4', egsData)).beruf.code,
         'EGS',
       );
     });
@@ -72,17 +72,17 @@ void main() {
       final zeitgruppe3Data = {...testData, 'zeitgruppe': 3};
 
       expect(
-        Klasse.fromFirestore(_MockDocumentSnapshot('k1', zeitgruppe1Data))
+        Klasse.fromFirestore(_FakeDocumentSnapshot('k1', zeitgruppe1Data))
             .zeitgruppe.nummer,
         1,
       );
       expect(
-        Klasse.fromFirestore(_MockDocumentSnapshot('k2', zeitgruppe2Data))
+        Klasse.fromFirestore(_FakeDocumentSnapshot('k2', zeitgruppe2Data))
             .zeitgruppe.nummer,
         2,
       );
       expect(
-        Klasse.fromFirestore(_MockDocumentSnapshot('k3', zeitgruppe3Data))
+        Klasse.fromFirestore(_FakeDocumentSnapshot('k3', zeitgruppe3Data))
             .zeitgruppe.nummer,
         3,
       );
@@ -200,7 +200,7 @@ void main() {
     });
 
     test('roundtrip fromFirestore/toFirestore should preserve data', () {
-      final mockDoc = _MockDocumentSnapshot('klasse1', testData);
+      final mockDoc = _FakeDocumentSnapshot('klasse1', testData);
       final klasse = Klasse.fromFirestore(mockDoc);
       final firestoreData = klasse.toFirestore();
 
@@ -307,17 +307,14 @@ void main() {
 }
 
 // Fake DocumentSnapshot for testing
-class _FakeDocumentSnapshot implements DocumentSnapshot<Map<String, dynamic>> {
+class _FakeDocumentSnapshot extends Fake implements DocumentSnapshot<Map<String, dynamic>> {
   @override
   final String id;
 
   final Map<String, dynamic> _data;
 
-  _MockDocumentSnapshot(this.id, this._data);
+  _FakeDocumentSnapshot(this.id, this._data);
 
   @override
   Map<String, dynamic>? data() => _data;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

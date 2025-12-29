@@ -20,7 +20,7 @@ void main() {
     };
 
     test('fromFirestore should correctly parse all fields', () {
-      final mockDoc = _MockDocumentSnapshot('subject1', testData);
+      final mockDoc = _FakeDocumentSnapshot('subject1', testData);
       final subject = Subject.fromFirestore(mockDoc);
 
       expect(subject.id, 'subject1');
@@ -42,7 +42,7 @@ void main() {
         'typ': 'ABF',
         'createdAt': Timestamp.fromDate(testDate),
       };
-      final mockDoc = _MockDocumentSnapshot('subject2', minimalData);
+      final mockDoc = _FakeDocumentSnapshot('subject2', minimalData);
       final subject = Subject.fromFirestore(mockDoc);
 
       expect(subject.name, 'Deutsch');
@@ -60,22 +60,22 @@ void main() {
       final lernfeldData = {...testData, 'typ': 'LF', 'berufe': []};
 
       expect(
-        Subject.fromFirestore(_MockDocumentSnapshot('s1', allgemeinData)).typ,
+        Subject.fromFirestore(_FakeDocumentSnapshot('s1', allgemeinData)).typ,
         FachTyp.allgemein,
       );
       expect(
-        Subject.fromFirestore(_MockDocumentSnapshot('s2', beruflichData)).typ,
+        Subject.fromFirestore(_FakeDocumentSnapshot('s2', beruflichData)).typ,
         FachTyp.beruflich,
       );
       expect(
-        Subject.fromFirestore(_MockDocumentSnapshot('s3', lernfeldData)).typ,
+        Subject.fromFirestore(_FakeDocumentSnapshot('s3', lernfeldData)).typ,
         FachTyp.lernfeld,
       );
     });
 
     test('fromFirestore should default to beruflich for invalid typ', () {
       final invalidData = {...testData, 'typ': 'INVALID', 'berufe': []};
-      final mockDoc = _MockDocumentSnapshot('subject3', invalidData);
+      final mockDoc = _FakeDocumentSnapshot('subject3', invalidData);
       final subject = Subject.fromFirestore(mockDoc);
 
       expect(subject.typ, FachTyp.beruflich);
@@ -86,10 +86,10 @@ void main() {
       final doubleCreditsData = {...testData, 'credits': 5.5, 'berufe': []};
 
       final subjectInt = Subject.fromFirestore(
-        _MockDocumentSnapshot('s1', intCreditsData),
+        _FakeDocumentSnapshot('s1', intCreditsData),
       );
       final subjectDouble = Subject.fromFirestore(
-        _MockDocumentSnapshot('s2', doubleCreditsData),
+        _FakeDocumentSnapshot('s2', doubleCreditsData),
       );
 
       expect(subjectInt.credits, 5.0);
@@ -210,7 +210,7 @@ void main() {
     });
 
     test('roundtrip fromFirestore/toFirestore should preserve data', () {
-      final mockDoc = _MockDocumentSnapshot('subject1', testData);
+      final mockDoc = _FakeDocumentSnapshot('subject1', testData);
       final subject = Subject.fromFirestore(mockDoc);
       final firestoreData = subject.toFirestore();
 
@@ -226,7 +226,7 @@ void main() {
 
     test('fromFirestore should handle empty berufe list', () {
       final dataWithEmptyBerufe = {...testData, 'berufe': []};
-      final mockDoc = _MockDocumentSnapshot('subject1', dataWithEmptyBerufe);
+      final mockDoc = _FakeDocumentSnapshot('subject1', dataWithEmptyBerufe);
       final subject = Subject.fromFirestore(mockDoc);
 
       expect(subject.berufe, isEmpty);
@@ -237,7 +237,7 @@ void main() {
         ...testData,
         'berufe': ['IE', 'EAT', 'EBT', 'EGS'],
       };
-      final mockDoc = _MockDocumentSnapshot('subject1', dataWithManyBerufe);
+      final mockDoc = _FakeDocumentSnapshot('subject1', dataWithManyBerufe);
       final subject = Subject.fromFirestore(mockDoc);
 
       expect(subject.berufe.length, 4);
@@ -248,17 +248,14 @@ void main() {
 }
 
 // Fake DocumentSnapshot for testing
-class _FakeDocumentSnapshot implements DocumentSnapshot<Map<String, dynamic>> {
+class _FakeDocumentSnapshot extends Fake implements DocumentSnapshot<Map<String, dynamic>> {
   @override
   final String id;
 
   final Map<String, dynamic> _data;
 
-  _MockDocumentSnapshot(this.id, this._data);
+  _FakeDocumentSnapshot(this.id, this._data);
 
   @override
   Map<String, dynamic>? data() => _data;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

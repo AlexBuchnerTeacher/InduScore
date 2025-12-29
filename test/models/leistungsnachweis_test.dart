@@ -23,7 +23,7 @@ void main() {
     };
 
     test('fromFirestore should correctly parse all fields', () {
-      final mockDoc = _MockDocumentSnapshot('ln1', testData);
+      final mockDoc = _FakeDocumentSnapshot('ln1', testData);
       final ln = Leistungsnachweis.fromFirestore(mockDoc);
 
       expect(ln.id, 'ln1');
@@ -49,7 +49,7 @@ void main() {
         'createdAt': Timestamp.fromDate(testDate),
         'updatedAt': Timestamp.fromDate(testDate),
       };
-      final mockDoc = _MockDocumentSnapshot('ln2', minimalData);
+      final mockDoc = _FakeDocumentSnapshot('ln2', minimalData);
       final ln = Leistungsnachweis.fromFirestore(mockDoc);
 
       expect(ln.subjectId, 'subject1');
@@ -69,19 +69,19 @@ void main() {
       final mitarbeitData = {...testData, 'typ': 'mitarbeit'};
 
       expect(
-        Leistungsnachweis.fromFirestore(_MockDocumentSnapshot('ln1', wochentestData)).typ,
+        Leistungsnachweis.fromFirestore(_FakeDocumentSnapshot('ln1', wochentestData)).typ,
         LeistungsnachweisTyp.wochentest,
       );
       expect(
-        Leistungsnachweis.fromFirestore(_MockDocumentSnapshot('ln2', praktischData)).typ,
+        Leistungsnachweis.fromFirestore(_FakeDocumentSnapshot('ln2', praktischData)).typ,
         LeistungsnachweisTyp.praktisch,
       );
       expect(
-        Leistungsnachweis.fromFirestore(_MockDocumentSnapshot('ln3', muendlichData)).typ,
+        Leistungsnachweis.fromFirestore(_FakeDocumentSnapshot('ln3', muendlichData)).typ,
         LeistungsnachweisTyp.muendlich,
       );
       expect(
-        Leistungsnachweis.fromFirestore(_MockDocumentSnapshot('ln4', mitarbeitData)).typ,
+        Leistungsnachweis.fromFirestore(_FakeDocumentSnapshot('ln4', mitarbeitData)).typ,
         LeistungsnachweisTyp.mitarbeit,
       );
     });
@@ -91,10 +91,10 @@ void main() {
       final doubleGewichtungData = {...testData, 'gewichtung': 1.5};
 
       final lnInt = Leistungsnachweis.fromFirestore(
-        _MockDocumentSnapshot('ln1', intGewichtungData),
+        _FakeDocumentSnapshot('ln1', intGewichtungData),
       );
       final lnDouble = Leistungsnachweis.fromFirestore(
-        _MockDocumentSnapshot('ln2', doubleGewichtungData),
+        _FakeDocumentSnapshot('ln2', doubleGewichtungData),
       );
 
       expect(lnInt.gewichtung, 2.0);
@@ -265,7 +265,7 @@ void main() {
     });
 
     test('roundtrip fromFirestore/toFirestore should preserve data', () {
-      final mockDoc = _MockDocumentSnapshot('ln1', testData);
+      final mockDoc = _FakeDocumentSnapshot('ln1', testData);
       final ln = Leistungsnachweis.fromFirestore(mockDoc);
       final firestoreData = ln.toFirestore();
 
@@ -337,17 +337,14 @@ void main() {
 }
 
 // Fake DocumentSnapshot for testing
-class _FakeDocumentSnapshot implements DocumentSnapshot<Map<String, dynamic>> {
+class _FakeDocumentSnapshot extends Fake implements DocumentSnapshot<Map<String, dynamic>> {
   @override
   final String id;
 
   final Map<String, dynamic> _data;
 
-  _MockDocumentSnapshot(this.id, this._data);
+  _FakeDocumentSnapshot(this.id, this._data);
 
   @override
   Map<String, dynamic>? data() => _data;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

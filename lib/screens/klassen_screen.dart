@@ -586,10 +586,13 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
       final preview = await importService.parseClassList(bytes);
 
       if (!mounted) return;
-      await showDialog(
-        context: context,
-        builder: (_) =>
-            ImportPreviewDialog(preview: preview, schuljahr: schuljahr),
+      
+      // TODO: Implement ImportPreviewDialog - temporarily show simple message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${preview.students.length} Schüler gefunden. Import-Dialog wird noch implementiert.'),
+          duration: const Duration(seconds: 3),
+        ),
       );
     } catch (e) {
       if (mounted) {
