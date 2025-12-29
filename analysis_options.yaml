@@ -28,7 +28,7 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # Issue #51 Finding F08: Enable stricter lints for better code quality
+    # Issue #51 Finding F08 & Issue #54 F-015: Enable stricter lints for better code quality
     
     # Const optimizations
     prefer_const_constructors: true
@@ -41,17 +41,48 @@ linter:
     avoid_print: true
     avoid_unnecessary_containers: true
     avoid_web_libraries_in_flutter: true
+    avoid_empty_else: true
+    avoid_returning_null_for_void: true
+    avoid_slow_async_io: true
+    avoid_type_to_string: true
     
     # Async patterns
     cancel_subscriptions: true
     close_sinks: true
     unnecessary_await_in_return: true
+    unawaited_futures: true
     
     # Best practices
     use_key_in_widget_constructors: true
     use_build_context_synchronously: true
     prefer_single_quotes: true
     require_trailing_commas: false  # Optional, can be enabled for formatting consistency
+    always_declare_return_types: true
+    always_put_required_named_parameters_first: true
+    annotate_overrides: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    prefer_if_null_operators: true
+    prefer_is_empty: true
+    prefer_is_not_empty: true
+    prefer_null_aware_operators: true
+    
+    # Error handling
+    only_throw_errors: true
+    
+    # Documentation
+    package_api_docs: false  # Can be enabled for public packages
+    public_member_api_docs: false  # Can be enabled for strict doc requirements
+    
+    # Style
+    curly_braces_in_flow_control_structures: true
+    unnecessary_brace_in_string_interps: true
+    unnecessary_getters_setters: true
+    unnecessary_lambdas: true
+    unnecessary_null_in_if_null_operators: true
+    unnecessary_overrides: true
+    unnecessary_parenthesis: true
+    unnecessary_this: true
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

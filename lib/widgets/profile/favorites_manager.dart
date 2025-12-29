@@ -16,9 +16,7 @@ class FavoritesManager extends ConsumerStatefulWidget {
   final List<String> currentFavorites;
 
   const FavoritesManager({
-    super.key,
-    required this.userId,
-    required this.currentFavorites,
+    required this.userId, required this.currentFavorites, super.key,
   });
 
   @override

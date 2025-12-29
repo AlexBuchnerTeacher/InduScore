@@ -117,22 +117,22 @@ void main() {
     });
 
     test('toString formats correctly', () {
-      final sj = Schuljahr(2024, 2025);
+      const sj = Schuljahr(2024, 2025);
       expect(sj.toString(), '2024/25');
     });
 
     test('equality works correctly', () {
-      final sj1 = Schuljahr(2024, 2025);
-      final sj2 = Schuljahr(2024, 2025);
-      final sj3 = Schuljahr(2023, 2024);
+      const sj1 = Schuljahr(2024, 2025);
+      const sj2 = Schuljahr(2024, 2025);
+      const sj3 = Schuljahr(2023, 2024);
 
       expect(sj1 == sj2, true);
       expect(sj1 == sj3, false);
     });
 
     test('hashCode is consistent', () {
-      final sj1 = Schuljahr(2024, 2025);
-      final sj2 = Schuljahr(2024, 2025);
+      const sj1 = Schuljahr(2024, 2025);
+      const sj2 = Schuljahr(2024, 2025);
 
       expect(sj1.hashCode, sj2.hashCode);
     });

@@ -25,21 +25,13 @@ class FaecherMatrixWidget extends StatelessWidget {
   final Color Function(int) getNoteColor;
 
   const FaecherMatrixWidget({
-    super.key,
-    required this.students,
-    required this.sortedSubjectIds,
-    required this.lnBySubject,
-    required this.subjects,
-    required this.studentFachSchnitte,
-    required this.studentGesamtSchnitte,
-    required this.onFachDetailTap,
-    required this.getNoteColor,
+    required this.students, required this.sortedSubjectIds, required this.lnBySubject, required this.subjects, required this.studentFachSchnitte, required this.studentGesamtSchnitte, required this.onFachDetailTap, required this.getNoteColor, super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     // Berechne Spaltenbreite
-    final fachSpaltenBreite = 85.0;
+    const fachSpaltenBreite = 85.0;
     final tableWidth =
         180.0 + (sortedSubjectIds.length * fachSpaltenBreite) + 80;
 

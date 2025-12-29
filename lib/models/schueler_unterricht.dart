@@ -25,9 +25,8 @@ class SchuelerUnterricht {
     required this.studentId,
     required this.subjectId,
     required this.lehrerId,
-    this.gruppe,
+    required this.createdAt, this.gruppe,
     this.klasseId,
-    required this.createdAt,
   });
 
   factory SchuelerUnterricht.fromFirestore(DocumentSnapshot doc) {

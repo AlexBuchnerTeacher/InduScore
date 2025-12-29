@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../models/student.dart';
+import '../models/klasse.dart';
 import '../models/beruf.dart';
 import '../providers/app_providers.dart';
 import '../widgets/rbs_drawer.dart';
@@ -70,9 +71,9 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             children: [
               Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
-              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              Text('Sie haben keine Berechtigung zur Schülerverwaltung.',
+              const Text('Sie haben keine Berechtigung zur Schülerverwaltung.',
                    style: RBSTypography.bodyMedium),
             ],
           ),
@@ -109,7 +110,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
               if (!canCreate) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.add),
-                onPressed: () => _showStudentDialog(),
+                onPressed: _showStudentDialog,
                 tooltip: 'Neuer Schüler',
               );
             },
@@ -246,7 +247,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                     );
                   },
                   loading: () => const SizedBox.shrink(),
-                  error: (e, _) => Text('Fehler: $e', style: TextStyle(color: RBSColors.error)),
+                  error: (e, _) => Text('Fehler: $e', style: const TextStyle(color: RBSColors.error)),
                 ),
                 const SizedBox(height: RBSSpacing.sm),
 
@@ -307,14 +308,14 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
     else if (_selectedBerufe.isNotEmpty || zeitgruppenFilter.isNotEmpty) {
       return klassenAsync.when(
         data: (klassen) {
-          final validKlassenIds = klassen
-              .where((k) => 
+          final validKlassenIds = (klassen as List<Klasse>)
+              .where((Klasse k) => 
                 (_selectedBerufe.isEmpty || _selectedBerufe.contains(k.beruf)) &&
-                (zeitgruppenFilter.isEmpty || zeitgruppenFilter.contains(k.zeitgruppe)))
-              .map((k) => k.id)
+                (zeitgruppenFilter.isEmpty || zeitgruppenFilter.contains(k.zeitgruppe.index)))
+              .map<String>((Klasse k) => k.id)
               .toSet();
           
-          filtered = filtered.where((s) => validKlassenIds.contains(s.klasseId)).toList();
+          filtered = filtered.where((Student s) => validKlassenIds.contains(s.klasseId)).toList();
 
           return _buildFilteredList(filtered, allStudents);
         },
@@ -489,7 +490,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
           ),
           const SizedBox(height: RBSSpacing.lg),
           ElevatedButton.icon(
-            onPressed: () => _showStudentDialog(),
+            onPressed: _showStudentDialog,
             icon: const Icon(Icons.add),
             label: const Text('Neuen Schüler anlegen'),
             style: ElevatedButton.styleFrom(

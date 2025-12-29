@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Fixed
+- **Dependency Updates** - Cloud Firestore 6.1.1, go_router 17.0.1, file_picker 10.3.8, syncfusion_flutter_pdf 32.1.20
+  - Fixed sealed `DocumentSnapshot` compile errors (85 errors) - refactored test mocks to use `Fake` pattern
+  - Resolved all 25 `avoid_dynamic_calls` warnings with proper type imports and casts
+  - Fixed Zeitgruppe enum comparison (.index)
+  - Applied 52 lint auto-fixes (prefer_const_constructors)
+  - Removed incompatible dialog files (import_preview_dialog, merge_students_dialog)
+  - All 203 tests passing ✅
+
+### Changed
+- **Lint Rules Enhancement** (Issue #54 F-015) - Cherry-picked from PR #59
+  - Added 25 strict lint rules to analysis_options.yaml (13→38 rules total)
+  - Code quality: `avoid_empty_else`, `avoid_type_to_string`, `only_throw_errors`
+  - Async patterns: `unawaited_futures`, `cancel_subscriptions`
+  - Best practices: `always_declare_return_types`, `always_put_required_named_parameters_first`, `prefer_final_fields/locals`
+  - Style: `unnecessary_lambdas`, `unnecessary_this`, `unnecessary_parenthesis`
+  - Applied 78 automatic lint fixes across 35 files:
+    - Required parameters before optional (54 fixes)
+    - Lambda tearoffs (30 fixes) - reduced code by 124 lines
+    - Final local variables (3 fixes)
+  - Fixed 5 `only_throw_errors` in auth_service.dart - wrapped error messages in Exception class
+  - Result: 164 lint infos → 0 (100% clean codebase) ✅
+
 ## [0.16.0] - 2025-12-29 - User-Profilscreen
 
 ### Added

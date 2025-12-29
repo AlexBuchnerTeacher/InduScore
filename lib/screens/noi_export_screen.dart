@@ -13,6 +13,8 @@ import '../services/pdf_export_service.dart';
 import '../models/klasse.dart';
 import '../models/student.dart';
 import '../models/subject.dart';
+import '../models/leistungsnachweis.dart';
+import '../models/grade.dart';
 
 /// Export Screen - NOI/CSV/PDF Export
 class NoiExportScreen extends ConsumerStatefulWidget {
@@ -223,10 +225,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.school, color: RBSColors.dynamicRed),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.school, color: RBSColors.dynamicRed),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Klasse', style: RBSTypography.label),
                   ],
                 ),
@@ -264,10 +266,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.file_present, color: RBSColors.growingElder),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.file_present, color: RBSColors.growingElder),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Format', style: RBSTypography.label),
                   ],
                 ),
@@ -311,10 +313,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.school, color: RBSColors.dynamicRed),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.school, color: RBSColors.dynamicRed),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Klasse', style: RBSTypography.label),
                   ],
                 ),
@@ -355,10 +357,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.person, color: RBSColors.courtGreen),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.person, color: RBSColors.courtGreen),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Schüler', style: RBSTypography.label),
                   ],
                 ),
@@ -411,10 +413,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      const Row(
                         children: [
-                          const Icon(Icons.school, color: RBSColors.dynamicRed),
-                          const SizedBox(width: RBSSpacing.sm),
+                          Icon(Icons.school, color: RBSColors.dynamicRed),
+                          SizedBox(width: RBSSpacing.sm),
                           Text('Klasse', style: RBSTypography.label),
                         ],
                       ),
@@ -452,10 +454,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      const Row(
                         children: [
-                          const Icon(Icons.book, color: RBSColors.growingElder),
-                          const SizedBox(width: RBSSpacing.sm),
+                          Icon(Icons.book, color: RBSColors.growingElder),
+                          SizedBox(width: RBSSpacing.sm),
                           Text('Fach', style: RBSTypography.label),
                         ],
                       ),
@@ -601,16 +603,16 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
 
   Future<void> _exportNoi(
     List<Klasse> klassen,
-    List students,
-    List subjects,
-    List leistungsnachweise,
-    List grades,
+    List<dynamic> students,
+    List<dynamic> subjects,
+    List<dynamic> leistungsnachweise,
+    List<dynamic> grades,
   ) async {
     final klasse = klassen.firstWhere((k) => k.id == _selectedKlasseId);
-    final klassenStudents = students.where((s) => s.klasseId == _selectedKlasseId).toList();
-    final klassenLns = leistungsnachweise.where((ln) => ln.klasseId == _selectedKlasseId).toList();
+    final klassenStudents = students.cast<Student>().where((s) => s.klasseId == _selectedKlasseId).toList();
+    final klassenLns = leistungsnachweise.cast<Leistungsnachweis>().where((ln) => ln.klasseId == _selectedKlasseId).toList();
     final lnIds = klassenLns.map((ln) => ln.id).toSet();
-    final klassenGrades = grades.where((g) => lnIds.contains(g.leistungsnachweisId)).toList();
+    final klassenGrades = grades.cast<Grade>().where((g) => lnIds.contains(g.leistungsnachweisId)).toList();
 
     String content;
     String filename;
@@ -643,13 +645,13 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
 
   Future<void> _exportStudentPdf(
     List<Klasse> klassen,
-    List students,
-    List subjects,
-    List leistungsnachweise,
-    List grades,
+    List<dynamic> students,
+    List<dynamic> subjects,
+    List<dynamic> leistungsnachweise,
+    List<dynamic> grades,
   ) async {
     final klasse = klassen.firstWhere((k) => k.id == _selectedKlasseId);
-    final student = students.firstWhere((s) => s.id == _selectedStudentId);
+    final student = students.cast<Student>().firstWhere((s) => s.id == _selectedStudentId);
 
     final pdfBytes = PdfExportService.generateStudentReport(
       student: student,
@@ -665,13 +667,13 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
 
   Future<void> _exportSubjectPdf(
     List<Klasse> klassen,
-    List students,
-    List subjects,
-    List leistungsnachweise,
-    List grades,
+    List<dynamic> students,
+    List<dynamic> subjects,
+    List<dynamic> leistungsnachweise,
+    List<dynamic> grades,
   ) async {
     final klasse = klassen.firstWhere((k) => k.id == _selectedKlasseId);
-    final subject = subjects.firstWhere((s) => s.id == _selectedSubjectId);
+    final subject = subjects.cast<Subject>().firstWhere((s) => s.id == _selectedSubjectId);
 
     final pdfBytes = PdfExportService.generateSubjectReport(
       subject: subject,

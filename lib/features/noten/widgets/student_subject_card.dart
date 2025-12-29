@@ -20,16 +20,7 @@ class StudentSubjectCard extends StatelessWidget {
   final String Function(DateTime) formatDate;
 
   const StudentSubjectCard({
-    super.key,
-    required this.student,
-    required this.subject,
-    required this.leistungsnachweise,
-    required this.noten,
-    required this.onNoteChanged,
-    required this.onTendenzChanged,
-    required this.getNoteColor,
-    required this.getNoteWithTendenz,
-    required this.formatDate,
+    required this.student, required this.subject, required this.leistungsnachweise, required this.noten, required this.onNoteChanged, required this.onTendenzChanged, required this.getNoteColor, required this.getNoteWithTendenz, required this.formatDate, super.key,
   });
 
   @override
@@ -93,7 +84,7 @@ class StudentSubjectCard extends StatelessWidget {
             ),
           ),
           // Einzelne Leistungsnachweise
-          ...leistungsnachweise.map((ln) => _buildLNRow(ln)),
+          ...leistungsnachweise.map(_buildLNRow),
           // Footer mit Anzahl
           if (stats.anzahl > 0)
             Padding(

@@ -18,8 +18,7 @@ class LNEditorScreen extends ConsumerWidget {
   final String leistungsnachweisId;
 
   const LNEditorScreen({
-    super.key,
-    required this.leistungsnachweisId,
+    required this.leistungsnachweisId, super.key,
   });
 
   @override

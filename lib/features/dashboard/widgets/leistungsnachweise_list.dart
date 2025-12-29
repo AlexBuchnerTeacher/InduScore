@@ -12,9 +12,7 @@ class LeistungsnachweisCard extends ConsumerWidget {
   final List<Subject> subjects;
 
   const LeistungsnachweisCard({
-    super.key,
-    required this.ln,
-    required this.subjects,
+    required this.ln, required this.subjects, super.key,
   });
 
   String _getMonthShort(int month) {
@@ -135,9 +133,7 @@ class LeistungsnachweiseList extends ConsumerWidget {
   final List<Subject> subjects;
 
   const LeistungsnachweiseList({
-    super.key,
-    required this.leistungsnachweise,
-    required this.subjects,
+    required this.leistungsnachweise, required this.subjects, super.key,
   });
 
   @override

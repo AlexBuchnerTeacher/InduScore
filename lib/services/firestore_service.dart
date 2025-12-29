@@ -44,7 +44,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) =>
-              snapshot.docs.map((doc) => Student.fromFirestore(doc)).toList(),
+              snapshot.docs.map(Student.fromFirestore).toList(),
         );
   }
 
@@ -82,7 +82,7 @@ class FirestoreService {
       snapshot,
     ) {
       final students = snapshot.docs
-          .map((doc) => Student.fromFirestore(doc))
+          .map(Student.fromFirestore)
           .toList();
       students.sort((a, b) => a.sortKey.compareTo(b.sortKey));
       return students;
@@ -97,7 +97,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) =>
-              snapshot.docs.map((doc) => Subject.fromFirestore(doc)).toList(),
+              snapshot.docs.map(Subject.fromFirestore).toList(),
         );
   }
 
@@ -137,7 +137,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) =>
-              snapshot.docs.map((doc) => Grade.fromFirestore(doc)).toList(),
+              snapshot.docs.map(Grade.fromFirestore).toList(),
         );
   }
 
@@ -148,7 +148,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) =>
-              snapshot.docs.map((doc) => Grade.fromFirestore(doc)).toList(),
+              snapshot.docs.map(Grade.fromFirestore).toList(),
         );
   }
 
@@ -158,7 +158,7 @@ class FirestoreService {
       snapshot,
     ) {
       final grades = snapshot.docs
-          .map((doc) => Grade.fromFirestore(doc))
+          .map(Grade.fromFirestore)
           .toList();
       grades.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return grades;
@@ -224,7 +224,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) =>
-              snapshot.docs.map((doc) => Klasse.fromFirestore(doc)).toList(),
+              snapshot.docs.map(Klasse.fromFirestore).toList(),
         );
   }
 
@@ -244,7 +244,7 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) {
           final klassen = snapshot.docs
-              .map((doc) => Klasse.fromFirestore(doc))
+              .map(Klasse.fromFirestore)
               .toList();
           klassen.sort((a, b) {
             final jahrCompare = a.jahrgangsstufe.compareTo(b.jahrgangsstufe);
@@ -285,7 +285,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => Leistungsnachweis.fromFirestore(doc))
+              .map(Leistungsnachweis.fromFirestore)
               .toList(),
         );
   }
@@ -304,7 +304,7 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) {
           final lns = snapshot.docs
-              .map((doc) => Leistungsnachweis.fromFirestore(doc))
+              .map(Leistungsnachweis.fromFirestore)
               .toList();
           lns.sort((a, b) => b.datum.compareTo(a.datum));
           return lns;
@@ -319,7 +319,7 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) {
           final lns = snapshot.docs
-              .map((doc) => Leistungsnachweis.fromFirestore(doc))
+              .map(Leistungsnachweis.fromFirestore)
               .toList();
           lns.sort((a, b) => b.datum.compareTo(a.datum));
           return lns;
@@ -370,7 +370,7 @@ class FirestoreService {
         .where('klasseId', isEqualTo: klasseId)
         .get();
     final students = snapshot.docs
-        .map((doc) => Student.fromFirestore(doc))
+        .map(Student.fromFirestore)
         .toList();
     students.sort((a, b) => a.sortKey.compareTo(b.sortKey));
     return students;
@@ -526,7 +526,7 @@ class FirestoreService {
   Stream<List<LnExemption>> getLnExemptions() {
     return _lnExemptions.snapshots().map(
       (snapshot) =>
-          snapshot.docs.map((doc) => LnExemption.fromFirestore(doc)).toList(),
+          snapshot.docs.map(LnExemption.fromFirestore).toList(),
     );
   }
 
@@ -591,7 +591,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => LnExemption.fromFirestore(doc))
+              .map(LnExemption.fromFirestore)
               .toList(),
         );
   }
@@ -607,7 +607,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) =>
-              snapshot.docs.map((doc) => AppUser.fromFirestore(doc)).toList(),
+              snapshot.docs.map(AppUser.fromFirestore).toList(),
         );
   }
 
@@ -711,7 +711,7 @@ class FirestoreService {
   Stream<List<SchuelerUnterricht>> getSchuelerUnterricht() {
     return _schuelerUnterricht.snapshots().map(
       (snapshot) => snapshot.docs
-          .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+          .map(SchuelerUnterricht.fromFirestore)
           .toList(),
     );
   }
@@ -723,7 +723,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+              .map(SchuelerUnterricht.fromFirestore)
               .toList(),
         );
   }
@@ -735,7 +735,7 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+              .map(SchuelerUnterricht.fromFirestore)
               .toList(),
         );
   }
@@ -768,32 +768,32 @@ class FirestoreService {
   /// Alle Klassen einmalig abrufen (nicht als Stream)
   Future<List<Klasse>> getKlassenOnce() async {
     final snapshot = await _klassen.get();
-    return snapshot.docs.map((doc) => Klasse.fromFirestore(doc)).toList();
+    return snapshot.docs.map(Klasse.fromFirestore).toList();
   }
 
   /// Alle Fächer einmalig abrufen
   Future<List<Subject>> getSubjectsOnce() async {
     final snapshot = await _subjects.get();
-    return snapshot.docs.map((doc) => Subject.fromFirestore(doc)).toList();
+    return snapshot.docs.map(Subject.fromFirestore).toList();
   }
 
   /// Alle AppUser einmalig abrufen
   Future<List<AppUser>> getAppUsersOnce() async {
     final snapshot = await _appUsers.get();
-    return snapshot.docs.map((doc) => AppUser.fromFirestore(doc)).toList();
+    return snapshot.docs.map(AppUser.fromFirestore).toList();
   }
 
   /// Alle Schüler einmalig abrufen
   Future<List<Student>> getStudentsOnce() async {
     final snapshot = await _students.get();
-    return snapshot.docs.map((doc) => Student.fromFirestore(doc)).toList();
+    return snapshot.docs.map(Student.fromFirestore).toList();
   }
 
   /// Alle Unterrichts-Beziehungen einmalig abrufen
   Future<List<SchuelerUnterricht>> getSchuelerUnterrichtOnce() async {
     final snapshot = await _schuelerUnterricht.get();
     return snapshot.docs
-        .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+        .map(SchuelerUnterricht.fromFirestore)
         .toList();
   }
 

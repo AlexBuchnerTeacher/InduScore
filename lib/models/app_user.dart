@@ -58,9 +58,8 @@ class AppUser {
     required this.name,
     required String kuerzel,
     required this.rolle,
-    this.status = UserStatus.aktiv,
+    required this.createdAt, this.status = UserStatus.aktiv,
     this.favoriteKlassenIds = const [],
-    required this.createdAt,
     this.lastLoginAt,
   }) : kuerzel = kuerzel.toUpperCase(); // Kürzel immer uppercase
 

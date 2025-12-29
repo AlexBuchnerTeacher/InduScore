@@ -18,14 +18,7 @@ class NotenTableWidget extends StatelessWidget {
   final double Function(int, Tendenz) getNoteWithTendenz;
 
   const NotenTableWidget({
-    super.key,
-    required this.students,
-    required this.leistungsnachweise,
-    required this.noten,
-    required this.onNoteChanged,
-    required this.onTendenzChanged,
-    required this.getNoteColor,
-    required this.getNoteWithTendenz,
+    required this.students, required this.leistungsnachweise, required this.noten, required this.onNoteChanged, required this.onTendenzChanged, required this.getNoteColor, required this.getNoteWithTendenz, super.key,
   });
 
   @override

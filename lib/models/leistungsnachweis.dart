@@ -1,4 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Art des Leistungsnachweises
 enum LeistungsnachweisTyp {
@@ -41,10 +41,8 @@ class Leistungsnachweis {
     required this.bezeichnung,
     required this.datum,
     required this.gewichtung,
-    this.beschreibung,
+    required this.createdAt, required this.updatedAt, this.beschreibung,
     this.createdBy,
-    required this.createdAt,
-    required this.updatedAt,
   });
 
   // Firestore Serialization

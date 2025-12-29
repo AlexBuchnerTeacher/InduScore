@@ -30,8 +30,7 @@ class FaecherDetailScreen extends ConsumerStatefulWidget {
   final String subjectId;
 
   const FaecherDetailScreen({
-    super.key,
-    required this.subjectId,
+    required this.subjectId, super.key,
   });
 
   @override

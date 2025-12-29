@@ -15,7 +15,7 @@ class PasswordChangeDialog extends StatefulWidget {
   /// Der AuthService für Passwort-Änderung
   final AuthService authService;
 
-  const PasswordChangeDialog({super.key, required this.authService});
+  const PasswordChangeDialog({required this.authService, super.key});
 
   @override
   State<PasswordChangeDialog> createState() => _PasswordChangeDialogState();

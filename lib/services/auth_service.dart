@@ -20,7 +20,7 @@ class AuthService {
         password: password,
       );
     } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+      throw Exception(_handleAuthException(e));
     }
   }
 
@@ -35,7 +35,7 @@ class AuthService {
         password: password,
       );
     } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+      throw Exception(_handleAuthException(e));
     }
   }
 
@@ -52,7 +52,7 @@ class AuthService {
         password: password,
       );
     } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+      throw Exception(_handleAuthException(e));
     }
   }
 
@@ -66,7 +66,7 @@ class AuthService {
     try {
       await _auth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+      throw Exception(_handleAuthException(e));
     }
   }
 
@@ -98,7 +98,7 @@ class AuthService {
       // Neues Passwort setzen
       await user.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+      throw Exception(_handleAuthException(e));
     }
   }
 

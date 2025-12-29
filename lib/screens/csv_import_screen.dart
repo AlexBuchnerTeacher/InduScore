@@ -64,9 +64,9 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
             children: [
               Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
-              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              Text('Nur Administratoren können CSV-Daten importieren.',
+              const Text('Nur Administratoren können CSV-Daten importieren.',
                    style: RBSTypography.bodyMedium),
             ],
           ),
@@ -102,7 +102,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: RBSColors.dynamicRed, size: 28),
+                    const Icon(Icons.info_outline, color: RBSColors.dynamicRed, size: 28),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -158,7 +158,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                     const SizedBox(height: 12),
                     Text(
                       '✓ ${_analysisResult!.rowCount} Zeilen erkannt (Delimiter: ${_analysisResult!.delimiter})',
-                      style: TextStyle(color: RBSColors.courtGreen, fontWeight: FontWeight.w500),
+                      style: const TextStyle(color: RBSColors.courtGreen, fontWeight: FontWeight.w500),
                     ),
                   ],
                   if (_asvParseResult != null && _asvParseResult!.isValid) ...[
@@ -361,11 +361,11 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.check_circle, color: RBSColors.courtGreen),
+                            const Icon(Icons.check_circle, color: RBSColors.courtGreen),
                             const SizedBox(width: 12),
                             Text(
                               '$_importedCount Schüler erfolgreich importiert!',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: RBSColors.courtGreen,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -978,10 +978,10 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         Icon(Icons.check_circle, color: RBSColors.courtGreen),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Text(
                           'Import erfolgreich!',
                           style: TextStyle(

@@ -14,9 +14,8 @@ class ClassImportPreview {
   final String extractedText;  // Rohtext für Debug/manuelle Eingabe
 
   ClassImportPreview({
-    this.rawClassName,
+    required this.students, this.rawClassName,
     this.parsedName,
-    required this.students,
     this.klassenleiterCode,
     this.invalidLines = const [],
     this.extractedText = '',
@@ -141,7 +140,7 @@ class PdfImportService {
       
       // Header/Meta-Zeilen überspringen
       final lowerLine = line.toLowerCase();
-      if (skipPatterns.any((p) => lowerLine.contains(p))) continue;
+      if (skipPatterns.any(lowerLine.contains)) continue;
       if (headerPatterns.hasMatch(line)) continue;
       
       // Reine Datumszeilen überspringen (gehören zum vorherigen Namen)

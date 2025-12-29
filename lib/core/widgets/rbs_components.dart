@@ -10,8 +10,7 @@ class RBSButton extends StatelessWidget {
   final IconData? icon;
 
   const RBSButton({
-    super.key,
-    required this.label,
+    required this.label, super.key,
     this.onPressed,
     this.isLoading = false,
     this.icon,
@@ -54,8 +53,7 @@ class RBSTag extends StatelessWidget {
   final IconData? icon;
 
   const RBSTag({
-    super.key,
-    required this.label,
+    required this.label, super.key,
     this.color,
     this.onTap,
     this.selected = false,
@@ -108,8 +106,7 @@ class RBSCard extends StatelessWidget {
   final Color? backgroundColor;
 
   const RBSCard({
-    super.key,
-    required this.child,
+    required this.child, super.key,
     this.padding,
     this.onTap,
     this.backgroundColor,
@@ -140,8 +137,7 @@ class RBSHeadline extends StatelessWidget {
   final TextAlign? textAlign;
 
   const RBSHeadline({
-    super.key,
-    required this.text,
+    required this.text, super.key,
     this.level = RBSHeadlineLevel.h2,
     this.color,
     this.textAlign,
@@ -236,9 +232,7 @@ class RBSFilterChip extends StatelessWidget {
   final IconData? icon;
 
   const RBSFilterChip({
-    super.key,
-    required this.label,
-    required this.selected,
+    required this.label, required this.selected, super.key,
     this.onSelected,
     this.color,
     this.icon,
@@ -285,8 +279,7 @@ class RBSActionChip extends StatelessWidget {
   final bool filled;
 
   const RBSActionChip({
-    super.key,
-    required this.label,
+    required this.label, super.key,
     this.onPressed,
     this.color,
     this.icon,
@@ -330,9 +323,7 @@ class RBSChoiceChip extends StatelessWidget {
   final Color? color;
 
   const RBSChoiceChip({
-    super.key,
-    required this.label,
-    required this.selected,
+    required this.label, required this.selected, super.key,
     this.onSelected,
     this.color,
   });
@@ -366,9 +357,7 @@ class RBSDialog extends StatelessWidget {
   final List<Widget>? actions;
 
   const RBSDialog({
-    super.key,
-    required this.title,
-    required this.content,
+    required this.title, required this.content, super.key,
     this.actions,
   });
 
@@ -420,9 +409,8 @@ class RBSSection extends StatelessWidget {
   final EdgeInsets? padding;
 
   const RBSSection({
-    super.key,
+    required this.child, super.key,
     this.title,
-    required this.child,
     this.backgroundColor,
     this.padding,
   });

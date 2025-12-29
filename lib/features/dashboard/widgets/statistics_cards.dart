@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
+import '../../../models/student.dart';
 
 /// Statistik-Kachel für Dashboard
 class DashboardStatCard extends StatelessWidget {
@@ -12,12 +13,7 @@ class DashboardStatCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const DashboardStatCard({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.onTap,
+    required this.icon, required this.label, required this.value, required this.color, required this.onTap, super.key,
   });
 
   @override
@@ -70,11 +66,7 @@ class DashboardStatisticsGrid extends ConsumerWidget {
   final AsyncValue gradesAsync;
 
   const DashboardStatisticsGrid({
-    super.key,
-    required this.klassenAsync,
-    required this.studentsAsync,
-    required this.subjectsAsync,
-    required this.gradesAsync,
+    required this.klassenAsync, required this.studentsAsync, required this.subjectsAsync, required this.gradesAsync, super.key,
   });
 
   @override
@@ -119,7 +111,7 @@ class DashboardStatisticsGrid extends ConsumerWidget {
               icon: Icons.people,
               label: 'Schüler',
               value: studentsAsync.when(
-                data: (data) => '${(data as List).where((s) => s.isAktiv).length}',
+                data: (data) => '${(data as List<dynamic>).cast<Student>().where((s) => s.isAktiv).length}',
                 loading: () => '...',
                 error: (e, s) => '-',
               ),

@@ -6,9 +6,6 @@ class NotenStatistik {
   final Map<int, int> verteilung;
 
   NotenStatistik({
-    this.durchschnitt,
-    required this.anzahl,
-    required this.gesamt,
-    required this.verteilung,
+    required this.anzahl, required this.gesamt, required this.verteilung, this.durchschnitt,
   });
 }

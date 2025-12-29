@@ -301,9 +301,7 @@ class Nachschreiber {
     required this.student,
     required this.leistungsnachweis,
     required this.klasse,
-    this.subject,
-    required this.stufe,
-    required this.tageAlt,
+    required this.stufe, required this.tageAlt, this.subject,
   });
 }
 
@@ -424,7 +422,7 @@ final currentAppUserProvider = FutureProvider<AppUser?>((ref) async {
   final firestoreService = ref.read(firestoreServiceProvider);
   
   // Versuche AppUser aus Firestore zu laden
-  var appUser = await firestoreService.getAppUserByEmail(firebaseUser.email ?? '');
+  final appUser = await firestoreService.getAppUserByEmail(firebaseUser.email ?? '');
   
   // Wenn kein AppUser existiert, erstelle einen (First-Run Setup)
   if (appUser == null) {

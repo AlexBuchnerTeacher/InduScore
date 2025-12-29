@@ -54,16 +54,10 @@ class NotenMatrixView extends ConsumerStatefulWidget {
   final Function(String klasseId)? onKlasseTap;
 
   const NotenMatrixView({
-    super.key,
-    required this.mode,
+    required this.mode, required this.students, required this.leistungsnachweise, required this.subjects, required this.grades, required this.klassen, super.key,
     this.klasseId,
     this.schuelerId,
     this.leistungsnachweisId,
-    required this.students,
-    required this.leistungsnachweise,
-    required this.subjects,
-    required this.grades,
-    required this.klassen,
     this.onStudentTap,
     this.onLNTap,
     this.onSubjectTap,
@@ -114,7 +108,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final fachColWidth =
+    const fachColWidth =
         170.0; // 170 - 8 (padding) = 162px für EditableNoteCell inkl. Tendenz
 
     return Column(
@@ -529,7 +523,7 @@ class _NotenMatrixViewState extends ConsumerState<NotenMatrixView> {
       });
 
     const leftColWidth = 170.0;
-    final lnColWidth = 170.0; // Match byKlasse for consistency, inkl. Tendenz
+    const lnColWidth = 170.0; // Match byKlasse for consistency, inkl. Tendenz
 
     return Column(
       children: [
