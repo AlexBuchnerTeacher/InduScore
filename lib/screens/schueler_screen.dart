@@ -110,7 +110,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
               if (!canCreate) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.add),
-                onPressed: () => _showStudentDialog(),
+                onPressed: _showStudentDialog,
                 tooltip: 'Neuer Schüler',
               );
             },
@@ -490,7 +490,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
           ),
           const SizedBox(height: RBSSpacing.lg),
           ElevatedButton.icon(
-            onPressed: () => _showStudentDialog(),
+            onPressed: _showStudentDialog,
             icon: const Icon(Icons.add),
             label: const Text('Neuen Schüler anlegen'),
             style: ElevatedButton.styleFrom(

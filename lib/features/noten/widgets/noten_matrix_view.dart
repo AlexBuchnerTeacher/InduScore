@@ -54,16 +54,10 @@ class NotenMatrixView extends ConsumerStatefulWidget {
   final Function(String klasseId)? onKlasseTap;
 
   const NotenMatrixView({
-    super.key,
-    required this.mode,
+    required this.mode, required this.students, required this.leistungsnachweise, required this.subjects, required this.grades, required this.klassen, super.key,
     this.klasseId,
     this.schuelerId,
     this.leistungsnachweisId,
-    required this.students,
-    required this.leistungsnachweise,
-    required this.subjects,
-    required this.grades,
-    required this.klassen,
     this.onStudentTap,
     this.onLNTap,
     this.onSubjectTap,

@@ -10,11 +10,7 @@ class EntityListWidget<T> extends StatelessWidget {
   final List<Widget>? actions;
 
   const EntityListWidget({
-    super.key,
-    required this.items,
-    required this.title,
-    required this.icon,
-    required this.itemBuilder,
+    required this.items, required this.title, required this.icon, required this.itemBuilder, super.key,
     this.onAdd,
     this.actions,
   });

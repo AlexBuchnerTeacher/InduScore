@@ -11,10 +11,7 @@ class KlasseChip extends StatelessWidget {
   final VoidCallback onTap;
 
   const KlasseChip({
-    super.key,
-    required this.name,
-    required this.color,
-    required this.onTap,
+    required this.name, required this.color, required this.onTap, super.key,
   });
 
   @override
@@ -60,8 +57,7 @@ class KlassenChipsList extends ConsumerWidget {
   final List<Klasse> klassen;
 
   const KlassenChipsList({
-    super.key,
-    required this.klassen,
+    required this.klassen, super.key,
   });
 
   Color _getBerufColor(dynamic beruf) {

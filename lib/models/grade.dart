@@ -1,4 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:induscore/models/tendenz.dart';
 
 /// Note zu einem Leistungsnachweis
@@ -21,11 +21,9 @@ class Grade {
     required this.studentId,
     required this.leistungsnachweisId,
     required this.note,
-    this.tendenz = Tendenz.keine,
+    required this.createdAt, required this.updatedAt, this.tendenz = Tendenz.keine,
     this.kommentar,
     this.updatedBy,
-    required this.createdAt,
-    required this.updatedAt,
   });
 
   /// Formatierte Note mit Tendenz (z.B. "2+", "3-", "1")

@@ -13,12 +13,7 @@ class DashboardStatCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const DashboardStatCard({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.onTap,
+    required this.icon, required this.label, required this.value, required this.color, required this.onTap, super.key,
   });
 
   @override
@@ -71,11 +66,7 @@ class DashboardStatisticsGrid extends ConsumerWidget {
   final AsyncValue gradesAsync;
 
   const DashboardStatisticsGrid({
-    super.key,
-    required this.klassenAsync,
-    required this.studentsAsync,
-    required this.subjectsAsync,
-    required this.gradesAsync,
+    required this.klassenAsync, required this.studentsAsync, required this.subjectsAsync, required this.gradesAsync, super.key,
   });
 
   @override

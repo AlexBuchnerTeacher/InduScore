@@ -16,8 +16,7 @@ class LnExemption {
     required this.id,
     required this.studentId,
     required this.leistungsnachweisId,
-    this.grund,
-    required this.createdAt,
+    required this.createdAt, this.grund,
     this.createdBy,
   });
 

@@ -12,8 +12,7 @@ class NotenEingabeScreen extends ConsumerStatefulWidget {
   final String leistungsnachweisId;
 
   const NotenEingabeScreen({
-    super.key,
-    required this.leistungsnachweisId,
+    required this.leistungsnachweisId, super.key,
   });
 
   @override

@@ -131,7 +131,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
               error: (e, s) => Center(child: Text('Fehler: $e')),
               data: (users) {
                 // Filter anwenden
-                var filtered = users.where((u) {
+                final filtered = users.where((u) {
                   // Suchfilter
                   if (_searchQuery.isNotEmpty) {
                     final query = _searchQuery.toLowerCase();
@@ -335,7 +335,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
     final formKey = GlobalKey<FormState>();
     
     UserRole selectedRole = user?.rolle ?? UserRole.lehrer;
-    List<String> selectedKlassenIds = List.from(user?.favoriteKlassenIds ?? []);
+    final List<String> selectedKlassenIds = List.from(user?.favoriteKlassenIds ?? []);
     String? kuerzelError;
 
     showDialog(
@@ -522,12 +522,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
 
   Future<void> _saveUser(
     BuildContext context, {
-    AppUser? user,
-    required String name,
-    required String email,
-    required String kuerzel,
-    required UserRole rolle,
-    required List<String> favoriteKlassenIds,
+    required String name, required String email, required String kuerzel, required UserRole rolle, required List<String> favoriteKlassenIds, AppUser? user,
     String? password,
   }) async {
     final firestoreService = ref.read(firestoreServiceProvider);

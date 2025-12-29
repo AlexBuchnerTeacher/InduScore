@@ -95,7 +95,7 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
               if (!canCreate) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.add),
-                onPressed: () => _showSubjectDialog(),
+                onPressed: _showSubjectDialog,
                 tooltip: 'Neues Fach',
               );
             },
@@ -173,7 +173,7 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
-                          onPressed: () => _showSubjectDialog(),
+                          onPressed: _showSubjectDialog,
                           icon: const Icon(Icons.add),
                           label: const Text('Erstes Fach erstellen'),
                           style: ElevatedButton.styleFrom(

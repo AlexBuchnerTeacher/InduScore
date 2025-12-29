@@ -1,4 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'beruf.dart';
 
 /// Typ des Fachs fÃ¼r die Berufsschule
@@ -27,13 +27,10 @@ class Subject {
   Subject({
     required this.id,
     required this.name,
-    this.shortName,
-    required this.typ,
-    required this.berufe,
+    required this.typ, required this.berufe, required this.createdAt, this.shortName,
     this.wochenstunden = 2,
     this.credits = 3.0,
     this.color,
-    required this.createdAt,
   });
 
   factory Subject.fromFirestore(DocumentSnapshot doc) {

@@ -29,8 +29,7 @@ class KlassenDetailScreen extends ConsumerStatefulWidget {
   final String klasseId;
 
   const KlassenDetailScreen({
-    super.key,
-    required this.klasseId,
+    required this.klasseId, super.key,
   });
 
   @override

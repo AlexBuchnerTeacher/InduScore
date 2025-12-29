@@ -25,8 +25,7 @@ class SchuelerDetailScreen extends ConsumerStatefulWidget {
   final String schuelerId;
 
   const SchuelerDetailScreen({
-    super.key,
-    required this.schuelerId,
+    required this.schuelerId, super.key,
   });
 
   @override

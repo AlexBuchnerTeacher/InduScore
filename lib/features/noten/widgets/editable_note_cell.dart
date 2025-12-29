@@ -25,15 +25,9 @@ class EditableNoteCell extends ConsumerStatefulWidget {
   final bool compact;
 
   const EditableNoteCell({
-    super.key,
-    required this.studentId,
-    required this.leistungsnachweisId,
-    required this.note,
-    required this.tendenz,
+    required this.studentId, required this.leistungsnachweisId, required this.note, required this.tendenz, required this.onNoteChanged, required this.onTendenzChanged, super.key,
     this.updatedBy,
     this.updatedAt,
-    required this.onNoteChanged,
-    required this.onTendenzChanged,
     this.compact = false,
   });
 

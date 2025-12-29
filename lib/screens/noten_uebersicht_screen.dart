@@ -219,7 +219,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
           children: [
             // Typ-Filter
             ...LeistungsnachweisTyp.values
-                .where((t) => availableTypen.contains(t))
+                .where(availableTypen.contains)
                 .map(
                   (typ) => Padding(
                     padding: const EdgeInsets.only(right: 8),

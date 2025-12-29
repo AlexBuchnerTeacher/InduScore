@@ -45,9 +45,8 @@ class Student {
     required this.lastName,
     required this.klasseId,
     required this.eintrittsDatum,
-    this.austrittsDatum,
+    required this.createdAt, this.austrittsDatum,
     this.status = StudentStatus.aktiv,
-    required this.createdAt,
     // ASV-Felder
     this.asvId,
     this.geschlecht,

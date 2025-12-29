@@ -17,13 +17,7 @@ class NoteDropdown extends StatelessWidget {
   final Color Function(int) getNoteColor;
 
   const NoteDropdown({
-    super.key,
-    required this.inputKey,
-    required this.eingabe,
-    required this.studentId,
-    required this.lnId,
-    required this.onNoteChanged,
-    required this.getNoteColor,
+    required this.inputKey, required this.eingabe, required this.studentId, required this.lnId, required this.onNoteChanged, required this.getNoteColor, super.key,
   });
 
   @override
@@ -85,13 +79,7 @@ class CompactNoteDropdown extends StatelessWidget {
   final Color Function(int) getNoteColor;
 
   const CompactNoteDropdown({
-    super.key,
-    required this.inputKey,
-    required this.eingabe,
-    required this.studentId,
-    required this.lnId,
-    required this.onNoteChanged,
-    required this.getNoteColor,
+    required this.inputKey, required this.eingabe, required this.studentId, required this.lnId, required this.onNoteChanged, required this.getNoteColor, super.key,
   });
 
   @override
@@ -158,12 +146,7 @@ class TendenzButtons extends StatelessWidget {
   final OnTendenzChanged onTendenzChanged;
 
   const TendenzButtons({
-    super.key,
-    required this.inputKey,
-    required this.eingabe,
-    required this.studentId,
-    required this.lnId,
-    required this.onTendenzChanged,
+    required this.inputKey, required this.eingabe, required this.studentId, required this.lnId, required this.onTendenzChanged, super.key,
   });
 
   @override
@@ -217,12 +200,7 @@ class CompactTendenzButtons extends StatelessWidget {
   final OnTendenzChanged onTendenzChanged;
 
   const CompactTendenzButtons({
-    super.key,
-    required this.inputKey,
-    required this.eingabe,
-    required this.studentId,
-    required this.lnId,
-    required this.onTendenzChanged,
+    required this.inputKey, required this.eingabe, required this.studentId, required this.lnId, required this.onTendenzChanged, super.key,
   });
 
   @override
