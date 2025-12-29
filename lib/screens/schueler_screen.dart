@@ -10,6 +10,7 @@ import '../models/beruf.dart';
 import '../providers/app_providers.dart';
 import '../widgets/rbs_drawer.dart';
 import '../providers/permissions_providers.dart';
+import '../widgets/dialogs/common_dialogs.dart';
 
 /// Schülerverwaltung Screen
 /// - Listet alle Schüler mit Filter nach Klasse
@@ -43,7 +44,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
     final studentsAsync = ref.watch(studentsProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final canManageData = ref.watch(canManageDataProvider);
-    
+
     // Permission Check
     if (!canManageData) {
       return Scaffold(
@@ -73,8 +74,10 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
               const SizedBox(height: 16),
               const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              const Text('Sie haben keine Berechtigung zur Schülerverwaltung.',
-                   style: RBSTypography.bodyMedium),
+              const Text(
+                'Sie haben keine Berechtigung zur Schülerverwaltung.',
+                style: RBSTypography.bodyMedium,
+              ),
             ],
           ),
         ),
@@ -99,9 +102,14 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
           ),
           // Toggle für ausgetretene Schüler
           IconButton(
-            icon: Icon(_showAusgetretene ? Icons.visibility : Icons.visibility_off),
-            onPressed: () => setState(() => _showAusgetretene = !_showAusgetretene),
-            tooltip: _showAusgetretene ? 'Ausgetretene ausblenden' : 'Ausgetretene anzeigen',
+            icon: Icon(
+              _showAusgetretene ? Icons.visibility : Icons.visibility_off,
+            ),
+            onPressed: () =>
+                setState(() => _showAusgetretene = !_showAusgetretene),
+            tooltip: _showAusgetretene
+                ? 'Ausgetretene ausblenden'
+                : 'Ausgetretene anzeigen',
           ),
           // Neuer Schüler Button - nur für Admin
           Consumer(
@@ -130,7 +138,12 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                 // 1. Beruf-Filter
                 Row(
                   children: [
-                    Text('Beruf:', style: RBSTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Beruf:',
+                      style: RBSTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(width: RBSSpacing.sm),
                     Expanded(
                       child: Wrap(
@@ -163,7 +176,12 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                 // 2. Zeitgruppen-Filter
                 Row(
                   children: [
-                    Text('Zeitgruppe:', style: RBSTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Zeitgruppe:',
+                      style: RBSTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(width: RBSSpacing.sm),
                     RBSFilterChip(
                       label: 'ZG1',
@@ -210,7 +228,10 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                     }
                     if (zeitgruppenFilter.isNotEmpty) {
                       filteredKlassen = filteredKlassen
-                          .where((k) => zeitgruppenFilter.contains(k.zeitgruppe.nummer))
+                          .where(
+                            (k) =>
+                                zeitgruppenFilter.contains(k.zeitgruppe.nummer),
+                          )
                           .toList();
                     }
 
@@ -221,7 +242,12 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Klasse:', style: RBSTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                        Text(
+                          'Klasse:',
+                          style: RBSTypography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: RBSSpacing.xs),
                         Wrap(
                           spacing: RBSSpacing.xs,
@@ -247,7 +273,10 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                     );
                   },
                   loading: () => const SizedBox.shrink(),
-                  error: (e, _) => Text('Fehler: $e', style: const TextStyle(color: RBSColors.error)),
+                  error: (e, _) => Text(
+                    'Fehler: $e',
+                    style: const TextStyle(color: RBSColors.error),
+                  ),
                 ),
                 const SizedBox(height: RBSSpacing.sm),
 
@@ -269,7 +298,10 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                           )
                         : null,
                     border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: RBSSpacing.md, vertical: RBSSpacing.sm),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: RBSSpacing.md,
+                      vertical: RBSSpacing.sm,
+                    ),
                   ),
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
@@ -282,7 +314,8 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
           // Schüler-Liste
           Expanded(
             child: studentsAsync.when(
-              data: (allStudents) => _buildStudentList(allStudents, klassenAsync),
+              data: (allStudents) =>
+                  _buildStudentList(allStudents, klassenAsync),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Fehler: $e')),
             ),
@@ -294,28 +327,36 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
 
   Widget _buildStudentList(List<Student> allStudents, AsyncValue klassenAsync) {
     // 1. Filtere nach Aktiv/Inaktiv
-    var filtered = _showAusgetretene 
-        ? allStudents 
+    var filtered = _showAusgetretene
+        ? allStudents
         : allStudents.where((s) => s.isAktiv).toList();
 
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
 
     // 2. Filtere nach ausgewählten Klassen (wenn welche gewählt)
     if (_selectedKlassenIds.isNotEmpty) {
-      filtered = filtered.where((s) => _selectedKlassenIds.contains(s.klasseId)).toList();
+      filtered = filtered
+          .where((s) => _selectedKlassenIds.contains(s.klasseId))
+          .toList();
     }
     // Wenn keine Klassen gewählt, aber Beruf/ZG-Filter aktiv → filtere nach Klassen-Beruf/ZG
     else if (_selectedBerufe.isNotEmpty || zeitgruppenFilter.isNotEmpty) {
       return klassenAsync.when(
         data: (klassen) {
           final validKlassenIds = (klassen as List<Klasse>)
-              .where((Klasse k) => 
-                (_selectedBerufe.isEmpty || _selectedBerufe.contains(k.beruf)) &&
-                (zeitgruppenFilter.isEmpty || zeitgruppenFilter.contains(k.zeitgruppe.index)))
+              .where(
+                (Klasse k) =>
+                    (_selectedBerufe.isEmpty ||
+                        _selectedBerufe.contains(k.beruf)) &&
+                    (zeitgruppenFilter.isEmpty ||
+                        zeitgruppenFilter.contains(k.zeitgruppe.index)),
+              )
               .map<String>((Klasse k) => k.id)
               .toSet();
-          
-          filtered = filtered.where((Student s) => validKlassenIds.contains(s.klasseId)).toList();
+
+          filtered = filtered
+              .where((Student s) => validKlassenIds.contains(s.klasseId))
+              .toList();
 
           return _buildFilteredList(filtered, allStudents);
         },
@@ -337,12 +378,14 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
 
   Widget _buildFilteredList(List<Student> filtered, List<Student> allStudents) {
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
-    
+
     if (filtered.isEmpty) {
       String message = 'Keine Schüler gefunden';
       if (_searchQuery.isNotEmpty) {
         message = 'Keine Schüler mit "$_searchQuery" gefunden';
-      } else if (_selectedKlassenIds.isEmpty && _selectedBerufe.isEmpty && zeitgruppenFilter.isEmpty) {
+      } else if (_selectedKlassenIds.isEmpty &&
+          _selectedBerufe.isEmpty &&
+          zeitgruppenFilter.isEmpty) {
         message = 'Wähle Filter oder suche nach Schülern';
       }
       return _buildEmptyState(message);
@@ -351,7 +394,9 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
     // Sortiere nach Nachname, dann Vorname
     filtered.sort((a, b) {
       final lastNameComp = a.lastName.compareTo(b.lastName);
-      return lastNameComp != 0 ? lastNameComp : a.firstName.compareTo(b.firstName);
+      return lastNameComp != 0
+          ? lastNameComp
+          : a.firstName.compareTo(b.firstName);
     });
 
     return ListView.builder(
@@ -367,9 +412,10 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
   Widget _buildStudentCard(Student student) {
     final dateFormat = DateFormat('dd.MM.yyyy');
     final isAusgetreten = !student.isAktiv;
-    
+
     return Tooltip(
-      message: 'Eintritt: ${dateFormat.format(student.eintrittsDatum)}'
+      message:
+          'Eintritt: ${dateFormat.format(student.eintrittsDatum)}'
           '${student.austrittsDatum != null ? '\nAustritt: ${dateFormat.format(student.austrittsDatum!)}' : ''}',
       child: Card(
         margin: const EdgeInsets.only(bottom: RBSSpacing.sm),
@@ -394,7 +440,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
               decoration: isAusgetreten ? TextDecoration.lineThrough : null,
             ),
           ),
-          subtitle: isAusgetreten 
+          subtitle: isAusgetreten
               ? Text(
                   'Ausgetreten am ${dateFormat.format(student.austrittsDatum!)}',
                   style: RBSTypography.bodySmall.copyWith(color: Colors.grey),
@@ -478,11 +524,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.person_outline,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.person_outline, size: 64, color: Colors.grey[400]),
           const SizedBox(height: RBSSpacing.md),
           Text(
             message,
@@ -505,8 +547,12 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
 
   void _showStudentDialog({Student? student}) {
     final isEditing = student != null;
-    final firstNameController = TextEditingController(text: student?.firstName ?? '');
-    final lastNameController = TextEditingController(text: student?.lastName ?? '');
+    final firstNameController = TextEditingController(
+      text: student?.firstName ?? '',
+    );
+    final lastNameController = TextEditingController(
+      text: student?.lastName ?? '',
+    );
     DateTime eintrittsDatum = student?.eintrittsDatum ?? DateTime.now();
 
     showDialog(
@@ -582,16 +628,20 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                   } else {
                     // Wird später erweitert mit Klassen-Auswahl
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Bitte erweitere den Dialog um Klassenauswahl')),
+                      const SnackBar(
+                        content: Text(
+                          'Bitte erweitere den Dialog um Klassenauswahl',
+                        ),
+                      ),
                     );
                     return;
                   }
                   if (context.mounted) Navigator.pop(context);
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Fehler: $e')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Fehler: $e')));
                   }
                 }
               },
@@ -671,10 +721,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
   Future<void> _reaktiviereStudent(Student student) async {
     final firestoreService = ref.read(firestoreServiceProvider);
     await firestoreService.updateStudent(
-      student.copyWith(
-        status: StudentStatus.aktiv,
-        austrittsDatum: null,
-      ),
+      student.copyWith(status: StudentStatus.aktiv, austrittsDatum: null),
     );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -687,33 +734,16 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
   }
 
   void _confirmDelete(Student student) {
-    showDialog(
+    CommonDialogs.showDeleteConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Schüler löschen?'),
-        content: Text(
-          'Möchtest du "${student.displayName}" wirklich löschen?\n\n'
+      title: 'Schüler löschen?',
+      itemName: student.displayName,
+      additionalWarning:
           'Alle Noten dieses Schülers werden ebenfalls gelöscht.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final firestoreService = ref.read(firestoreServiceProvider);
-              await firestoreService.deleteStudent(student.id);
-              if (context.mounted) Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      onDelete: () async {
+        final firestoreService = ref.read(firestoreServiceProvider);
+        await firestoreService.deleteStudent(student.id);
+      },
     );
   }
 

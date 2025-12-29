@@ -4,6 +4,7 @@ import '../models/beruf.dart';
 import '../models/subject.dart';
 import '../providers/app_providers.dart';
 import '../core/theme/rbs_theme.dart';
+import '../widgets/dialogs/common_dialogs.dart';
 
 /// Settings-Screen für globale Verwaltung von Berufen und Fächern
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -365,53 +366,22 @@ class _FaecherTab extends ConsumerWidget {
   }
 
   void _deleteFach(BuildContext context, WidgetRef ref, Subject subject) {
-    showDialog(
+    CommonDialogs.showDeleteConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Fach löschen?'),
-        content: Text(
-          'Möchten Sie "${subject.name}" wirklich löschen? '
-          'Dies kann nicht rückgängig gemacht werden.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final firestoreService = ref.read(firestoreServiceProvider);
-              try {
-                await firestoreService.deleteSubject(subject.id);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${subject.name} wurde gelöscht'),
-                      backgroundColor: RBSColors.courtGreen,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Fehler: $e'),
-                      backgroundColor: RBSColors.error,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: RBSColors.error,
-              foregroundColor: RBSColors.white,
+      title: 'Fach löschen?',
+      itemName: subject.name,
+      onDelete: () async {
+        final firestoreService = ref.read(firestoreServiceProvider);
+        await firestoreService.deleteSubject(subject.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${subject.name} wurde gelöscht'),
+              backgroundColor: RBSColors.courtGreen,
             ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+          );
+        }
+      },
     );
   }
 }

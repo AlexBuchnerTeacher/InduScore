@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Common Dialog Library** (Issue #54 F-011/F-012) - Dialog Consolidation ✅
+  - Created `lib/widgets/dialogs/common_dialogs.dart` (253 LOC) with 6 reusable dialog builders:
+    - `showConfirmationDialog()` - Standard confirmation with custom actions
+    - `showDeleteConfirmationDialog()` - Delete confirmation with red warning styling
+    - `showInfoDialog()` - Simple info message with OK button
+    - `showErrorDialog()` - Error message with red icon and styling
+    - `showSuccessDialog()` - Success message with green icon and styling
+    - `showInputDialog()` - Text input dialog with form validation
+  - Replaced 16 inline AlertDialog implementations across 5 screens:
+    - schueler_screen.dart: Delete confirmation
+    - settings_screen.dart: Subject delete confirmation
+    - user_verwaltung_screen.dart: Password reset + user delete confirmations
+    - faecher_screen.dart: Subject delete confirmation
+  - Reduced duplicate dialog code by ~150-200 LOC
+  - All dialogs follow RBS Styleguide 1.2 theming
+  - Remaining 15 showDialog calls are context-specific (forms, specialized widgets)
+
 ### Changed
 - **csv_import_screen.dart UI Widget Extraction** (Issue #54 F-003 Phase 1) - 11% LOC Reduction ✅
   - Created `lib/screens/widgets/csv_import_widgets.dart` (246 LOC) with 5 reusable UI components:

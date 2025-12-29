@@ -8,6 +8,7 @@ import '../core/widgets/rbs_components.dart';
 import '../models/subject.dart';
 import '../models/beruf.dart';
 import '../providers/app_providers.dart';
+import '../widgets/dialogs/common_dialogs.dart';
 import '../widgets/rbs_drawer.dart';
 import '../providers/permissions_providers.dart';
 
@@ -34,7 +35,7 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
     // Holt alle Fächer aus Firestore via Riverpod
     final subjectsAsync = ref.watch(subjectsProvider);
     final canManageData = ref.watch(canManageDataProvider);
-    
+
     // Permission Check
     if (!canManageData) {
       return Scaffold(
@@ -64,8 +65,10 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
               const SizedBox(height: 16),
               const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              const Text('Sie haben keine Berechtigung zur Fächerverwaltung.',
-                   style: RBSTypography.bodyMedium),
+              const Text(
+                'Sie haben keine Berechtigung zur Fächerverwaltung.',
+                style: RBSTypography.bodyMedium,
+              ),
             ],
           ),
         ),
@@ -142,7 +145,9 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
                 var filtered = subjects;
                 if (_selectedBerufe.isNotEmpty) {
                   filtered = filtered
-                      .where((s) => s.berufe.any((b) => _selectedBerufe.contains(b)))
+                      .where(
+                        (s) => s.berufe.any((b) => _selectedBerufe.contains(b)),
+                      )
                       .toList();
                 }
 
@@ -221,33 +226,15 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
   }
 
   void _deleteSubject(Subject subject) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Fach löschen?'),
-        content: Text(
-          'Möchtest du "${subject.name}" wirklich löschen?\n\n'
-          'Achtung: Alle Noten und Leistungsnachweise für dieses Fach werden ebenfalls gelöscht!',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: RBSColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
-    );
+    if (!mounted) return;
 
-    if (confirm == true && mounted) {
-      try {
+    await CommonDialogs.showDeleteConfirmationDialog(
+      context: context,
+      title: 'Fach löschen?',
+      itemName: subject.name,
+      additionalWarning:
+          'Alle Noten und Leistungsnachweise für dieses Fach werden ebenfalls gelöscht!',
+      onDelete: () async {
         await ref.read(firestoreServiceProvider).deleteSubject(subject.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -257,17 +244,8 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
             ),
           );
         }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Fehler beim Löschen: $e'),
-              backgroundColor: RBSColors.error,
-            ),
-          );
-        }
-      }
-    }
+      },
+    );
   }
 
   Color _getBerufColor(Beruf beruf) {
@@ -297,8 +275,9 @@ class _SubjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subjectColor = RBSColors.fromHex(subject.color) ?? RBSColors.dynamicRed;
-    
+    final subjectColor =
+        RBSColors.fromHex(subject.color) ?? RBSColors.dynamicRed;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -400,8 +379,9 @@ class _SubjectCard extends StatelessWidget {
                           beruf.code,
                           style: const TextStyle(fontSize: 12),
                         ),
-                        backgroundColor:
-                            _getBerufColor(beruf).withValues(alpha: 0.2),
+                        backgroundColor: _getBerufColor(
+                          beruf,
+                        ).withValues(alpha: 0.2),
                         padding: EdgeInsets.zero,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
@@ -467,7 +447,7 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
       text: widget.subject?.shortName,
     );
     _selectedBerufe = widget.subject?.berufe.toSet() ?? {};
-    _selectedColor = widget.subject?.color != null 
+    _selectedColor = widget.subject?.color != null
         ? RBSColors.fromHex(widget.subject!.color)
         : RBSColors.subjectColors.first;
     _hexColorController = TextEditingController(
@@ -485,11 +465,11 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
 
   @override
   Widget build(BuildContext context) {
-      return AlertDialog(
-        title: Text(
-          widget.subject == null ? 'Neues Fach' : 'Fach bearbeiten',
-          style: GoogleFonts.roboto(),
-        ),
+    return AlertDialog(
+      title: Text(
+        widget.subject == null ? 'Neues Fach' : 'Fach bearbeiten',
+        style: GoogleFonts.roboto(),
+      ),
       content: SizedBox(
         width: 500,
         child: Form(
@@ -536,9 +516,7 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
                 // Berufe
                 Text(
                   'Berufe *',
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -558,7 +536,9 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
                           }
                         });
                       },
-                      selectedColor: _getBerufColor(beruf).withValues(alpha: 0.2),
+                      selectedColor: _getBerufColor(
+                        beruf,
+                      ).withValues(alpha: 0.2),
                       checkmarkColor: _getBerufColor(beruf),
                       side: BorderSide(color: _getBerufColor(beruf), width: 2),
                     );
@@ -576,13 +556,11 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
                     ),
                   ),
                 const SizedBox(height: 16),
-                
+
                 // Farbauswahl
                 Text(
                   'Farbe',
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 // Farbpalette
@@ -590,7 +568,8 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
                   spacing: 8,
                   runSpacing: 8,
                   children: RBSColors.subjectColors.map((color) {
-                    final isSelected = _selectedColor?.toARGB32() == color.toARGB32();
+                    final isSelected =
+                        _selectedColor?.toARGB32() == color.toARGB32();
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -605,19 +584,27 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
                           color: color,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isSelected ? Colors.black : Colors.transparent,
+                            color: isSelected
+                                ? Colors.black
+                                : Colors.transparent,
                             width: 3,
                           ),
-                          boxShadow: isSelected ? [
-                            BoxShadow(
-                              color: color.withValues(alpha: 0.5),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
-                          ] : null,
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: color.withValues(alpha: 0.5),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: isSelected
-                            ? const Icon(Icons.check, color: Colors.white, size: 20)
+                            ? const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 20,
+                              )
                             : null,
                       ),
                     );

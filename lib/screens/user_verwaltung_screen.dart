@@ -7,6 +7,7 @@ import '../widgets/rbs_drawer.dart';
 import '../models/app_user.dart';
 import '../providers/app_providers.dart';
 import '../providers/permissions_providers.dart';
+import '../widgets/dialogs/common_dialogs.dart';
 
 /// Benutzerverwaltung - nur für Admins
 class UserVerwaltungScreen extends ConsumerStatefulWidget {
@@ -574,99 +575,46 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
     }
   }
 
-  void _showResetPasswordDialog(AppUser user) {
-    showDialog(
+  void _showResetPasswordDialog(AppUser user) async {
+    await CommonDialogs.showConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Passwort zurücksetzen'),
-        content: Text(
-          'Eine E-Mail zum Zurücksetzen des Passworts wird an ${user.email} gesendet.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final authService = ref.read(authServiceProvider);
-              try {
-                await authService.sendPasswordResetEmail(user.email);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Passwort-Reset Email an ${user.email} gesendet')),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red),
-                  );
-                }
-              }
-            },
-            child: const Text('Email senden'),
-          ),
-        ],
-      ),
+      title: 'Passwort zurücksetzen',
+      message: 'Eine E-Mail zum Zurücksetzen des Passworts wird an ${user.email} gesendet.',
+      confirmText: 'Email senden',
+      onConfirm: () async {
+        final authService = ref.read(authServiceProvider);
+        try {
+          await authService.sendPasswordResetEmail(user.email);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Passwort-Reset Email an ${user.email} gesendet')),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red),
+            );
+          }
+        }
+      },
     );
   }
 
   void _showDeleteConfirmation(AppUser user) {
-    showDialog(
+    CommonDialogs.showDeleteConfirmationDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Benutzer löschen?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${user.name} (${user.email}) wird unwiderruflich gelöscht.'),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.shade200),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.warning, color: Colors.red),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Diese Aktion kann nicht rückgängig gemacht werden!',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () async {
-              final firestoreService = ref.read(firestoreServiceProvider);
-              await firestoreService.deleteAppUser(user.id);
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${user.name} gelöscht')),
-                );
-              }
-            },
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      title: 'Benutzer löschen?',
+      itemName: '${user.name} (${user.email})',
+      onDelete: () async {
+        final firestoreService = ref.read(firestoreServiceProvider);
+        await firestoreService.deleteAppUser(user.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${user.name} gelöscht')),
+          );
+        }
+      },
     );
   }
 
