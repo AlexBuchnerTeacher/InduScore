@@ -23,12 +23,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - RBS-konformes Design (Cards, Dialoge, Farben)
   - Route `/einstellungen` im Navigation-Drawer
   - Firestore-Persistenz für alle Operationen
+- **Flexibler Login mit Kürzel und Email** - NEU ✅
+  - Login unterstützt jetzt BEIDE Eingabearten: Kürzel (z.B. "BU") UND vollständige Email-Adresse
+  - Automatische Kürzel-zu-Email-Auflösung über Firestore `app_users` Collection
+  - Neue Methode `FirestoreService.getAppUserByKuerzel()` für Kürzel-Lookup
+  - Fallback auf alte `@induscore.de` Konvention wenn Kürzel nicht in Firestore gefunden
+  - Script `create_appusers.js` zum Erstellen von appUser-Dokumenten für existierende Auth-User
 
 ### Changed
 - Version auf 0.15.0 für v0.15.0 MVP Vorbereitung
 - Versionsnummern-Notation durchgehend auf v0.15.0 vereinheitlicht (statt v1.0.0)
 
 ### Fixed
+- **Login-Problem behoben**: Eingabe von Kürzeln funktioniert jetzt mit echten Email-Domains (@bs-ie.muenchen.musin.de, @gmx.de), nicht nur mit gehardcodeten @induscore.de
+- **DEBUG-Code entfernt**: Admin-User-Erstellungs-Button wurde aus Login-Screen entfernt
 
 ---
 
