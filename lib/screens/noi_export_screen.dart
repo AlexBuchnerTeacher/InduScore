@@ -13,6 +13,8 @@ import '../services/pdf_export_service.dart';
 import '../models/klasse.dart';
 import '../models/student.dart';
 import '../models/subject.dart';
+import '../models/leistungsnachweis.dart';
+import '../models/grade.dart';
 
 /// Export Screen - NOI/CSV/PDF Export
 class NoiExportScreen extends ConsumerStatefulWidget {
@@ -601,16 +603,16 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
 
   Future<void> _exportNoi(
     List<Klasse> klassen,
-    List students,
-    List subjects,
-    List leistungsnachweise,
-    List grades,
+    List<dynamic> students,
+    List<dynamic> subjects,
+    List<dynamic> leistungsnachweise,
+    List<dynamic> grades,
   ) async {
     final klasse = klassen.firstWhere((k) => k.id == _selectedKlasseId);
-    final klassenStudents = students.where((s) => s.klasseId == _selectedKlasseId).toList();
-    final klassenLns = leistungsnachweise.where((ln) => ln.klasseId == _selectedKlasseId).toList();
+    final klassenStudents = students.cast<Student>().where((s) => s.klasseId == _selectedKlasseId).toList();
+    final klassenLns = leistungsnachweise.cast<Leistungsnachweis>().where((ln) => ln.klasseId == _selectedKlasseId).toList();
     final lnIds = klassenLns.map((ln) => ln.id).toSet();
-    final klassenGrades = grades.where((g) => lnIds.contains(g.leistungsnachweisId)).toList();
+    final klassenGrades = grades.cast<Grade>().where((g) => lnIds.contains(g.leistungsnachweisId)).toList();
 
     String content;
     String filename;
@@ -643,13 +645,13 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
 
   Future<void> _exportStudentPdf(
     List<Klasse> klassen,
-    List students,
-    List subjects,
-    List leistungsnachweise,
-    List grades,
+    List<dynamic> students,
+    List<dynamic> subjects,
+    List<dynamic> leistungsnachweise,
+    List<dynamic> grades,
   ) async {
     final klasse = klassen.firstWhere((k) => k.id == _selectedKlasseId);
-    final student = students.firstWhere((s) => s.id == _selectedStudentId);
+    final student = students.cast<Student>().firstWhere((s) => s.id == _selectedStudentId);
 
     final pdfBytes = PdfExportService.generateStudentReport(
       student: student,
@@ -665,13 +667,13 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
 
   Future<void> _exportSubjectPdf(
     List<Klasse> klassen,
-    List students,
-    List subjects,
-    List leistungsnachweise,
-    List grades,
+    List<dynamic> students,
+    List<dynamic> subjects,
+    List<dynamic> leistungsnachweise,
+    List<dynamic> grades,
   ) async {
     final klasse = klassen.firstWhere((k) => k.id == _selectedKlasseId);
-    final subject = subjects.firstWhere((s) => s.id == _selectedSubjectId);
+    final subject = subjects.cast<Subject>().firstWhere((s) => s.id == _selectedSubjectId);
 
     final pdfBytes = PdfExportService.generateSubjectReport(
       subject: subject,

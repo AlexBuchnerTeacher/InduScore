@@ -182,7 +182,7 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
   }
 
   Widget _buildFilterBar(
-    List subjects,
+    List<Subject> subjects,
     List<String> availableSubjectIds,
     List<LeistungsnachweisTyp> availableTypen,
   ) {
@@ -225,7 +225,7 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
             // Fach-Filter
             ...subjects
                 .where((s) => availableSubjectIds.contains(s.id))
-                .map((subject) {
+                .map<Widget>((subject) {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: RBSFilterChip(

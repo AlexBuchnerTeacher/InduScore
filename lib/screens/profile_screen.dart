@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../providers/app_providers.dart';
+import '../models/app_user.dart';
 import '../widgets/profile/profile_info_section.dart';
 import '../widgets/profile/password_change_dialog.dart';
 import '../widgets/profile/favorites_manager.dart';
@@ -103,7 +104,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
 /// Tab 1 - Profil (Readonly User-Info)
 class _ProfileTab extends StatelessWidget {
-  final dynamic user; // AppUser
+  final AppUser user;
 
   const _ProfileTab({required this.user});
 
@@ -217,7 +218,7 @@ class _SecurityTab extends ConsumerWidget {
 
 /// Tab 3 - Favoriten (Favoriten-Klassen verwalten)
 class _FavoritesTab extends StatelessWidget {
-  final dynamic user; // AppUser
+  final AppUser user;
 
   const _FavoritesTab({required this.user});
 

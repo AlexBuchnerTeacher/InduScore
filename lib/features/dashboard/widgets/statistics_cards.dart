@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
+import '../../../models/student.dart';
 
 /// Statistik-Kachel für Dashboard
 class DashboardStatCard extends StatelessWidget {
@@ -119,7 +120,7 @@ class DashboardStatisticsGrid extends ConsumerWidget {
               icon: Icons.people,
               label: 'Schüler',
               value: studentsAsync.when(
-                data: (data) => '${(data as List).where((s) => s.isAktiv).length}',
+                data: (data) => '${(data as List<dynamic>).cast<Student>().where((s) => s.isAktiv).length}',
                 loading: () => '...',
                 error: (e, s) => '-',
               ),

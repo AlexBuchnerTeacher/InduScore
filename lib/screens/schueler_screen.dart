@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../models/student.dart';
+import '../models/klasse.dart';
 import '../models/beruf.dart';
 import '../providers/app_providers.dart';
 import '../widgets/rbs_drawer.dart';
@@ -307,14 +308,14 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
     else if (_selectedBerufe.isNotEmpty || zeitgruppenFilter.isNotEmpty) {
       return klassenAsync.when(
         data: (klassen) {
-          final validKlassenIds = klassen
-              .where((k) => 
+          final validKlassenIds = (klassen as List<Klasse>)
+              .where((Klasse k) => 
                 (_selectedBerufe.isEmpty || _selectedBerufe.contains(k.beruf)) &&
-                (zeitgruppenFilter.isEmpty || zeitgruppenFilter.contains(k.zeitgruppe)))
-              .map((k) => k.id)
+                (zeitgruppenFilter.isEmpty || zeitgruppenFilter.contains(k.zeitgruppe.index)))
+              .map<String>((Klasse k) => k.id)
               .toSet();
           
-          filtered = filtered.where((s) => validKlassenIds.contains(s.klasseId)).toList();
+          filtered = filtered.where((Student s) => validKlassenIds.contains(s.klasseId)).toList();
 
           return _buildFilteredList(filtered, allStudents);
         },
