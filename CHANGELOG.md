@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **noten_matrix_view.dart Widget Extraction** (Issue #54 F-002) - 91% LOC Reduction ✅
+  - Split monolithic noten_matrix_view.dart into 4 specialized widget files:
+    - `lib/features/noten/widgets/klassen_matrix_widget.dart` (412 LOC) - Schüler × Fächer/LNs Matrix
+    - `lib/features/noten/widgets/schueler_matrix_widget.dart` (301 LOC) - LNs × Note für einzelnen Schüler
+    - `lib/features/noten/widgets/ln_matrix_widget.dart` (359 LOC) - Schüler × Note für einzelnen LN
+    - `lib/features/noten/widgets/matrix_common_widgets.dart` (155 LOC) - Shared widgets and helpers
+  - Reduced noten_matrix_view.dart from 1056→91 LOC (91% reduction)
+  - Main file now simple router widget delegating to specialized widgets
+  - All widgets <450 LOC (well under 800 LOC limit)
+  - Preserved all features: inline editing, optimistic updates, callbacks
+  - RBS Styleguide 1.2 compliance maintained
+  - Backward compatible (same public API)
+
 ## [0.17.0] - 2025-12-29 - Widget Extraction & Code Quality
 
 ### Fixed
