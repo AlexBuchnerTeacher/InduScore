@@ -5,7 +5,14 @@ import '../../core/widgets/rbs_components.dart';
 import 'package:intl/intl.dart';
 
 /// Readonly User-Info Section für Profil-Tab
+/// 
+/// Zeigt alle Benutzerdaten in übersichtlichen Karten an:
+/// - Benutzerdaten (Kürzel, E-Mail, Name, Rolle, Status)
+/// - Account-Informationen (Erstellt am, Letzter Login)
+/// 
+/// Alle Felder sind schreibgeschützt. Bearbeitung über Admin-Settings.
 class ProfileInfoSection extends StatelessWidget {
+  /// Der anzuzeigende Benutzer
   final AppUser user;
 
   const ProfileInfoSection({super.key, required this.user});

@@ -71,7 +71,15 @@ class AuthService {
   }
 
   /// Passwort des aktuell eingeloggten Users ändern
-  /// Benötigt Re-Authentifizierung mit aktuellem Passwort
+  /// 
+  /// Benötigt Re-Authentifizierung mit aktuellem Passwort aus Sicherheitsgründen.
+  /// Wirft Exception wenn:
+  /// - Kein User eingeloggt ist
+  /// - Das aktuelle Passwort falsch ist (wrong-password)
+  /// - Das neue Passwort zu schwach ist (weak-password)
+  /// 
+  /// [currentPassword] Das aktuelle Passwort zur Re-Authentifizierung
+  /// [newPassword] Das neue Passwort (mind. 6 Zeichen)
   Future<void> changePassword(
     String currentPassword,
     String newPassword,

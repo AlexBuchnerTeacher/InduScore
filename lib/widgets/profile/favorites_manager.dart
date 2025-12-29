@@ -5,8 +5,14 @@ import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
 
 /// Favoriten-Klassen Manager für Profil
+/// 
+/// Ermöglicht dem User die Auswahl seiner Favoriten-Klassen.
+/// Diese werden im Dashboard prominent angezeigt.
+/// Änderungen werden direkt in Firestore gespeichert.
 class FavoritesManager extends ConsumerStatefulWidget {
+  /// Die ID des aktuellen Users
   final String userId;
+  /// Die aktuell ausgewählten Favoriten-Klassen IDs
   final List<String> currentFavorites;
 
   const FavoritesManager({

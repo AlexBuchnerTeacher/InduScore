@@ -4,7 +4,15 @@ import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
 
 /// Dialog zum Passwort ändern mit Re-Authentifizierung
+/// 
+/// Fordert den User auf:
+/// 1. Aktuelles Passwort eingeben (zur Re-Authentifizierung)
+/// 2. Neues Passwort eingeben (mind. 6 Zeichen)
+/// 3. Neues Passwort bestätigen
+/// 
+/// Zeigt Erfolg/Fehler über SnackBars an.
 class PasswordChangeDialog extends StatefulWidget {
+  /// Der AuthService für Passwort-Änderung
   final AuthService authService;
 
   const PasswordChangeDialog({super.key, required this.authService});

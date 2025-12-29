@@ -677,6 +677,12 @@ class FirestoreService {
   }
 
   /// Favoriten-Klassen für einen User aktualisieren
+  /// 
+  /// Überschreibt die komplette Liste der Favoriten-Klassen.
+  /// Diese Klassen werden im Dashboard prominent angezeigt.
+  /// 
+  /// [userId] Die ID des AppUsers
+  /// [klassenIds] Liste der Klassen-IDs (kann leer sein)
   Future<void> updateFavoriteKlassen(
     String userId,
     List<String> klassenIds,

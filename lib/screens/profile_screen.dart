@@ -9,7 +9,15 @@ import '../widgets/profile/favorites_manager.dart';
 import 'package:intl/intl.dart';
 
 /// User-Profilscreen für persönliche Einstellungen
-/// Getrennt von Admin Einstellungen - für ALLE User-Rollen verfügbar
+/// 
+/// Getrennt von Admin Einstellungen - für ALLE User-Rollen verfügbar.
+/// 
+/// Enthält 3 Tabs:
+/// - **Profil**: Readonly Benutzerdaten (Kürzel, E-Mail, Name, Rolle, Status)
+/// - **Sicherheit**: Passwort ändern mit Re-Authentifizierung
+/// - **Favoriten**: Klassen-Auswahl für Dashboard
+/// 
+/// Route: /profil
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
