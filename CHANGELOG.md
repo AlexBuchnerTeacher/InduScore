@@ -18,6 +18,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All 203 tests passing ✅
 
 ### Changed
+- **klassen_screen.dart Widget Extraction** (Issue #54 F-001) - 50% LOC Reduction ✅
+  - Extracted 4 reusable widgets from klassen_screen.dart:
+    - `lib/widgets/klassen/klassen_filter_section.dart` (115 LOC) - Zeitgruppen/Beruf/Schuljahr filters
+    - `lib/widgets/klassen/klasse_card.dart` (87 LOC) - Color-coded class cards
+    - `lib/widgets/dialogs/klasse_edit_dialog.dart` (233 LOC) - Create/edit with Klassenname validation
+    - `lib/widgets/dialogs/klasse_delete_dialog.dart` (67 LOC) - Cascade deletion confirmation
+  - Reduced klassen_screen.dart from 608→304 LOC (99% of <300 target)
+  - Removed duplicate _getBerufColor method (appeared 3 times)
+  - All widgets maintain RBS Styleguide 1.2 compliance
+  - Callback pattern preserves Riverpod integration
+
 - **Lint Rules Enhancement** (Issue #54 F-015) - Cherry-picked from PR #59
   - Added 25 strict lint rules to analysis_options.yaml (13→38 rules total)
   - Code quality: `avoid_empty_else`, `avoid_type_to_string`, `only_throw_errors`
