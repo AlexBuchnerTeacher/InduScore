@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2025-12-29 - Widget Extraction & Code Quality
+
 ### Fixed
-- **Dependency Updates** - Cloud Firestore 6.1.1, go_router 17.0.1, file_picker 10.3.8, syncfusion_flutter_pdf 32.1.20
+- **Dependency Updates** - Cloud Firestore 6.1.1, go_router 17.0.1, file_picker 10.3.8, syncfusion_flutter_pdf 32.1.20, google_fonts 6.3.3
   - Fixed sealed `DocumentSnapshot` compile errors (85 errors) - refactored test mocks to use `Fake` pattern
   - Resolved all 25 `avoid_dynamic_calls` warnings with proper type imports and casts
   - Fixed Zeitgruppe enum comparison (.index)
@@ -29,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All widgets maintain RBS Styleguide 1.2 compliance
   - Callback pattern preserves Riverpod integration
 
-- **Lint Rules Enhancement** (Issue #54 F-015) - Cherry-picked from PR #59
+- **Lint Rules Enhancement** (Issue #54 F-015) - Cherry-picked from PR #59 ✅
   - Added 25 strict lint rules to analysis_options.yaml (13→38 rules total)
   - Code quality: `avoid_empty_else`, `avoid_type_to_string`, `only_throw_errors`
   - Async patterns: `unawaited_futures`, `cancel_subscriptions`
