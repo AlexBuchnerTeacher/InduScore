@@ -450,21 +450,23 @@ class RBSSection extends StatelessWidget {
   }
 }
 
-/// SnackBar Type für RBSSnackBar
+/// SnackBar Type for RBSSnackBar
 enum RBSSnackBarType { success, error, info, warning }
 
-/// RBS SnackBar - Zentralisierter SnackBar Helper
-/// Verwendung: Alle User-Feedback Messages (Erfolg, Fehler, Info, Warnung)
-/// 
-/// Eliminiert 56x duplizierte ScaffoldMessenger.showSnackBar Aufrufe
-/// gemäß Issue #51 Finding F05 (Quick Win)
+/// RBS SnackBar - Centralized SnackBar Helper
+///
+/// Usage: All user-feedback messages (success, error, info, warning)
+///
+/// Eliminates 56x duplicated ScaffoldMessenger.showSnackBar calls
+/// as per Issue #51 Finding F05 (Quick Win)
 class RBSSnackBar {
-  /// Zeigt eine SnackBar mit typisiertem Styling
-  /// 
-  /// [context]: BuildContext für ScaffoldMessenger
-  /// [message]: Anzuzeigende Nachricht (deutsch, user-facing)
-  /// [type]: Art der Nachricht (success, error, info, warning)
-  /// [duration]: Anzeigedauer (Standard: 3 Sekunden)
+  /// Shows a SnackBar with typed styling
+  ///
+  /// Parameters:
+  /// - [context]: BuildContext for ScaffoldMessenger
+  /// - [message]: Message to display (German, user-facing)
+  /// - [type]: Type of message (success, error, info, warning)
+  /// - [duration]: Display duration (default: 3 seconds)
   static void show(
     BuildContext context,
     String message, {
@@ -491,7 +493,10 @@ class RBSSnackBar {
             ? SnackBarAction(
                 label: 'OK',
                 textColor: RBSColors.textOnDark,
-                onPressed: () {},
+                onPressed: () {
+                  // Dismiss the SnackBar when OK is pressed
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
               )
             : null,
       ),
