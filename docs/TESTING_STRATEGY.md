@@ -4,7 +4,7 @@
 
 Dieses Dokument definiert die Testing-Standards für InduScore. Ziel ist es, eine hohe Code-Qualität zu gewährleisten und Regressions-Fehler zu minimieren, ohne die Entwicklungsgeschwindigkeit zu sehr einzuschränken.
 
-**Aktuelle Test-Coverage:** 51.71% (Stand v0.13.4)  
+**Aktuelle Test-Coverage:** 51.71% (Stand v0.16.0)  
 **Ziel-Coverage:** 70% (v1.0.0)  
 **Test-Dateien:** 16  
 **Test-LOC:** ~3.000
@@ -167,7 +167,7 @@ flutter pub run build_runner build
 | Test-Datei | LOC | Coverage | Status |
 |------------|-----|----------|--------|
 | `test/models/grade_test.dart` | ~150 | 100% | ✅ |
-| `test/models/student_test.dart` | ~120 | 100% | ⚠️ Fehlt |
+| `test/models/student_test.dart` | 0 | 0% | ❌ Fehlt |
 | `test/models/zeugnisnote_test.dart` | ~200 | 100% | ✅ |
 | `test/models/noten_eingabe_test.dart` | ~180 | 100% | ✅ |
 | `test/models/noten_statistik_test.dart` | ~160 | 100% | ✅ |
