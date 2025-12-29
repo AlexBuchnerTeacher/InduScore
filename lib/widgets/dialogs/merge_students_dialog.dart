@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/constants/rbs_colors.dart';
-import '../../core/constants/rbs_spacing.dart';
-import '../../core/constants/rbs_typography.dart';
+import '../../core/theme/rbs_theme.dart';
 import '../../models/klasse.dart';
 import '../../models/schuljahr.dart';
 import '../../models/student.dart';
