@@ -48,3 +48,4 @@ app.*.map.json
 scripts/firebase-admin-key.json
 **/firebase-admin-key.json
 scripts/node_modules/
+flutter_linux.tar.xz
