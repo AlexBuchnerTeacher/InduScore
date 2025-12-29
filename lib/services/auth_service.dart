@@ -70,6 +70,30 @@ class AuthService {
     }
   }
 
+  /// Passwort des aktuell eingeloggten Users ändern
+  /// Benötigt Re-Authentifizierung mit aktuellem Passwort
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Nicht eingeloggt');
+
+    // Re-Authentifizierung mit aktuellem Passwort
+    final credential = EmailAuthProvider.credential(
+      email: user.email!,
+      password: currentPassword,
+    );
+
+    try {
+      await user.reauthenticateWithCredential(credential);
+      // Neues Passwort setzen
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
   // Handle Firebase Auth exceptions with German messages
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {

@@ -676,6 +676,14 @@ class FirestoreService {
     await _appUsers.doc(userId).delete();
   }
 
+  /// Favoriten-Klassen für einen User aktualisieren
+  Future<void> updateFavoriteKlassen(
+    String userId,
+    List<String> klassenIds,
+  ) async {
+    await _appUsers.doc(userId).update({'favoriteKlassenIds': klassenIds});
+  }
+
   /// Prüft ob ein Kürzel bereits vergeben ist
   Future<bool> isKuerzelTaken(String kuerzel, {String? excludeUserId}) async {
     final snapshot = await _appUsers

@@ -114,6 +114,14 @@ class RBSDrawer extends ConsumerWidget {
                       disabled: true,
                     ),
                     const Divider(),
+                    // Mein Profil (alle User)
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.person_outlined,
+                      title: 'Mein Profil',
+                      route: '/profil',
+                    ),
+                    const Divider(),
                     // Admin-Bereich (nur für Admins)
                     if (canManageUsers) ...[
                       _buildDrawerItem(

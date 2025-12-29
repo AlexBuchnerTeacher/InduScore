@@ -21,6 +21,7 @@ import 'screens/noi_export_screen.dart';
 import 'screens/csv_import_screen.dart';
 import 'screens/user_verwaltung_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/profile_screen.dart';
 import 'screens/test_matrix_screen.dart';
 import 'features/klassen/klassen_detail_screen.dart';
 import 'features/schueler/schueler_detail_screen.dart';
@@ -174,6 +175,11 @@ final _router = GoRouter(
     GoRoute(
       path: '/einstellungen',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    // User-Profil (alle User-Rollen)
+    GoRoute(
+      path: '/profil',
+      builder: (context, state) => const ProfileScreen(),
     ),
     // TEST: Matrix View (Development only)
     GoRoute(

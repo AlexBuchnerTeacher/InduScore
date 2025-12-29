@@ -3,7 +3,7 @@ name: induscore
 description: "InduScore - Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München"
 publish_to: 'none'
 
-version: 0.15.0 # v0.15.0 MVP Vorbereitung: Unit-Tests für Zeugnisnoten, Settings-Screen
+version: 0.16.0+16 # v0.16.0: User-Profilscreen für persönliche Einstellungen
 
 environment:
   sdk: ^3.10.0
@@ -43,6 +43,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

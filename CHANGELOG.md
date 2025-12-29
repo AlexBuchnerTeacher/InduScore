@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased] - v0.15.0 MVP Vorbereitung
+## [Unreleased] - v0.16.0
+
+### Added
+- **User-Profilscreen** (Issue #48) ✅
+  - Getrennt von Admin Einstellungen (für alle User-Rollen)
+  - 3 Tabs: Profil (readonly), Sicherheit, Favoriten
+  - Passwort ändern mit Re-Authentifizierung
+  - Favoriten-Klassen Verwaltung
+  - Navigationseintrag "Mein Profil" im Drawer
+  - RBS-konformes Design
+  - Route: /profil
+
+## [0.15.0] - 2025-12-29 - v0.15.0 MVP Vorbereitung
 
 ### Added
 - **Unit-Tests für Zeugnisnoten-Berechnung** (Issue #11) - ABGESCHLOSSEN ✅
