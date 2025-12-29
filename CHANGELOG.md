@@ -6,20 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased] - v1.0.0 MVP Vorbereitung
+## [Unreleased] - v0.15.0 MVP Vorbereitung
 
 ### Added
-- Unit-Tests für Zeugnisnoten-Berechnung (Issue #11)
-  - Tests für `Zeugnisnote.berechneSchnitt()`
-  - Tests für `Zeugnisnote.rundeNote()` (Rundungsregel < 0.6 / ≥ 0.6)
-  - Tests für `Zeugnisnote.berechneZeugnisnote()`
-- Settings-Screen (Issue #14)
-  - Berufe verwalten (EAT/EBT)
-  - Fächer global pflegbar
-  - Persistenz in Firestore
+- **Unit-Tests für Zeugnisnoten-Berechnung** (Issue #11) - ABGESCHLOSSEN ✅
+  - 24 Tests für `Zeugnisnote.berechneSchnitt()`
+  - Tests für `Zeugnisnote.rundeNote()` (Rundungsregel < 0.6 abrunden, ≥ 0.6 aufrunden)
+  - Tests für `Zeugnisnote.berechneZeugnisnote()` (End-to-End)
+  - Tests für `formatSchnitt()` und `getTendenz()`
+  - Alle 89 Tests bestehen
+- **Settings-Screen** (Issue #14) - ABGESCHLOSSEN ✅
+  - Tab-basierte UI für Berufe (readonly) und Fächer (CRUD)
+  - Fächer-Verwaltung: Erstellen, Bearbeiten, Löschen
+  - Zuordnung von Fächern zu Berufen
+  - Fachtyp, Wochenstunden, Credits konfigurierbar
+  - RBS-konformes Design (Cards, Dialoge, Farben)
+  - Route `/einstellungen` im Navigation-Drawer
+  - Firestore-Persistenz für alle Operationen
 
 ### Changed
-- Version auf 0.15.0 für v1.0.0 MVP Vorbereitung
+- Version auf 0.15.0 für v0.15.0 MVP Vorbereitung
+- Versionsnummern-Notation durchgehend auf v0.15.0 vereinheitlicht (statt v1.0.0)
 
 ### Fixed
 
