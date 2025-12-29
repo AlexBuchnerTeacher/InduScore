@@ -575,8 +575,10 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
     }
   }
 
-  void _showResetPasswordDialog(AppUser user) async {
-    await CommonDialogs.showConfirmationDialog(
+  void _showResetPasswordDialog(AppUser user) {
+    final messenger = ScaffoldMessenger.of(context);
+    
+    CommonDialogs.showConfirmationDialog(
       context: context,
       title: 'Passwort zurücksetzen',
       message: 'Eine E-Mail zum Zurücksetzen des Passworts wird an ${user.email} gesendet.',
@@ -586,13 +588,13 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
         try {
           await authService.sendPasswordResetEmail(user.email);
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            messenger.showSnackBar(
               SnackBar(content: Text('Passwort-Reset Email an ${user.email} gesendet')),
             );
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            messenger.showSnackBar(
               SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red),
             );
           }
@@ -602,6 +604,8 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
   }
 
   void _showDeleteConfirmation(AppUser user) {
+    final messenger = ScaffoldMessenger.of(context);
+    
     CommonDialogs.showDeleteConfirmationDialog(
       context: context,
       title: 'Benutzer löschen?',
@@ -610,7 +614,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
         final firestoreService = ref.read(firestoreServiceProvider);
         await firestoreService.deleteAppUser(user.id);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             SnackBar(content: Text('${user.name} gelöscht')),
           );
         }
