@@ -9,6 +9,8 @@ import '../models/beruf.dart';
 import '../providers/app_providers.dart';
 import '../widgets/rbs_drawer.dart';
 import '../providers/permissions_providers.dart';
+import '../widgets/dialogs/student_edit_dialog.dart';
+import '../widgets/dialogs/student_austritt_dialog.dart';
 
 /// Schülerverwaltung Screen
 /// - Listet alle Schüler mit Filter nach Klasse
@@ -503,167 +505,43 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
   }
 
   void _showStudentDialog({Student? student}) {
-    final isEditing = student != null;
-    final firstNameController = TextEditingController(text: student?.firstName ?? '');
-    final lastNameController = TextEditingController(text: student?.lastName ?? '');
-    DateTime eintrittsDatum = student?.eintrittsDatum ?? DateTime.now();
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(isEditing ? 'Schüler bearbeiten' : 'Neuer Schüler'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: firstNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Vorname',
-                  hintText: 'z.B. Max',
-                ),
-                autofocus: true,
-              ),
-              const SizedBox(height: RBSSpacing.sm),
-              TextField(
-                controller: lastNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nachname',
-                  hintText: 'z.B. Mustermann',
-                ),
-              ),
-              const SizedBox(height: RBSSpacing.md),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: eintrittsDatum,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                    helpText: 'Eintrittsdatum',
-                  );
-                  if (picked != null) {
-                    setDialogState(() => eintrittsDatum = picked);
-                  }
-                },
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Eintrittsdatum',
-                    prefixIcon: Icon(Icons.calendar_today),
-                  ),
-                  child: Text(DateFormat('dd.MM.yyyy').format(eintrittsDatum)),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Abbrechen'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final firstName = firstNameController.text.trim();
-                final lastName = lastNameController.text.trim();
-                if (firstName.isEmpty || lastName.isEmpty) return;
-
-                final firestoreService = ref.read(firestoreServiceProvider);
-
-                try {
-                  if (isEditing) {
-                    await firestoreService.updateStudent(
-                      student.copyWith(
-                        firstName: firstName,
-                        lastName: lastName,
-                        eintrittsDatum: eintrittsDatum,
-                      ),
-                    );
-                  } else {
-                    // Wird später erweitert mit Klassen-Auswahl
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Bitte erweitere den Dialog um Klassenauswahl')),
-                    );
-                    return;
-                  }
-                  if (context.mounted) Navigator.pop(context);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Fehler: $e')),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: RBSColors.dynamicRed,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(isEditing ? 'Speichern' : 'Hinzufügen'),
-            ),
-          ],
+    if (student != null) {
+      // Edit existing student
+      showDialog(
+        context: context,
+        builder: (context) => StudentEditDialog(student: student),
+      );
+    } else {
+      // Creating new students not supported via this dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bitte erweitere den Dialog um Klassenauswahl'),
         ),
-      ),
-    );
+      );
+    }
+  }
+
+  void _showStudentDialog({Student? student}) {
+    if (student != null) {
+      // Edit existing student
+      showDialog(
+        context: context,
+        builder: (context) => StudentEditDialog(student: student),
+      );
+    } else {
+      // Creating new students not supported via this dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bitte erweitere den Dialog um Klassenauswahl'),
+        ),
+      );
+    }
   }
 
   void _showAustrittDialog(Student student) {
-    DateTime austrittsDatum = DateTime.now();
-
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Austritt markieren'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('${student.displayName} als ausgetreten markieren?'),
-              const SizedBox(height: RBSSpacing.md),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: austrittsDatum,
-                    firstDate: student.eintrittsDatum,
-                    lastDate: DateTime(2100),
-                    helpText: 'Austrittsdatum',
-                  );
-                  if (picked != null) {
-                    setDialogState(() => austrittsDatum = picked);
-                  }
-                },
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Austrittsdatum',
-                    prefixIcon: Icon(Icons.calendar_today),
-                  ),
-                  child: Text(DateFormat('dd.MM.yyyy').format(austrittsDatum)),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Abbrechen'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final firestoreService = ref.read(firestoreServiceProvider);
-                await firestoreService.updateStudent(
-                  student.markAsAusgetreten(austrittsDatum),
-                );
-                if (context.mounted) Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Austritt speichern'),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) => StudentAustrittDialog(student: student),
     );
   }
 
