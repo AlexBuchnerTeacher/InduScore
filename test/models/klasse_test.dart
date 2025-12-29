@@ -306,8 +306,8 @@ void main() {
   });
 }
 
-// Mock DocumentSnapshot for testing
-class _MockDocumentSnapshot implements DocumentSnapshot<Map<String, dynamic>> {
+// Fake DocumentSnapshot for testing
+class _FakeDocumentSnapshot implements DocumentSnapshot<Map<String, dynamic>> {
   @override
   final String id;
 

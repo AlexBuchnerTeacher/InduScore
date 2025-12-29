@@ -11,7 +11,6 @@ import '../models/beruf.dart';
 import '../providers/app_providers.dart';
 import '../services/pdf_import_service.dart';
 import '../providers/permissions_providers.dart';
-import '../widgets/dialogs/import_preview_dialog.dart';
 
 class KlassenScreen extends ConsumerStatefulWidget {
   const KlassenScreen({super.key});
