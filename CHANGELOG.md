@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Fixed
+- **Dependency Updates** - Cloud Firestore 6.1.1, go_router 17.0.1, file_picker 10.3.8, syncfusion_flutter_pdf 32.1.20
+  - Fixed sealed `DocumentSnapshot` compile errors (85 errors) - refactored test mocks to use `Fake` pattern
+  - Resolved all 25 `avoid_dynamic_calls` warnings with proper type imports and casts
+  - Fixed Zeitgruppe enum comparison (.index)
+  - Applied 52 lint auto-fixes (prefer_const_constructors)
+  - Removed incompatible dialog files (import_preview_dialog, merge_students_dialog)
+  - All 203 tests passing ✅
+
 ## [0.16.0] - 2025-12-29 - User-Profilscreen
 
 ### Added
