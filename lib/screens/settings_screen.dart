@@ -37,7 +37,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         backgroundColor: RBSColors.dynamicRed,
         foregroundColor: RBSColors.white,
         title: const Text(
-          'Einstellungen',
+          'Admin Einstellungen',
           style: TextStyle(
             fontFamily: 'RobotoCondensed',
             fontWeight: FontWeight.bold,
@@ -266,7 +266,7 @@ class _FaecherTab extends ConsumerWidget {
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: subject.color != null
-                              ? Color(int.parse('0xFF${subject.color}'))
+                              ? Color(int.parse('0xFF${subject.color!.replaceAll('#', '')}'))
                               : RBSColors.courtGreen.withValues(alpha: 0.2),
                           child: Text(
                             subject.shortName ?? subject.name[0],

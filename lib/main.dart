@@ -170,7 +170,7 @@ final _router = GoRouter(
       path: '/einstellungen/benutzer',
       builder: (context, state) => const UserVerwaltungScreen(),
     ),
-    // Einstellungen (Berufe & Fächer)
+    // Admin Einstellungen (nur Admins) - Berufe & Fächer
     GoRoute(
       path: '/einstellungen',
       builder: (context, state) => const SettingsScreen(),
