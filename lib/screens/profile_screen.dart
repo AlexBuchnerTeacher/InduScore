@@ -199,7 +199,7 @@ class _SecurityTab extends ConsumerWidget {
               );
             },
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (error, _) => const SizedBox.shrink(),
           ),
         ],
       ),
