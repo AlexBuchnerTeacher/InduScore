@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased] - v1.0.0 MVP Vorbereitung
+
+### Added
+- Unit-Tests für Zeugnisnoten-Berechnung (Issue #11)
+  - Tests für `Zeugnisnote.berechneSchnitt()`
+  - Tests für `Zeugnisnote.rundeNote()` (Rundungsregel < 0.6 / ≥ 0.6)
+  - Tests für `Zeugnisnote.berechneZeugnisnote()`
+- Settings-Screen (Issue #14)
+  - Berufe verwalten (EAT/EBT)
+  - Fächer global pflegbar
+  - Persistenz in Firestore
+
+### Changed
+- Version auf 0.15.0 für v1.0.0 MVP Vorbereitung
+
+### Fixed
+
+---
+
 ## [0.14.0] - 2025-12-18
 
 ### Added
