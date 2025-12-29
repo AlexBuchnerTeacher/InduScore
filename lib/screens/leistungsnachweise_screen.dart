@@ -443,7 +443,7 @@ class _LeistungsnachweiseScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Klasse auswählen
-                    Text('Klasse *', style: RBSTypography.label),
+                    const Text('Klasse *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     klassenAsync.when(
                       data: (klassen) => DropdownButtonFormField<String>(
@@ -472,7 +472,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.md),
 
                     // Fach auswählen (nur Fächer die zum Beruf der Klasse passen)
-                    Text('Fach *', style: RBSTypography.label),
+                    const Text('Fach *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     subjectsAsync.when(
                       data: (subjects) {
@@ -528,7 +528,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.md),
 
                     // Typ auswählen
-                    Text('Typ *', style: RBSTypography.label),
+                    const Text('Typ *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     DropdownButtonFormField<LeistungsnachweisTyp>(
                       initialValue: selectedTyp,
@@ -559,7 +559,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.md),
 
                     // Gewichtung auswählen
-                    Text('Gewichtung *', style: RBSTypography.label),
+                    const Text('Gewichtung *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     DropdownButtonFormField<double>(
                       initialValue: selectedGewichtung,
@@ -590,7 +590,7 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.md),
 
                     // Datum
-                    Text('Datum *', style: RBSTypography.label),
+                    const Text('Datum *', style: RBSTypography.label),
                     const SizedBox(height: RBSSpacing.xs),
                     InkWell(
                       onTap: () async {
@@ -722,8 +722,8 @@ class _LeistungsnachweiseScreenState
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Leistungsnachweis gelöscht'),
+                    const SnackBar(
+                      content: Text('Leistungsnachweis gelöscht'),
                       backgroundColor: RBSColors.courtGreen,
                     ),
                   );

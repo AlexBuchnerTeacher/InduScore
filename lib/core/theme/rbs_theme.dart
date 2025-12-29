@@ -199,7 +199,7 @@ class RBSTheme {
       useMaterial3: true,
 
       // COLOR SCHEME - Dynamic Red als Primary
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: RBSColors.dynamicRed,
         onPrimary: RBSColors.textOnRed,
         secondary: RBSColors.growingElder,

@@ -60,9 +60,9 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
             children: [
               Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
-              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'Sie haben keine Berechtigung zur Klassenverwaltung.',
                 style: RBSTypography.bodyMedium,
               ),
@@ -538,8 +538,8 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Klasse gelöscht'),
+                    const SnackBar(
+                      content: Text('Klasse gelöscht'),
                       backgroundColor: RBSColors.courtGreen,
                     ),
                   );
@@ -562,7 +562,7 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
   }
 
   Future<void> _handlePdfImport() async {
-    final schuljahr = ref.read(currentSchuljahrProvider);
+    // final schuljahr = ref.read(currentSchuljahrProvider); // TODO: Will be used when dialog is implemented
     try {
       setState(() => _isImporting = true);
       final picked = await FilePicker.platform.pickFiles(

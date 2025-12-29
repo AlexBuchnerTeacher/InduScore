@@ -73,7 +73,7 @@ class ProfileInfoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: RBSSpacing.lg),
-        RBSButton(
+        const RBSButton(
           label: 'Profil bearbeiten',
           onPressed: null, // Disabled
           icon: Icons.edit_outlined,

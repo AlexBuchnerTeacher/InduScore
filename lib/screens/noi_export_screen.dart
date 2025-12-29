@@ -223,10 +223,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.school, color: RBSColors.dynamicRed),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.school, color: RBSColors.dynamicRed),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Klasse', style: RBSTypography.label),
                   ],
                 ),
@@ -264,10 +264,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.file_present, color: RBSColors.growingElder),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.file_present, color: RBSColors.growingElder),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Format', style: RBSTypography.label),
                   ],
                 ),
@@ -311,10 +311,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.school, color: RBSColors.dynamicRed),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.school, color: RBSColors.dynamicRed),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Klasse', style: RBSTypography.label),
                   ],
                 ),
@@ -355,10 +355,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.person, color: RBSColors.courtGreen),
-                    const SizedBox(width: RBSSpacing.sm),
+                    Icon(Icons.person, color: RBSColors.courtGreen),
+                    SizedBox(width: RBSSpacing.sm),
                     Text('Schüler', style: RBSTypography.label),
                   ],
                 ),
@@ -411,10 +411,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      const Row(
                         children: [
-                          const Icon(Icons.school, color: RBSColors.dynamicRed),
-                          const SizedBox(width: RBSSpacing.sm),
+                          Icon(Icons.school, color: RBSColors.dynamicRed),
+                          SizedBox(width: RBSSpacing.sm),
                           Text('Klasse', style: RBSTypography.label),
                         ],
                       ),
@@ -452,10 +452,10 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      const Row(
                         children: [
-                          const Icon(Icons.book, color: RBSColors.growingElder),
-                          const SizedBox(width: RBSSpacing.sm),
+                          Icon(Icons.book, color: RBSColors.growingElder),
+                          SizedBox(width: RBSSpacing.sm),
                           Text('Fach', style: RBSTypography.label),
                         ],
                       ),

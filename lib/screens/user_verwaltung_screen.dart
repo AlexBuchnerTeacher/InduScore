@@ -369,7 +369,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
                     helperText: isEdit 
                         ? '⚠️ Email-Änderung erfordert Login-Update!' 
                         : null,
-                    helperStyle: TextStyle(color: RBSColors.dynamicRed),
+                    helperStyle: const TextStyle(color: RBSColors.dynamicRed),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
@@ -407,7 +407,7 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
                 const SizedBox(height: RBSSpacing.md),
                 
                 // Rolle
-                Text('Rolle *', style: RBSTypography.label),
+                const Text('Rolle *', style: RBSTypography.label),
                 const SizedBox(height: RBSSpacing.xs),
                 Wrap(
                   spacing: 8,
@@ -438,14 +438,14 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
                 
                 // Favoriten-Klassen (nur für Lehrer/Ausbilder)
                 if (selectedRole == UserRole.lehrer || selectedRole == UserRole.ausbilder) ...[
-                  Text('Favoriten-Klassen (optional)', style: RBSTypography.label),
+                  const Text('Favoriten-Klassen (optional)', style: RBSTypography.label),
                   const SizedBox(height: RBSSpacing.xs),
                   Consumer(builder: (context, ref, _) {
                     final klassenAsync = ref.watch(klassenProvider);
                     return klassenAsync.when(
                       data: (klassen) {
                         if (klassen.isEmpty) {
-                          return Text('Keine Klassen vorhanden', 
+                          return const Text('Keine Klassen vorhanden', 
                                      style: RBSTypography.bodySmall);
                         }
                         return Wrap(

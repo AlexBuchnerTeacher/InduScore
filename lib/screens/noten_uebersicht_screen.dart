@@ -67,7 +67,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         title: Text(_getTitle()),
         actions: [
           IconButton(
-            icon: Icon(Icons.home, color: RBSColors.dynamicRed),
+            icon: const Icon(Icons.home, color: RBSColors.dynamicRed),
             onPressed: () => context.go('/'),
             tooltip: 'Zum Dashboard',
           ),

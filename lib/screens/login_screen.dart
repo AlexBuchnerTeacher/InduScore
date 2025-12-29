@@ -98,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Geben Sie Ihre E-Mail-Adresse oder Ihr Lehrerkürzel ein. Sie erhalten einen Link zum Zurücksetzen Ihres Passworts.',
                 style: RBSTypography.bodyMedium,
               ),
@@ -143,8 +143,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   if (context.mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
+                      const SnackBar(
+                        content: Text(
                           'Passwort-Reset-Link wurde gesendet. Bitte prüfen Sie Ihre E-Mails.',
                         ),
                         backgroundColor: RBSColors.courtGreen,
@@ -325,7 +325,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
 
           // TAG: #induscore (rechts oben)
-          Positioned(
+          const Positioned(
             top: RBSSpacing.lg,
             right: RBSSpacing.lg,
             child: RBSTag(label: '#induscore', color: RBSColors.white),

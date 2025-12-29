@@ -79,12 +79,12 @@ class _BerufeTab extends ConsumerWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(RBSBorderRadius.medium),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(RBSSpacing.md),
+            child: const Padding(
+              padding: EdgeInsets.all(RBSSpacing.md),
               child: Row(
                 children: [
                   Icon(Icons.info_outline, color: RBSColors.dynamicRed),
-                  const SizedBox(width: RBSSpacing.sm),
+                  SizedBox(width: RBSSpacing.sm),
                   Expanded(
                     child: Text(
                       'Berufe sind aktuell fest im System hinterlegt. '
@@ -103,7 +103,7 @@ class _BerufeTab extends ConsumerWidget {
           const SizedBox(height: RBSSpacing.lg),
 
           // Berufe Liste
-          Text(
+          const Text(
             'Verfügbare Berufe',
             style: TextStyle(
               fontFamily: 'RobotoCondensed',
@@ -132,7 +132,7 @@ class _BerufeTab extends ConsumerWidget {
                       ),
                       child: Text(
                         beruf.code,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'RobotoCondensed',
                           fontWeight: FontWeight.bold,
                           color: RBSColors.dynamicRed,
@@ -182,7 +182,7 @@ class _FaecherTab extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Globale Fächerliste',
                 style: TextStyle(
                   fontFamily: 'RobotoCondensed',
@@ -270,7 +270,7 @@ class _FaecherTab extends ConsumerWidget {
                               : RBSColors.courtGreen.withValues(alpha: 0.2),
                           child: Text(
                             subject.shortName ?? subject.name[0],
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontFamily: 'RobotoCondensed',
                               fontWeight: FontWeight.bold,
                               color: RBSColors.textOnLight,
@@ -572,8 +572,8 @@ class _FachDialogState extends State<_FachDialog> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Fachname darf nicht leer sein'),
+        const SnackBar(
+          content: Text('Fachname darf nicht leer sein'),
           backgroundColor: RBSColors.error,
         ),
       );

@@ -39,7 +39,7 @@ class FaecherMatrixWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Berechne Spaltenbreite
-    final fachSpaltenBreite = 85.0;
+    const fachSpaltenBreite = 85.0;
     final tableWidth =
         180.0 + (sortedSubjectIds.length * fachSpaltenBreite) + 80;
 

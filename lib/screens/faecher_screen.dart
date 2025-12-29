@@ -62,9 +62,9 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
             children: [
               Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
-              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              Text('Sie haben keine Berechtigung zur Fächerverwaltung.',
+              const Text('Sie haben keine Berechtigung zur Fächerverwaltung.',
                    style: RBSTypography.bodyMedium),
             ],
           ),

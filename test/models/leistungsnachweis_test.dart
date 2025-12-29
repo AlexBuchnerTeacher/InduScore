@@ -337,6 +337,7 @@ void main() {
 }
 
 // Fake DocumentSnapshot for testing
+// ignore: subtype_of_sealed_class
 class _FakeDocumentSnapshot extends Fake implements DocumentSnapshot<Map<String, dynamic>> {
   @override
   final String id;

@@ -70,9 +70,9 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             children: [
               Icon(Icons.lock, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
-              Text('Zugriff verweigert', style: RBSTypography.h3),
+              const Text('Zugriff verweigert', style: RBSTypography.h3),
               const SizedBox(height: 8),
-              Text('Sie haben keine Berechtigung zur Schülerverwaltung.',
+              const Text('Sie haben keine Berechtigung zur Schülerverwaltung.',
                    style: RBSTypography.bodyMedium),
             ],
           ),
@@ -246,7 +246,7 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                     );
                   },
                   loading: () => const SizedBox.shrink(),
-                  error: (e, _) => Text('Fehler: $e', style: TextStyle(color: RBSColors.error)),
+                  error: (e, _) => Text('Fehler: $e', style: const TextStyle(color: RBSColors.error)),
                 ),
                 const SizedBox(height: RBSSpacing.sm),
 
