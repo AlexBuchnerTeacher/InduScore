@@ -10,16 +10,17 @@ import '../models/schueler_unterricht.dart';
 
 /// Ergebnis eines Schüler-Merge-Vorgangs
 class MergeResult {
-  final List<Student> matched;   // Existierende Schüler die gematcht wurden
-  final List<Student> added;     // Neue Schüler die hinzugefügt wurden
-  final List<Student> unmatched; // Existierende Schüler ohne Match (evtl. ausgetreten)
+  final List<Student> matched; // Existierende Schüler die gematcht wurden
+  final List<Student> added; // Neue Schüler die hinzugefügt wurden
+  final List<Student>
+  unmatched; // Existierende Schüler ohne Match (evtl. ausgetreten)
 
   MergeResult({
     required this.matched,
     required this.added,
     required this.unmatched,
   });
-  
+
   bool get hasUnmatched => unmatched.isNotEmpty;
   bool get hasAdded => added.isNotEmpty;
 }
@@ -77,16 +78,15 @@ class FirestoreService {
 
   /// Schüler nach Klasse abrufen (alphabetisch sortiert)
   Stream<List<Student>> getStudentsByKlasse(String klasseId) {
-    return _students
-        .where('klasseId', isEqualTo: klasseId)
-        .snapshots()
-        .map((snapshot) {
-          final students = snapshot.docs
-              .map((doc) => Student.fromFirestore(doc))
-              .toList();
-          students.sort((a, b) => a.sortKey.compareTo(b.sortKey));
-          return students;
-        });
+    return _students.where('klasseId', isEqualTo: klasseId).snapshots().map((
+      snapshot,
+    ) {
+      final students = snapshot.docs
+          .map((doc) => Student.fromFirestore(doc))
+          .toList();
+      students.sort((a, b) => a.sortKey.compareTo(b.sortKey));
+      return students;
+    });
   }
 
   // ============ SUBJECTS ============
@@ -154,16 +154,15 @@ class FirestoreService {
 
   /// Alle Noten eines Schülers abrufen
   Stream<List<Grade>> getGradesByStudent(String studentId) {
-    return _grades
-        .where('studentId', isEqualTo: studentId)
-        .snapshots()
-        .map((snapshot) {
-          final grades = snapshot.docs
-              .map((doc) => Grade.fromFirestore(doc))
-              .toList();
-          grades.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          return grades;
-        });
+    return _grades.where('studentId', isEqualTo: studentId).snapshots().map((
+      snapshot,
+    ) {
+      final grades = snapshot.docs
+          .map((doc) => Grade.fromFirestore(doc))
+          .toList();
+      grades.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return grades;
+    });
   }
 
   Future<Grade> getGrade(String id) async {
@@ -180,7 +179,7 @@ class FirestoreService {
   /// Mehrere Noten auf einmal speichern (Batch-Operation)
   Future<void> saveGrades(List<Grade> grades) async {
     if (grades.isEmpty) return;
-    
+
     final batch = _db.batch();
     for (final grade in grades) {
       if (grade.id.isEmpty) {
@@ -204,7 +203,9 @@ class FirestoreService {
   }
 
   /// Alle Noten eines Leistungsnachweises löschen
-  Future<void> deleteGradesByLeistungsnachweis(String leistungsnachweisId) async {
+  Future<void> deleteGradesByLeistungsnachweis(
+    String leistungsnachweisId,
+  ) async {
     final snapshot = await _grades
         .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
         .get();
@@ -358,7 +359,7 @@ class FirestoreService {
         .where('schuljahr', isEqualTo: schuljahr)
         .limit(1)
         .get();
-    
+
     if (snapshot.docs.isEmpty) return null;
     return Klasse.fromFirestore(snapshot.docs.first);
   }
@@ -395,12 +396,7 @@ class FirestoreService {
       final studentId = student.id.isEmpty ? _students.doc().id : student.id;
       batch.set(
         _students.doc(studentId),
-        student
-            .copyWith(
-              id: studentId,
-              klasseId: klasseId,
-            )
-            .toFirestore(),
+        student.copyWith(id: studentId, klasseId: klasseId).toFirestore(),
       );
     }
 
@@ -424,12 +420,13 @@ class FirestoreService {
 
     // Set für schnelles Lookup
     final matchedExistingIds = <String>{};
-    
+
     final batch = _db.batch();
 
     for (final neuer in neueSchueler) {
-      final neuerKey = '${neuer.firstName.toLowerCase()} ${neuer.lastName.toLowerCase()}';
-      
+      final neuerKey =
+          '${neuer.firstName.toLowerCase()} ${neuer.lastName.toLowerCase()}';
+
       // 1. Manuelles Matching prüfen
       if (manuellesMatching.containsKey(neuerKey)) {
         final existingId = manuellesMatching[neuerKey]!;
@@ -437,17 +434,22 @@ class FirestoreService {
         matched.add(neuer);
         continue;
       }
-      
+
       // 2. Automatisches Matching nach Name
       final existing = existierendeSchueler.firstWhere(
-        (e) => e.firstName.toLowerCase() == neuer.firstName.toLowerCase() &&
-               e.lastName.toLowerCase() == neuer.lastName.toLowerCase(),
+        (e) =>
+            e.firstName.toLowerCase() == neuer.firstName.toLowerCase() &&
+            e.lastName.toLowerCase() == neuer.lastName.toLowerCase(),
         orElse: () => Student(
-          id: '', firstName: '', lastName: '', klasseId: '', 
-          eintrittsDatum: DateTime.now(), createdAt: DateTime.now(),
+          id: '',
+          firstName: '',
+          lastName: '',
+          klasseId: '',
+          eintrittsDatum: DateTime.now(),
+          createdAt: DateTime.now(),
         ),
       );
-      
+
       if (existing.id.isNotEmpty) {
         matchedExistingIds.add(existing.id);
         matched.add(neuer);
@@ -471,16 +473,12 @@ class FirestoreService {
 
     await batch.commit();
 
-    return MergeResult(
-      matched: matched,
-      added: added,
-      unmatched: unmatched,
-    );
+    return MergeResult(matched: matched, added: added, unmatched: unmatched);
   }
 
   /// Markiert mehrere Schüler als ausgetreten
   Future<void> markStudentsAsAusgetreten(
-    List<String> studentIds, 
+    List<String> studentIds,
     DateTime austrittsDatum,
   ) async {
     final batch = _db.batch();
@@ -504,7 +502,9 @@ class FirestoreService {
   }
 
   /// Berechnet den gewichteten Durchschnitt für Noten mit Gewichtungen
-  double calculateWeightedAverage(List<({Grade grade, double gewichtung})> gradesWithWeight) {
+  double calculateWeightedAverage(
+    List<({Grade grade, double gewichtung})> gradesWithWeight,
+  ) {
     if (gradesWithWeight.isEmpty) return 0.0;
 
     double totalWeighted = 0.0;
@@ -531,7 +531,10 @@ class FirestoreService {
   }
 
   /// Prüft ob ein Schüler von einem LN befreit ist
-  Future<bool> isStudentExempt(String studentId, String leistungsnachweisId) async {
+  Future<bool> isStudentExempt(
+    String studentId,
+    String leistungsnachweisId,
+  ) async {
     final snapshot = await _lnExemptions
         .where('studentId', isEqualTo: studentId)
         .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
@@ -551,7 +554,7 @@ class FirestoreService {
         .where('studentId', isEqualTo: studentId)
         .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
         .get();
-    
+
     if (existing.docs.isNotEmpty) {
       return existing.docs.first.id; // Bereits vorhanden
     }
@@ -567,12 +570,15 @@ class FirestoreService {
   }
 
   /// Befreiung aufheben
-  Future<void> deleteLnExemption(String studentId, String leistungsnachweisId) async {
+  Future<void> deleteLnExemption(
+    String studentId,
+    String leistungsnachweisId,
+  ) async {
     final snapshot = await _lnExemptions
         .where('studentId', isEqualTo: studentId)
         .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
         .get();
-    
+
     for (final doc in snapshot.docs) {
       await doc.reference.delete();
     }
@@ -583,8 +589,11 @@ class FirestoreService {
     return _lnExemptions
         .where('leistungsnachweisId', isEqualTo: leistungsnachweisId)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => LnExemption.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => LnExemption.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   // ============ APP USERS ============
@@ -596,8 +605,10 @@ class FirestoreService {
     return _appUsers
         .orderBy('name')
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => AppUser.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => AppUser.fromFirestore(doc)).toList(),
+        );
   }
 
   /// Einzelnen Benutzer nach ID abrufen
@@ -614,6 +625,18 @@ class FirestoreService {
         .limit(1)
         .get();
     if (snapshot.docs.isEmpty) return null;
+    return AppUser.fromFirestore(snapshot.docs.first);
+  }
+
+  /// Benutzer nach Kürzel suchen (für Login-Unterstützung)
+  Future<AppUser> getAppUserByKuerzel(String kuerzel) async {
+    final snapshot = await _appUsers
+        .where('kuerzel', isEqualTo: kuerzel.toUpperCase())
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) {
+      throw Exception('Kein Benutzer mit Kürzel "$kuerzel" gefunden');
+    }
     return AppUser.fromFirestore(snapshot.docs.first);
   }
 
@@ -635,23 +658,17 @@ class FirestoreService {
 
   /// Letzten Login aktualisieren
   Future<void> updateLastLogin(String userId) async {
-    await _appUsers.doc(userId).update({
-      'lastLoginAt': Timestamp.now(),
-    });
+    await _appUsers.doc(userId).update({'lastLoginAt': Timestamp.now()});
   }
 
   /// Benutzer deaktivieren
   Future<void> deactivateAppUser(String userId) async {
-    await _appUsers.doc(userId).update({
-      'status': UserStatus.deaktiviert.name,
-    });
+    await _appUsers.doc(userId).update({'status': UserStatus.deaktiviert.name});
   }
 
   /// Benutzer aktivieren
   Future<void> activateAppUser(String userId) async {
-    await _appUsers.doc(userId).update({
-      'status': UserStatus.aktiv.name,
-    });
+    await _appUsers.doc(userId).update({'status': UserStatus.aktiv.name});
   }
 
   /// Benutzer löschen
@@ -664,7 +681,7 @@ class FirestoreService {
     final snapshot = await _appUsers
         .where('kuerzel', isEqualTo: kuerzel.toUpperCase())
         .get();
-    
+
     if (excludeUserId != null) {
       return snapshot.docs.any((doc) => doc.id != excludeUserId);
     }
@@ -673,15 +690,16 @@ class FirestoreService {
 
   // ============ SCHUELER-UNTERRICHT (Beziehungen) ============
 
-  CollectionReference get _schuelerUnterricht => _db.collection('schueler_unterricht');
+  CollectionReference get _schuelerUnterricht =>
+      _db.collection('schueler_unterricht');
 
   /// Alle Unterrichts-Beziehungen abrufen
   Stream<List<SchuelerUnterricht>> getSchuelerUnterricht() {
-    return _schuelerUnterricht
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => SchuelerUnterricht.fromFirestore(doc))
-            .toList());
+    return _schuelerUnterricht.snapshots().map(
+      (snapshot) => snapshot.docs
+          .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+          .toList(),
+    );
   }
 
   /// Unterricht nach Schüler
@@ -689,9 +707,11 @@ class FirestoreService {
     return _schuelerUnterricht
         .where('studentId', isEqualTo: studentId)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => SchuelerUnterricht.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   /// Unterricht nach Lehrer
@@ -699,9 +719,11 @@ class FirestoreService {
     return _schuelerUnterricht
         .where('lehrerId', isEqualTo: lehrerId)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => SchuelerUnterricht.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   /// Neue Unterrichts-Beziehung erstellen
@@ -756,7 +778,9 @@ class FirestoreService {
   /// Alle Unterrichts-Beziehungen einmalig abrufen
   Future<List<SchuelerUnterricht>> getSchuelerUnterrichtOnce() async {
     final snapshot = await _schuelerUnterricht.get();
-    return snapshot.docs.map((doc) => SchuelerUnterricht.fromFirestore(doc)).toList();
+    return snapshot.docs
+        .map((doc) => SchuelerUnterricht.fromFirestore(doc))
+        .toList();
   }
 
   /// Schüler nach ASV-ID suchen

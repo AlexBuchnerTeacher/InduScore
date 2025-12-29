@@ -45,12 +45,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
+      final firestoreService = ref.read(firestoreServiceProvider);
       final input = _emailController.text.trim();
 
-      // Wenn Kürzel (2-4 Buchstaben ohne @), konvertiere zu Email
-      final email = input.contains('@')
-          ? input
-          : '${input.toUpperCase()}@induscore.de';
+      String email;
+
+      // Wenn Email-Format (enthält @), direkt verwenden
+      if (input.contains('@')) {
+        email = input;
+      } else {
+        // Kürzel eingegeben → In Firestore nach User mit diesem Kürzel suchen
+        final kuerzel = input.toUpperCase();
+        try {
+          final appUser = await firestoreService.getAppUserByKuerzel(kuerzel);
+          email = appUser.email;
+        } catch (e) {
+          // Fallback: Versuche alte @induscore.de Konvention
+          email = '$kuerzel@induscore.de';
+        }
+      }
 
       await authService.signInWithEmailPassword(
         email: email,
@@ -156,8 +169,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
-
-
 
   Future<void> _showRegisterDialog() async {
     final emailController = TextEditingController();
