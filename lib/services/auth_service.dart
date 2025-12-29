@@ -1,7 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Custom AuthException class
+class AuthException implements Exception {
+  final String message;
+  final String code;
+
+  AuthException(this.message, this.code);
+
+  @override
+  String toString() => message;
+}
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Get current user
   User? get currentUser => _auth.currentUser;
@@ -9,11 +22,9 @@ class AuthService {
   // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Sign in with email & password
-  Future<UserCredential> signInWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
+  // Sign in with email and password
+  Future<UserCredential> signInWithEmailAndPassword(
+      String email, String password) async {
     try {
       return await _auth.signInWithEmailAndPassword(
         email: email,
@@ -24,28 +35,9 @@ class AuthService {
     }
   }
 
-  // Register with email & password
-  Future<UserCredential> registerWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      return await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    }
-  }
-
-  /// Erstellt einen neuen User (für Admin-Zwecke)
-  /// HINWEIS: Dies loggt den Admin aus und den neuen User ein!
-  /// Für echte Admin-User-Erstellung braucht man Firebase Admin SDK
-  Future<UserCredential> createUserWithEmailAndPassword(
-    String email,
-    String password,
-  ) async {
+  // Register with email and password
+  Future<UserCredential> registerWithEmailAndPassword(
+      String email, String password) async {
     try {
       return await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -61,8 +53,8 @@ class AuthService {
     await _auth.signOut();
   }
 
-  // Password reset
-  Future<void> sendPasswordResetEmail(String email) async {
+  // Reset password
+  Future<void> resetPassword(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
@@ -70,59 +62,91 @@ class AuthService {
     }
   }
 
-  /// Passwort des aktuell eingeloggten Users ändern
-  /// 
-  /// Benötigt Re-Authentifizierung mit aktuellem Passwort aus Sicherheitsgründen.
-  /// Wirft Exception wenn:
-  /// - Kein User eingeloggt ist
-  /// - Das aktuelle Passwort falsch ist (wrong-password)
-  /// - Das neue Passwort zu schwach ist (weak-password)
-  /// 
-  /// [currentPassword] Das aktuelle Passwort zur Re-Authentifizierung
-  /// [newPassword] Das neue Passwort (mind. 6 Zeichen)
-  Future<void> changePassword(
-    String currentPassword,
-    String newPassword,
-  ) async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception('Nicht eingeloggt');
-
-    // Re-Authentifizierung mit aktuellem Passwort
-    final credential = EmailAuthProvider.credential(
-      email: user.email!,
-      password: currentPassword,
-    );
-
+  // Change password
+  Future<void> changePassword(String currentPassword, String newPassword) async {
     try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw AuthException('Kein Benutzer angemeldet', 'no-user');
+      }
+
+      // Re-authenticate user
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
       await user.reauthenticateWithCredential(credential);
-      // Neues Passwort setzen
+
+      // Update password
       await user.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  // Handle Firebase Auth exceptions with German messages
-  String _handleAuthException(FirebaseAuthException e) {
+  // Update user email
+  Future<void> updateEmail(String newEmail, String password) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw AuthException('Kein Benutzer angemeldet', 'no-user');
+      }
+
+      // Re-authenticate user
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      // Update email
+      await user.updateEmail(newEmail);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  // Handle auth exceptions
+  AuthException _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return 'Kein Benutzer mit dieser E-Mail gefunden.';
+        return AuthException('Kein Benutzer mit dieser E-Mail gefunden.', e.code);
       case 'wrong-password':
-        return 'Falsches Passwort.';
+        return AuthException('Falsches Passwort.', e.code);
       case 'email-already-in-use':
-        return 'Diese E-Mail wird bereits verwendet.';
+        return AuthException('Diese E-Mail wird bereits verwendet.', e.code);
       case 'weak-password':
-        return 'Das Passwort ist zu schwach.';
+        return AuthException('Das Passwort ist zu schwach.', e.code);
       case 'invalid-email':
-        return 'Ungültige E-Mail-Adresse.';
+        return AuthException('Ungültige E-Mail-Adresse.', e.code);
       case 'user-disabled':
-        return 'Dieser Benutzer wurde deaktiviert.';
+        return AuthException('Dieser Benutzer wurde deaktiviert.', e.code);
       case 'too-many-requests':
-        return 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.';
+        return AuthException('Zu viele Anfragen. Bitte versuchen Sie es später erneut.', e.code);
       case 'operation-not-allowed':
-        return 'Diese Operation ist nicht erlaubt.';
+        return AuthException('Diese Operation ist nicht erlaubt.', e.code);
+      case 'requires-recent-login':
+        return AuthException('Bitte melden Sie sich erneut an, um fortzufahren.', e.code);
       default:
-        return 'Authentifizierungsfehler: ${e.message}';
+        return AuthException('Ein Fehler ist aufgetreten: ${e.message}', e.code);
     }
+  }
+
+  // Get user role from Firestore
+  Future<String?> getUserRole(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      return doc.data()?['role'] as String?;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Check if user is admin
+  Future<bool> isAdmin() async {
+    final user = currentUser;
+    if (user == null) return false;
+    final role = await getUserRole(user.uid);
+    return role == 'admin';
   }
 }

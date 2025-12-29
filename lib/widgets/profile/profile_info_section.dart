@@ -1,125 +1,109 @@
 import 'package:flutter/material.dart';
-import '../../models/app_user.dart';
-import '../../core/theme/rbs_theme.dart';
-import '../../core/widgets/rbs_components.dart';
-import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-/// Readonly User-Info Section für Profil-Tab
-/// 
-/// Zeigt alle Benutzerdaten in übersichtlichen Karten an:
-/// - Benutzerdaten (Kürzel, E-Mail, Name, Rolle, Status)
-/// - Account-Informationen (Erstellt am, Letzter Login)
-/// 
-/// Alle Felder sind schreibgeschützt. Bearbeitung über Admin-Settings.
 class ProfileInfoSection extends StatelessWidget {
-  /// Der anzuzeigende Benutzer
-  final AppUser user;
+  final User user;
 
-  const ProfileInfoSection({super.key, required this.user});
+  const ProfileInfoSection({
+    required this.user,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('dd.MM.yyyy HH:mm');
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RBSCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const RBSHeadline(
-                text: 'Benutzerdaten',
-                level: RBSHeadlineLevel.h3,
+    return Card(
+      margin: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Profil Informationen',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: RBSSpacing.md),
-              _buildInfoRow('Kürzel', user.kuerzel),
-              const Divider(height: RBSSpacing.lg),
-              _buildInfoRow('E-Mail', user.email),
-              const Divider(height: RBSSpacing.lg),
-              _buildInfoRow('Name', user.name),
-              const Divider(height: RBSSpacing.lg),
-              _buildInfoRow('Rolle', user.rolle.label),
-              const Divider(height: RBSSpacing.lg),
-              _buildInfoRow(
-                'Status',
-                user.status.label,
-                valueColor: user.status == UserStatus.aktiv
-                    ? RBSColors.success
-                    : RBSColors.error,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(
+              icon: Icons.person,
+              label: 'Name',
+              value: user.displayName ?? 'Nicht angegeben',
+            ),
+            const Divider(),
+            _buildInfoRow(
+              icon: Icons.email,
+              label: 'E-Mail',
+              value: user.email ?? 'Nicht angegeben',
+            ),
+            const Divider(),
+            _buildInfoRow(
+              icon: Icons.verified_user,
+              label: 'E-Mail verifiziert',
+              value: user.emailVerified ? 'Ja' : 'Nein',
+            ),
+            const Divider(),
+            _buildInfoRow(
+              icon: Icons.calendar_today,
+              label: 'Erstellt am',
+              value: user.metadata.creationTime != null
+                  ? _formatDate(user.metadata.creationTime!)
+                  : 'Unbekannt',
+            ),
+            const Divider(),
+            _buildInfoRow(
+              icon: Icons.login,
+              label: 'Letzte Anmeldung',
+              value: user.metadata.lastSignInTime != null
+                  ? _formatDate(user.metadata.lastSignInTime!)
+                  : 'Unbekannt',
+            ),
+          ],
         ),
-        const SizedBox(height: RBSSpacing.md),
-        RBSCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const RBSHeadline(
-                text: 'Account-Informationen',
-                level: RBSHeadlineLevel.h3,
-              ),
-              const SizedBox(height: RBSSpacing.md),
-              _buildInfoRow('Erstellt am', dateFormat.format(user.createdAt)),
-              if (user.lastLoginAt != null) ...[
-                const Divider(height: RBSSpacing.lg),
-                _buildInfoRow(
-                  'Letzter Login',
-                  dateFormat.format(user.lastLoginAt!),
-                ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: RBSSpacing.lg),
-        const RBSButton(
-          label: 'Profil bearbeiten',
-          onPressed: null, // Disabled
-          icon: Icons.edit_outlined,
-        ),
-        const SizedBox(height: RBSSpacing.sm),
-        const Text(
-          'Profil-Bearbeitung demnächst verfügbar',
-          style: TextStyle(
-            fontFamily: 'OpenSans',
-            fontSize: 13,
-            color: Colors.grey,
-            fontStyle: FontStyle.italic,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'OpenSans',
-            fontSize: 14,
-            color: Colors.grey,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(width: RBSSpacing.md),
-        Flexible(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontFamily: 'OpenSans',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: valueColor ?? RBSColors.textOnLight,
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 24, color: Colors.grey[600]),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            textAlign: TextAlign.end,
           ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}.${date.month}.${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
-import '../../core/theme/rbs_theme.dart';
-import '../../core/widgets/rbs_components.dart';
 
-/// Dialog zum Passwort ändern mit Re-Authentifizierung
-/// 
-/// Fordert den User auf:
-/// 1. Aktuelles Passwort eingeben (zur Re-Authentifizierung)
-/// 2. Neues Passwort eingeben (mind. 6 Zeichen)
-/// 3. Neues Passwort bestätigen
-/// 
-/// Zeigt Erfolg/Fehler über SnackBars an.
 class PasswordChangeDialog extends StatefulWidget {
-  /// Der AuthService für Passwort-Änderung
   final AuthService authService;
 
-  const PasswordChangeDialog({super.key, required this.authService});
+  const PasswordChangeDialog({
+    required this.authService,
+    super.key,
+  });
 
   @override
   State<PasswordChangeDialog> createState() => _PasswordChangeDialogState();
@@ -27,6 +19,9 @@ class _PasswordChangeDialogState extends State<PasswordChangeDialog> {
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscureCurrentPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -39,7 +34,9 @@ class _PasswordChangeDialogState extends State<PasswordChangeDialog> {
   Future<void> _changePassword() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       await widget.authService.changePassword(
@@ -47,100 +44,129 @@ class _PasswordChangeDialogState extends State<PasswordChangeDialog> {
         _newPasswordController.text,
       );
 
-      if (!mounted) return;
-
-      // Erfolg - Dialog schließen und SnackBar zeigen
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Passwort erfolgreich geändert'),
-          backgroundColor: RBSColors.success,
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Passwort erfolgreich geändert'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
-
-      if (!mounted) return;
-
-      // Fehler anzeigen
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: RBSColors.error),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RBSBorderRadius.medium),
-      ),
-      title: const Row(
-        children: [
-          Icon(Icons.lock_outline, color: RBSColors.dynamicRed),
-          SizedBox(width: RBSSpacing.sm),
-          Text(
-            'Passwort ändern',
-            style: TextStyle(
-              fontFamily: 'RobotoCondensed',
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+      title: const Text('Passwort ändern'),
       content: Form(
         key: _formKey,
-        child: SizedBox(
-          width: 400,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RBSInput(
-                label: 'Aktuelles Passwort',
-                controller: _currentPasswordController,
-                obscureText: true,
-                prefixIcon: Icons.lock,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bitte aktuelles Passwort eingeben';
-                  }
-                  return null;
-                },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _currentPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Aktuelles Passwort',
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureCurrentPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureCurrentPassword = !_obscureCurrentPassword;
+                    });
+                  },
+                ),
               ),
-              const SizedBox(height: RBSSpacing.md),
-              RBSInput(
-                label: 'Neues Passwort',
-                controller: _newPasswordController,
-                obscureText: true,
-                prefixIcon: Icons.lock_open,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bitte neues Passwort eingeben';
-                  }
-                  if (value.length < 6) {
-                    return 'Passwort muss mindestens 6 Zeichen lang sein';
-                  }
-                  return null;
-                },
+              obscureText: _obscureCurrentPassword,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Bitte geben Sie Ihr aktuelles Passwort ein';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _newPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Neues Passwort',
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureNewPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureNewPassword = !_obscureNewPassword;
+                    });
+                  },
+                ),
               ),
-              const SizedBox(height: RBSSpacing.md),
-              RBSInput(
-                label: 'Passwort bestätigen',
-                controller: _confirmPasswordController,
-                obscureText: true,
-                prefixIcon: Icons.check,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bitte Passwort bestätigen';
-                  }
-                  if (value != _newPasswordController.text) {
-                    return 'Passwörter stimmen nicht überein';
-                  }
-                  return null;
-                },
+              obscureText: _obscureNewPassword,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Bitte geben Sie ein neues Passwort ein';
+                }
+                if (value.length < 6) {
+                  return 'Das Passwort muss mindestens 6 Zeichen lang sein';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _confirmPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Passwort bestätigen',
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                    });
+                  },
+                ),
               ),
-            ],
-          ),
+              obscureText: _obscureConfirmPassword,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Bitte bestätigen Sie Ihr neues Passwort';
+                }
+                if (value != _newPasswordController.text) {
+                  return 'Die Passwörter stimmen nicht überein';
+                }
+                return null;
+              },
+            ),
+          ],
         ),
       ),
       actions: [
@@ -148,11 +174,15 @@ class _PasswordChangeDialogState extends State<PasswordChangeDialog> {
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
           child: const Text('Abbrechen'),
         ),
-        RBSButton(
-          label: 'Passwort ändern',
+        ElevatedButton(
           onPressed: _isLoading ? null : _changePassword,
-          isLoading: _isLoading,
-          icon: Icons.save,
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Ändern'),
         ),
       ],
     );
