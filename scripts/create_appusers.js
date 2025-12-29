@@ -23,7 +23,7 @@ async function createAppUsers() {
       uid: 'gqCuY6YRwgRo9lovGCiXrzMocQk1',
       email: 'alex.buchner@gmx.de',
       name: 'Alexander Buchner',
-      kuerzel: 'BU2',
+      kuerzel: 'BU-ADMIN',
       rolle: 'admin'
     }
   ];
