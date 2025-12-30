@@ -3,6 +3,26 @@ import 'package:induscore/models/app_user.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/models/leistungsnachweis.dart';
 
+// Re-export Feature-Flags Provider für einfachen Zugriff
+export 'package:induscore/providers/feature_flags_provider.dart' show
+    canImportCSVProvider,
+    canCreateSchuelerProvider,
+    canEditSchuelerProvider,
+    canDeleteSchuelerProvider,
+    canCreateFaecherProvider,
+    canEditFaecherProvider,
+    canDeleteFaecherProvider,
+    canCreateKlassenProvider,
+    canEditKlassenProvider,
+    canDeleteKlassenProvider,
+    canCreateLNProvider,
+    canEditLNProvider,
+    canDeleteLNProvider,
+    canToggleFavoritesProvider,
+    canExportPDFProvider,
+    canExportExcelProvider,
+    canExportNOIProvider;
+
 /// **Benutzerverwaltung** (Issue #39)
 ///
 /// Admin: Voller Zugriff auf Benutzerverwaltung
@@ -67,30 +87,6 @@ final canCreateLeistungsnachweisProvider = Provider<bool>((ref) {
                     (user.rolle == UserRole.admin || 
                      user.rolle == UserRole.lehrer ||
                      user.rolle == UserRole.ausbilder),
-    orElse: () => false,
-  );
-});
-
-/// **CSV Import** (Issue #39)
-///
-/// Admin: Ja
-/// Andere: Nein
-final canImportCSVProvider = Provider<bool>((ref) {
-  final currentUser = ref.watch(currentAppUserProvider);
-  return currentUser.maybeWhen(
-    data: (user) => user?.rolle == UserRole.admin,
-    orElse: () => false,
-  );
-});
-
-/// **Stammdaten erstellen** (Issue #39)
-///
-/// Nur Admin darf neue Klassen, Fächer, Schüler erstellen
-/// Lehrer/Ausbilder können nur bestehende Daten bearbeiten
-final canCreateDataProvider = Provider<bool>((ref) {
-  final currentUser = ref.watch(currentAppUserProvider);
-  return currentUser.maybeWhen(
-    data: (user) => user?.rolle == UserRole.admin,
     orElse: () => false,
   );
 });

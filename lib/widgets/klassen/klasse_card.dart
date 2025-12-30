@@ -31,7 +31,9 @@ class KlasseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canCreate = ref.watch(canCreateDataProvider);
+    // Feature-Flags für Aktionen
+    final canEdit = ref.watch(canEditKlassenProvider);
+    final canDelete = ref.watch(canDeleteKlassenProvider);
 
     return RBSCard(
       child: ListTile(
@@ -48,20 +50,22 @@ class KlasseCard extends ConsumerWidget {
         ),
         title: Text(klasse.name, style: RBSTypography.h4),
         subtitle: Text(klasse.beruf.name, style: RBSTypography.bodySmall),
-        trailing: canCreate
+        trailing: (canEdit || canDelete)
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: onEdit,
-                    tooltip: 'Bearbeiten',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: onDelete,
-                    tooltip: 'Löschen',
-                  ),
+                  if (canEdit)
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: onEdit,
+                      tooltip: 'Bearbeiten',
+                    ),
+                  if (canDelete)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: onDelete,
+                      tooltip: 'Löschen',
+                    ),
                 ],
               )
             : null,

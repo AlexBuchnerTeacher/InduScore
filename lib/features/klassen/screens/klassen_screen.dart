@@ -89,11 +89,11 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
             onPressed: () => context.go('/'),
             tooltip: 'Zum Dashboard',
           ),
-          // Import Button - nur für Admin
-          Consumer(
-            builder: (context, ref, _) {
-              final canCreate = ref.watch(canCreateDataProvider);
-              if (!canCreate) return const SizedBox.shrink();
+          // Import Button - per Feature-Flag gesteuert
+          Builder(
+            builder: (context) {
+              final canImport = ref.watch(canImportCSVProvider);
+              if (!canImport) return const SizedBox.shrink();
 
               return Padding(
                 padding: const EdgeInsets.only(right: RBSSpacing.sm),
@@ -120,10 +120,10 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
               );
             },
           ),
-          // Neue Klasse Button - nur für Admin
-          Consumer(
-            builder: (context, ref, _) {
-              final canCreate = ref.watch(canCreateDataProvider);
+          // Neue Klasse Button - per Feature-Flag gesteuert
+          Builder(
+            builder: (context) {
+              final canCreate = ref.watch(canCreateKlassenProvider);
               if (!canCreate) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.add),
@@ -187,9 +187,9 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
                           ),
                         ),
                         const SizedBox(height: RBSSpacing.sm),
-                        Consumer(
-                          builder: (context, ref, _) {
-                            final canCreate = ref.watch(canCreateDataProvider);
+                        Builder(
+                          builder: (context) {
+                            final canCreate = ref.watch(canCreateKlassenProvider);
                             if (!canCreate) return const SizedBox.shrink();
                             return RBSButton(
                               label: 'Erste Klasse erstellen',

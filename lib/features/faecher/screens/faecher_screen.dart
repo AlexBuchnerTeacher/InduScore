@@ -92,10 +92,10 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
             onPressed: () => context.go('/'),
             tooltip: 'Zum Dashboard',
           ),
-          // Neues Fach Button - nur für Admin
-          Consumer(
-            builder: (context, ref, _) {
-              final canCreate = ref.watch(canCreateDataProvider);
+          // Neues Fach Button - per Feature-Flag gesteuert
+          Builder(
+            builder: (context) {
+              final canCreate = ref.watch(canCreateFaecherProvider);
               if (!canCreate) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.add),
@@ -258,7 +258,7 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
   }
 }
 
-class _SubjectCard extends StatelessWidget {
+class _SubjectCard extends ConsumerWidget {
   final Subject subject;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -270,9 +270,13 @@ class _SubjectCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final subjectColor =
         RBSColors.fromHex(subject.color) ?? RBSColors.dynamicRed;
+    
+    // Feature-Flags für Aktionen
+    final canEdit = ref.watch(canEditFaecherProvider);
+    final canDelete = ref.watch(canDeleteFaecherProvider);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -326,41 +330,44 @@ class _SubjectCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Actions
-                  PopupMenuButton(
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 20),
-                            SizedBox(width: 8),
-                            Text('Bearbeiten'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, size: 20, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text(
-                              'Löschen',
-                              style: TextStyle(color: Colors.red),
+                  // Actions - nur anzeigen wenn Edit oder Delete erlaubt
+                  if (canEdit || canDelete)
+                    PopupMenuButton(
+                      itemBuilder: (context) => [
+                        if (canEdit)
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, size: 20),
+                                SizedBox(width: 8),
+                                Text('Bearbeiten'),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        onEdit();
-                      } else if (value == 'delete') {
-                        onDelete();
-                      }
-                    },
-                  ),
+                          ),
+                        if (canDelete)
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, size: 20, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Löschen',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          onEdit();
+                        } else if (value == 'delete') {
+                          onDelete();
+                        }
+                      },
+                    ),
                 ],
               ),
               const SizedBox(height: 12),

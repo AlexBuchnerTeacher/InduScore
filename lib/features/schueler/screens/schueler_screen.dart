@@ -45,6 +45,9 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
     final studentsAsync = ref.watch(studentsProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final canManageData = ref.watch(canManageDataProvider);
+    
+    // Feature-Flag für Create Button in AppBar
+    final canCreate = ref.watch(canCreateSchuelerProvider);
 
     // Permission Check
     if (!canManageData) {
@@ -112,18 +115,13 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                 ? 'Ausgetretene ausblenden'
                 : 'Ausgetretene anzeigen',
           ),
-          // Neuer Schüler Button - nur für Admin
-          Consumer(
-            builder: (context, ref, _) {
-              final canCreate = ref.watch(canCreateDataProvider);
-              if (!canCreate) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: _showStudentDialog,
-                tooltip: 'Neuer Schüler',
-              );
-            },
-          ),
+          // Neuer Schüler Button - per Feature-Flag gesteuert
+          if (canCreate)
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _showStudentDialog,
+              tooltip: 'Neuer Schüler',
+            ),
         ],
       ),
       drawer: const RBSDrawer(),
@@ -413,6 +411,10 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
   Widget _buildStudentCard(Student student) {
     final dateFormat = DateFormat('dd.MM.yyyy');
     final isAusgetreten = !student.isAktiv;
+    
+    // Feature-Flags für Aktionen
+    final canEdit = ref.watch(canEditSchuelerProvider);
+    final canDelete = ref.watch(canDeleteSchuelerProvider);
 
     return Tooltip(
       message:
@@ -465,17 +467,18 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit_outlined),
-                    SizedBox(width: 8),
-                    Text('Bearbeiten'),
-                  ],
+              if (canEdit)
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined),
+                      SizedBox(width: 8),
+                      Text('Bearbeiten'),
+                    ],
+                  ),
                 ),
-              ),
-              if (student.isAktiv)
+              if (canEdit && student.isAktiv)
                 const PopupMenuItem(
                   value: 'austritt',
                   child: Row(
@@ -485,8 +488,8 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                       Text('Als ausgetreten markieren'),
                     ],
                   ),
-                )
-              else
+                ),
+              if (canEdit && !student.isAktiv)
                 const PopupMenuItem(
                   value: 'reaktivieren',
                   child: Row(
@@ -497,16 +500,17 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                     ],
                   ),
                 ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_outlined, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Löschen', style: TextStyle(color: Colors.red)),
-                  ],
+              if (canDelete)
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outlined, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Löschen', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -521,6 +525,8 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
   }
 
   Widget _buildEmptyState(String message) {
+    final canCreate = ref.watch(canCreateSchuelerProvider);
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -531,16 +537,18 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
             message,
             style: RBSTypography.h3.copyWith(color: Colors.grey[600]),
           ),
-          const SizedBox(height: RBSSpacing.lg),
-          ElevatedButton.icon(
-            onPressed: _showStudentDialog,
-            icon: const Icon(Icons.add),
-            label: const Text('Neuen Schüler anlegen'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: RBSColors.dynamicRed,
-              foregroundColor: Colors.white,
+          if (canCreate) ...[
+            const SizedBox(height: RBSSpacing.lg),
+            ElevatedButton.icon(
+              onPressed: _showStudentDialog,
+              icon: const Icon(Icons.add),
+              label: const Text('Neuen Schüler anlegen'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: RBSColors.dynamicRed,
+                foregroundColor: Colors.white,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
