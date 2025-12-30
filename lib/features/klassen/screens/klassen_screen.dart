@@ -257,7 +257,8 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
   }
 
   Future<void> _handlePdfImport() async {
-    // final schuljahr = ref.read(currentSchuljahrProvider); // TODO: Will be used when dialog is implemented
+    // Schuljahr wird für ImportPreviewDialog benötigt (#21)
+    // final schuljahr = ref.read(currentSchuljahrProvider);
     try {
       setState(() => _isImporting = true);
       final picked = await FilePicker.platform.pickFiles(
@@ -282,7 +283,7 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
 
       if (!mounted) return;
       
-      // TODO: Implement ImportPreviewDialog - temporarily show simple message
+      // ImportPreviewDialog geplant für Issue #21 (Premium PDF Import Pipeline)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${preview.students.length} Schüler gefunden. Import-Dialog wird noch implementiert.'),

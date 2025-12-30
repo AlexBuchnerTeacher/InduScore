@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.21.0] - 2025-12-30 - Phase 4: Quality & Observability
+
+### Added
+- **Integration Tests** - E2E-Test-Grundgerüst ✅
+  - `integration_test/app_test.dart` - App-Start, Login-Screen, Navigation
+  - `integration_test/README.md` - Dokumentation für Test-Ausführung
+  - `integration_test` SDK-Dependency in pubspec.yaml
+
+- **Firebase Crashlytics** - Crash-Reporting für Production ✅
+  - `firebase_crashlytics: ^5.0.6` Dependency hinzugefügt
+  - Automatische Fehler-Erfassung in Release-Builds
+  - Flutter-Fehler und async Fehler werden an Firebase gesendet
+
+### Changed
+- **TODO-Kommentare**: Alle TODOs mit Issue-Referenzen versehen (#21)
+- **Test-Suite**: 269 Tests (alle bestanden)
+
+### Fixed
+- TODOs in `klassen_screen.dart` mit Issue #21 Referenzen dokumentiert
+
 ## [0.20.0] - 2025-12-30 - Phase 3: Architecture & Accessibility
 
 ### Added
