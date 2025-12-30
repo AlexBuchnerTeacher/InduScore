@@ -17,13 +17,13 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Optimized: DashboardStatisticsGrid uses dashboardStatsProvider internally
+    // for stats display, but we still need these for other widget parts
     final klassenAsync = ref.watch(klassenProvider);
     final filteredKlassen = ref.watch(filteredKlassenProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final leistungsnachweiseAsync = ref.watch(leistungsnachweiseProvider);
-    final studentsAsync = ref.watch(studentsProvider);
     final subjectsAsync = ref.watch(subjectsProvider);
-    final gradesAsync = ref.watch(gradesProvider);
     final currentSchuljahr = ref.watch(currentSchuljahrProvider);
 
     return Scaffold(
@@ -60,13 +60,8 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: RBSSpacing.lg),
             
-            // Statistik-Karten (4 Kacheln)
-            DashboardStatisticsGrid(
-              klassenAsync: klassenAsync,
-              studentsAsync: studentsAsync,
-              subjectsAsync: subjectsAsync,
-              gradesAsync: gradesAsync,
-            ),
+            // Statistik-Karten (4 Kacheln) - uses dashboardStatsProvider internally
+            const DashboardStatisticsGrid(),
             const SizedBox(height: RBSSpacing.lg),
 
             // Schnellzugriff: Meine Klassen

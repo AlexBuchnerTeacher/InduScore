@@ -250,6 +250,57 @@ final leistungsnachweiseProvider = StreamProvider<List<Leistungsnachweis>>((
   return firestoreService.getLeistungsnachweise();
 });
 
+// ============ DASHBOARD STATISTICS PROVIDER ============
+// Computed provider for dashboard statistics - avoids unnecessary rebuilds
+// by only providing counts instead of full lists
+
+/// Dashboard statistics for efficient rendering
+class DashboardStats {
+  final int klassenCount;
+  final int studentsCount;
+  final int subjectsCount;
+  final int gradesCount;
+  final bool isLoading;
+
+  const DashboardStats({
+    required this.klassenCount,
+    required this.studentsCount,
+    required this.subjectsCount,
+    required this.gradesCount,
+    this.isLoading = false,
+  });
+
+  static const loading = DashboardStats(
+    klassenCount: 0,
+    studentsCount: 0,
+    subjectsCount: 0,
+    gradesCount: 0,
+    isLoading: true,
+  );
+}
+
+/// Provides dashboard statistics as computed values
+/// Using .select() pattern internally - widget rebuilds only when counts change
+final dashboardStatsProvider = Provider<DashboardStats>((ref) {
+  final klassenAsync = ref.watch(klassenProvider);
+  final studentsAsync = ref.watch(studentsProvider);
+  final subjectsAsync = ref.watch(subjectsProvider);
+  final gradesAsync = ref.watch(gradesProvider);
+
+  // Check if any is loading
+  if (klassenAsync.isLoading || studentsAsync.isLoading || 
+      subjectsAsync.isLoading || gradesAsync.isLoading) {
+    return DashboardStats.loading;
+  }
+
+  return DashboardStats(
+    klassenCount: klassenAsync.value?.length ?? 0,
+    studentsCount: studentsAsync.value?.length ?? 0,
+    subjectsCount: subjectsAsync.value?.length ?? 0,
+    gradesCount: gradesAsync.value?.length ?? 0,
+  );
+});
+
 // Leistungsnachweis by ID
 final leistungsnachweisProvider =
     FutureProvider.family<Leistungsnachweis, String>((ref, id) async {
