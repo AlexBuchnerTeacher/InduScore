@@ -4,6 +4,65 @@
 /// Issue #47: Notenübersicht kompakter und ruhiger gestalten
 library;
 
+import 'package:flutter/material.dart';
+
+/// Farb-Konstanten für die Notenübersicht
+/// 
+/// v0.29.0: Reduzierte Farbpalette - nur kritische Noten (5, 6) werden rot
+/// hervorgehoben. Andere Noten bleiben neutral für ein ruhigeres Design.
+class NotenColors {
+  // Prevent instantiation
+  NotenColors._();
+  
+  /// Kritische Note (5) - Rot
+  static const Color critical = Color(0xFFD32F2F); // Colors.red[700]
+  
+  /// Sehr kritische Note (6) - Dunkelrot
+  static const Color veryCritical = Color(0xFFB71C1C); // Colors.red[900]
+  
+  /// Neutrale Note (1-4) - Dunkelgrau
+  static const Color neutral = Color(0xFF424242); // Colors.grey[800]
+  
+  /// Keine Note / Placeholder
+  static const Color empty = Color(0xFF9E9E9E); // Colors.grey
+  
+  /// Hintergrund für Note-Zellen (neutral)
+  static const Color cellBackground = Color(0xFFFAFAFA); // Colors.grey[50]
+  
+  /// Hintergrund für kritische Noten (leicht rot)
+  static const Color criticalBackground = Color(0xFFFFEBEE); // Colors.red[50]
+  
+  /// Rahmenfarbe (hell)
+  static const Color border = Color(0xFFE0E0E0); // Colors.grey[300]
+  
+  /// Gibt die Farbe für eine Note zurück
+  /// 
+  /// Nur Noten 5 und 6 werden farbig hervorgehoben (rot),
+  /// alle anderen Noten sind neutral (dunkelgrau).
+  static Color getColor(int note) {
+    switch (note) {
+      case 5:
+        return critical;
+      case 6:
+        return veryCritical;
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+        return neutral;
+      default:
+        return empty;
+    }
+  }
+  
+  /// Gibt die Hintergrundfarbe für eine Zelle basierend auf der Note zurück
+  static Color getCellBackground(int? note) {
+    if (note == null) return Colors.transparent;
+    if (note >= 5) return criticalBackground;
+    return Colors.transparent;
+  }
+}
+
 /// Spacing-Konstanten für die Notenübersicht
 class NotenSpacing {
   // Prevent instantiation

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../models/tendenz.dart';
+import '../noten_layout_constants.dart';
 
 /// Editierbare Noten-Zelle mit Inline-Editing
 /// 
@@ -188,22 +189,8 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell> {
     );
   }
 
+  /// Gibt die Farbe für eine Note zurück (verwendet zentrale Konstanten)
   Color _getNoteColor(int note) {
-    switch (note) {
-      case 1:
-        return Colors.green[700]!;
-      case 2:
-        return Colors.green[600]!;
-      case 3:
-        return Colors.orange[700]!;
-      case 4:
-        return Colors.orange[800]!;
-      case 5:
-        return Colors.red[700]!;
-      case 6:
-        return Colors.red[900]!;
-      default:
-        return Colors.grey;
-    }
+    return NotenColors.getColor(note);
   }
 }

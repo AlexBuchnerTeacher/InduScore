@@ -406,13 +406,21 @@ class NotenTableWidget extends StatelessWidget {
         note,
       ) {
         final count = verteilung[note] ?? 0;
+        final color = NotenColors.getColor(note);
+        final isCritical = note >= 5;
+        
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
           decoration: BoxDecoration(
-            color: getNoteColor(note).withValues(alpha: 0.15),
+            // v0.29.0: Nur kritische Noten farbig, andere dezent
+            color: isCritical 
+                ? color.withValues(alpha: 0.15) 
+                : Colors.grey[100],
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: getNoteColor(note).withValues(alpha: 0.3),
+              color: isCritical 
+                  ? color.withValues(alpha: 0.3) 
+                  : NotenColors.border,
             ),
           ),
           child: Text(
@@ -420,7 +428,7 @@ class NotenTableWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.bold,
-              color: getNoteColor(note),
+              color: color,
             ),
           ),
         );

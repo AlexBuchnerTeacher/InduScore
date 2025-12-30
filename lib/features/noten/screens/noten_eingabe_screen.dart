@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:induscore/features/noten/noten_layout_constants.dart';
 import 'package:induscore/models/grade.dart';
 import 'package:induscore/models/leistungsnachweis.dart';
 import 'package:induscore/models/student.dart';
@@ -666,23 +667,9 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
     );
   }
 
+  /// Gibt die Farbe für eine Note zurück (verwendet zentrale Konstanten)
   Color _getNoteColor(int note) {
-    switch (note) {
-      case 1:
-        return Colors.green[700]!;
-      case 2:
-        return Colors.green;
-      case 3:
-        return Colors.orange;
-      case 4:
-        return Colors.orange[700]!;
-      case 5:
-        return Colors.red;
-      case 6:
-        return Colors.red[900]!;
-      default:
-        return Colors.grey;
-    }
+    return NotenColors.getColor(note);
   }
 
   IconData _getTypIcon(LeistungsnachweisTyp typ) {

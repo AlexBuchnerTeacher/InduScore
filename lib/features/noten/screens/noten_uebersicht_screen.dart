@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:induscore/core/theme/rbs_theme.dart';
 import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/features/noten/noten_layout_constants.dart';
 import 'package:induscore/features/noten/widgets/faecher_matrix_widget.dart';
 import 'package:induscore/features/noten/widgets/noten_table_widget.dart';
 import 'package:induscore/features/noten/widgets/student_subject_card.dart';
@@ -920,23 +921,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     return namePart.toLowerCase();
   }
 
+  /// Gibt die Farbe für eine Note zurück (verwendet zentrale Konstanten)
   Color _getNoteColor(int note) {
-    switch (note) {
-      case 1:
-        return Colors.green[700]!;
-      case 2:
-        return Colors.green;
-      case 3:
-        return Colors.orange;
-      case 4:
-        return Colors.orange[700]!;
-      case 5:
-        return Colors.red;
-      case 6:
-        return Colors.red[900]!;
-      default:
-        return Colors.grey;
-    }
+    return NotenColors.getColor(note);
   }
 
   String _formatDate(DateTime date) {

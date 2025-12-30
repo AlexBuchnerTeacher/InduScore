@@ -6,6 +6,7 @@ import '../../../models/grade.dart';
 import '../../../models/tendenz.dart';
 import '../../../models/student.dart';
 import '../../../providers/app_providers.dart';
+import '../noten_layout_constants.dart';
 import '../noten_matrix_logic.dart';
 
 /// Basis-Mixin für gemeinsame Matrix-Funktionalität
@@ -95,25 +96,10 @@ mixin NotenMatrixBaseMixin<T extends ConsumerStatefulWidget> on ConsumerState<T>
     await firestoreService.updateGrade(updatedGrade);
   }
 
-  /// Farbe für Note
+  /// Farbe für Note (verwendet zentrale Konstanten)
   Color _getNoteColor(int? note) {
-    if (note == null) return Colors.grey;
-    switch (note) {
-      case 1:
-        return const Color(0xFF2E7D32); // Dunkelgrün
-      case 2:
-        return const Color(0xFF66BB6A); // Hellgrün
-      case 3:
-        return const Color(0xFFFFA726); // Orange
-      case 4:
-        return const Color(0xFFFF7043); // Hellorange
-      case 5:
-        return const Color(0xFFE53935); // Rot
-      case 6:
-        return const Color(0xFFC62828); // Dunkelrot
-      default:
-        return Colors.grey;
-    }
+    if (note == null) return NotenColors.empty;
+    return NotenColors.getColor(note);
   }
 
   /// Befreiung-Badge für Schüler

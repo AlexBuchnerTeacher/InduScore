@@ -92,7 +92,8 @@ class CompactNoteDropdown extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
+              // v0.29.0: Dezenterer Rahmen
+              border: Border.all(color: NotenColors.border),
               borderRadius: BorderRadius.circular(4),
             ),
             child: DropdownButton<int?>(
