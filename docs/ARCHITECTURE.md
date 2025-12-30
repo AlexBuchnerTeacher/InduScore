@@ -547,7 +547,11 @@ if (canManage) {
 
 - **README.md:** Setup-Anleitung, Features
 - **CODING_GUIDELINES.md:** Code-Style, Naming Conventions
-- **TESTING_STRATEGY.md:** (noch zu erstellen, Issue #51 F04)
+- **TESTING_STRATEGY.md:** Testpyramide, Coverage-Ziele, Mocking
+- **LOGGING_POLICY.md:** PII-Schutz, Error-Handling
+- **PERFORMANCE_OPTIMIZATIONS.md:** Lazy Loading, Pagination
+- **REPO_DEEP_DIVE_ANALYSIS.md:** Vollständige Repo-Analyse mit Findings (v0.32.0)
+- **IMPROVEMENT_ISSUES.md:** Priorisierter Backlog für Refactoring
 - **Firestore Rules:** `firestore.rules`
 - **CI/CD:** `.github/workflows/ci.yml`
 

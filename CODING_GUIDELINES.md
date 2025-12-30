@@ -651,4 +651,32 @@ Diese Guidelines werden durch folgende Mechanismen enforced:
 
 ---
 
+## 11. File Size Compliance (v0.32.0 Status)
+
+Die folgenden Dateien überschreiten die empfohlenen Limits:
+
+| Datei | LOC | Limit | Status |
+|-------|-----|-------|--------|
+| `lib/features/import/screens/csv_import_screen.dart` | 1034 | 500 | ⚠️ Refactoring erforderlich |
+| `lib/features/noten/screens/noten_uebersicht_screen.dart` | 950 | 500 | ⚠️ Refactoring erforderlich |
+| `lib/features/noten/screens/noten_eingabe_screen.dart` | 785 | 500 | ⚠️ Refactoring erforderlich |
+| `lib/features/schueler/screens/schueler_screen.dart` | 767 | 500 | ⚠️ Refactoring erforderlich |
+| `lib/features/faecher/screens/faecher_screen.dart` | 764 | 500 | ⚠️ Refactoring erforderlich |
+| `lib/services/firestore_service.dart` | 849 | 800 | ⚠️ Refactoring erforderlich |
+
+**Tracking:** Siehe `docs/IMPROVEMENT_ISSUES.md` für Refactoring-Plan.
+
+---
+
+## 12. Weiterführende Dokumentation
+
+- **Architektur:** `docs/ARCHITECTURE.md` - Layer, Datenfluss, ADRs
+- **Testing:** `docs/TESTING_STRATEGY.md` - Testpyramide, Coverage-Ziele
+- **Logging:** `docs/LOGGING_POLICY.md` - PII-Schutz, Error-Handling
+- **Performance:** `docs/PERFORMANCE_OPTIMIZATIONS.md` - Lazy Loading, Pagination
+- **Repo-Analyse:** `docs/REPO_DEEP_DIVE_ANALYSIS.md` - Vollständige Analyse mit Findings
+- **Improvement Backlog:** `docs/IMPROVEMENT_ISSUES.md` - Priorisierte Tickets
+
+---
+
 **Bei Fragen zu diesen Guidelines:** Issue öffnen mit Label `documentation`
