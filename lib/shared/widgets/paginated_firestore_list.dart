@@ -45,10 +45,10 @@ class PaginatedFirestoreList<T> extends StatefulWidget {
   final double scrollLoadThreshold;
 
   const PaginatedFirestoreList({
-    super.key,
     required this.query,
     required this.fromFirestore,
     required this.itemBuilder,
+    super.key,
     this.pageSize = 25,
     this.header,
     this.emptyWidget,
