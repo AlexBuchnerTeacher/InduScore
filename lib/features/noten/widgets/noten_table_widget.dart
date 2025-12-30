@@ -161,7 +161,7 @@ class NotenTableWidget extends StatelessWidget {
 
   List<DataColumn> _buildColumns() {
     return [
-      DataColumn(
+      const DataColumn(
         label: SizedBox(
           width: NotenTableDimensions.nameColumnWidth,
           child: Text(
@@ -183,7 +183,7 @@ class NotenTableWidget extends StatelessWidget {
               children: [
                 Text(
                   ln.bezeichnung,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: NotenFontSizes.header,
                   ),
@@ -203,7 +203,7 @@ class NotenTableWidget extends StatelessWidget {
         ),
       ),
       // Spalte für Schüler-Durchschnitt
-      DataColumn(
+      const DataColumn(
         label: SizedBox(
           width: NotenTableDimensions.avgColumnWidth,
           child: Text(
@@ -228,7 +228,7 @@ class NotenTableWidget extends StatelessWidget {
               child: Text(
                 student.displayName,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: NotenFontSizes.studentName),
+                style: const TextStyle(fontSize: NotenFontSizes.studentName),
               ),
             ),
           ),
@@ -253,7 +253,7 @@ class NotenTableWidget extends StatelessWidget {
                       onNoteChanged: onNoteChanged,
                       getNoteColor: getNoteColor,
                     ),
-                    SizedBox(width: NotenSpacing.xs),
+                    const SizedBox(width: NotenSpacing.xs),
                     CompactTendenzButtons(
                       inputKey: key,
                       eingabe: eingabe,

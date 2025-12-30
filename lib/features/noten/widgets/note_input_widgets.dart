@@ -100,9 +100,9 @@ class CompactNoteDropdown extends StatelessWidget {
               value: eingabe.note,
               isExpanded: true,
               underline: const SizedBox(),
-              padding: EdgeInsets.symmetric(horizontal: NotenSpacing.xs),
+              padding: const EdgeInsets.symmetric(horizontal: NotenSpacing.xs),
               iconSize: 14,
-              style: TextStyle(fontSize: NotenFontSizes.noteValue),
+              style: const TextStyle(fontSize: NotenFontSizes.noteValue),
               items: [
                 const DropdownMenuItem<int?>(
                   value: null,
