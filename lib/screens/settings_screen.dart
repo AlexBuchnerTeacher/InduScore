@@ -4,6 +4,7 @@ import '../models/beruf.dart';
 import '../models/subject.dart';
 import '../providers/app_providers.dart';
 import '../core/theme/rbs_theme.dart';
+import '../shared/widgets/app_snack_bars.dart';
 import '../widgets/dialogs/common_dialogs.dart';
 
 /// Settings-Screen für globale Verwaltung von Berufen und Fächern
@@ -374,12 +375,7 @@ class _FaecherTab extends ConsumerWidget {
         final firestoreService = ref.read(firestoreServiceProvider);
         await firestoreService.deleteSubject(subject.id);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${subject.name} wurde gelöscht'),
-              backgroundColor: RBSColors.courtGreen,
-            ),
-          );
+          AppSnackBars.showSuccess(context, '${subject.name} wurde gelöscht');
         }
       },
     );
@@ -541,12 +537,7 @@ class _FachDialogState extends State<_FachDialog> {
   Future<void> _saveFach() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Fachname darf nicht leer sein'),
-          backgroundColor: RBSColors.error,
-        ),
-      );
+      AppSnackBars.showError(context, 'Fachname darf nicht leer sein');
       return;
     }
 
@@ -576,26 +567,17 @@ class _FachDialogState extends State<_FachDialog> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.subject == null
-                  ? 'Fach wurde hinzugefügt'
-                  : 'Fach wurde aktualisiert',
-            ),
-            backgroundColor: RBSColors.courtGreen,
-          ),
+        AppSnackBars.showSuccess(
+          context,
+          widget.subject == null
+              ? 'Fach wurde hinzugefügt'
+              : 'Fach wurde aktualisiert',
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fehler: $e'),
-            backgroundColor: RBSColors.error,
-          ),
-        );
+        AppSnackBars.showError(context, 'Fehler', error: e);
       }
     }
   }

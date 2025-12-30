@@ -8,6 +8,7 @@ import '../models/student.dart';
 import '../models/klasse.dart';
 import '../models/beruf.dart';
 import '../providers/app_providers.dart';
+import '../shared/widgets/app_snack_bars.dart';
 import '../widgets/rbs_drawer.dart';
 import '../providers/permissions_providers.dart';
 import '../widgets/dialogs/common_dialogs.dart';
@@ -627,21 +628,16 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
                     );
                   } else {
                     // Wird später erweitert mit Klassen-Auswahl
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Bitte erweitere den Dialog um Klassenauswahl',
-                        ),
-                      ),
+                    AppSnackBars.showInfo(
+                      context,
+                      'Bitte erweitere den Dialog um Klassenauswahl',
                     );
                     return;
                   }
                   if (context.mounted) Navigator.pop(context);
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Fehler: $e')));
+                    AppSnackBars.showError(context, 'Fehler', error: e);
                   }
                 }
               },
@@ -724,11 +720,9 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
       student.copyWith(status: StudentStatus.aktiv, austrittsDatum: null),
     );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${student.displayName} wurde reaktiviert'),
-          backgroundColor: RBSColors.courtGreen,
-        ),
+      AppSnackBars.showSuccess(
+        context,
+        '${student.displayName} wurde reaktiviert',
       );
     }
   }
