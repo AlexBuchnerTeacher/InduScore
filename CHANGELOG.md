@@ -10,6 +10,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.18.0] - 2025-12-30 - Phase 2: Testing & Security
+
+### Added
+- **Service Test Suite** (Issue #67 F-008) - 50 neue Tests ✅
+  - `test/services/csv_import_service_test.dart` (22 Tests) - CSV-Parsing, Spaltennerkennung, Import
+  - `test/services/noi_export_service_test.dart` (17 Tests) - XML-Generierung, Sonderzeichen, Dateinamen
+  - `test/services/pdf_export_service_test.dart` (16 Tests) - PDF-Erzeugung, Umlaute, Formatierung
+  - Gesamt: 253 Tests (+50 neue Tests seit v0.17.0)
+
+- **Dependency Injection** (Issue #67 F-013) ✅
+  - `AuthService`: Constructor DI mit optionalem `FirebaseAuth` Parameter
+  - `FirestoreService`: Constructor DI mit optionalem `FirebaseFirestore` Parameter
+  - Ermöglicht Unit-Testing mit Mocks ohne echte Firebase-Verbindung
+
+### Changed
+- **Firestore Security Rules** (Issue #67 F-004/F-005) - Rollenbasierte Zugriffskontrolle ✅
+  - Helper-Funktionen: `isAuthenticated()`, `isAdmin()`, `isLehrer()`, `isAktiv()`, `hasAccessToKlasse()`
+  - `app_users`: Field-Level Protection für `rolle`, `status`, `email`, `kuerzel`
+  - `subjects`: Lesen für alle auth. User, Schreiben nur für Admins
+  - `klassen`: CRUD mit Klassen-spezifischer Zugriffskontrolle
+  - `students`: Zugriff basierend auf `klasseId` Mitgliedschaft
+  - `leistungsnachweise`: Update nur für Ersteller oder Admin
+  - `grades`: Voller CRUD für aktive User, Löschen nur für Admins
+  - Catch-All: Lesen für aktive User, Schreiben nur für Admins
+
+### Documentation
+- **Dartdoc** (Issue #67 F-014) - Services dokumentiert ✅
+  - Alle Services haben Dartdoc-Kommentare
+  - Usage-Beispiele für DI-Pattern
+
+### Deferred to Phase 3
+- F-016: Migration screens → features (>16h Aufwand)
+- F-009: Pagination für Firestore-Queries
+- F-018: Einheitliche Fehlerbehandlung
+
 ## [0.17.0] - 2025-12-29 - Phase 1: Code Quality & Refactoring
 
 ### Added
