@@ -10,6 +10,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.23.0] - 2025-12-30 - Phase 6: Documentation & Coverage
+
+### Added
+- **Performance-Dokumentation** ✅
+  - `docs/PERFORMANCE_OPTIMIZATIONS.md` - Umfassende Doku aller Optimierungen
+  - Lazy Loading, DashboardStatsProvider, NoTransitionPage erklärt
+  - Best Practices und Anti-Patterns dokumentiert
+
+- **Accessibility-Dokumentation** ✅
+  - `docs/ACCESSIBILITY.md` - WCAG-Richtlinien und Semantics-Guide
+  - Widget-Referenz für RBSButton, RBSCard, RBSDrawer
+  - Testing-Anleitung für Screen Reader
+
+- **Neue Test-Dateien** ✅
+  - `test/models/app_user_test.dart` - AppUser, UserRole, UserStatus
+  - `test/core/rbs_theme_test.dart` - RBSColors, RBSTypography, RBSSpacing
+  - `test/models/schueler_unterricht_test.dart` - SchuelerUnterricht Model
+  - `test/models/ln_exemption_test.dart` - LnExemption Model
+  - `test/providers/app_providers_test.dart` - DashboardStats, extractZeitgruppe
+  - `test/services/asv_import_service_test.dart` - ASV-Import Parser
+
+### Changed
+- **Test-Suite erweitert**: 314 → 342 Tests (+28)
+- **Coverage verbessert**: 45.3% → 47.9%
+
 ## [0.22.0] - 2025-12-30 - Phase 5: Performance
 
 ### Added
