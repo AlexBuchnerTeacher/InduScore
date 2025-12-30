@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:induscore/models/app_user.dart';
 import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/providers/feature_flags_provider.dart';
 import 'package:induscore/models/leistungsnachweis.dart';
 
 // Re-export Feature-Flags Provider für einfachen Zugriff
@@ -51,16 +52,22 @@ final canManageDataProvider = Provider<bool>((ref) {
   );
 });
 
-/// **Leistungsnachweis bearbeiten** (Issue #39)
+/// **Leistungsnachweis bearbeiten** (Issue #39 + #46)
 ///
-/// Admin: Alle Leistungsnachweise
-/// Lehrer/Ausbilder: Nur eigene (createdBy == current user)
+/// Kombiniert Rollen-Check mit Feature-Flags:
+/// - Admin: Immer erlaubt (effectiveFeatureFlags gibt true)
+/// - Lehrer/Ausbilder: Nur eigene UND Feature-Flag aktiv
 final canEditLeistungsnachweisProvider = Provider.family<bool, Leistungsnachweis>(
   (ref, leistungsnachweis) {
     final currentUser = ref.watch(currentAppUserProvider);
+    final canEditByFlag = ref.watch(canEditLNProvider);
+    
     return currentUser.maybeWhen(
       data: (user) {
         if (user == null) return false;
+        
+        // Feature-Flag Check (Admin bekommt durch effectiveFeatureFlags true)
+        if (!canEditByFlag) return false;
         
         // Admin kann alles
         if (user.rolle == UserRole.admin) return true;
@@ -77,16 +84,56 @@ final canEditLeistungsnachweisProvider = Provider.family<bool, Leistungsnachweis
   },
 );
 
-/// **Leistungsnachweis erstellen** (Issue #39)
+/// **Leistungsnachweis löschen** (Issue #46)
 ///
-/// Admin, Lehrer, Ausbilder: Ja
+/// Kombiniert Rollen-Check mit Feature-Flags:
+/// - Admin: Immer erlaubt
+/// - Lehrer/Ausbilder: Nur eigene UND Feature-Flag aktiv
+final canDeleteLeistungsnachweisProvider = Provider.family<bool, Leistungsnachweis>(
+  (ref, leistungsnachweis) {
+    final currentUser = ref.watch(currentAppUserProvider);
+    final canDeleteByFlag = ref.watch(canDeleteLNProvider);
+    
+    return currentUser.maybeWhen(
+      data: (user) {
+        if (user == null) return false;
+        
+        // Feature-Flag Check (Admin bekommt durch effectiveFeatureFlags true)
+        if (!canDeleteByFlag) return false;
+        
+        // Admin kann alles
+        if (user.rolle == UserRole.admin) return true;
+        
+        // Lehrer/Ausbilder: Nur eigene
+        if (user.rolle == UserRole.lehrer || user.rolle == UserRole.ausbilder) {
+          return leistungsnachweis.createdBy == user.id;
+        }
+        
+        return false;
+      },
+      orElse: () => false,
+    );
+  },
+);
+
+/// **Leistungsnachweis erstellen** (Issue #39 + #46)
+///
+/// Admin, Lehrer, Ausbilder: Ja (mit Feature-Flag)
 final canCreateLeistungsnachweisProvider = Provider<bool>((ref) {
   final currentUser = ref.watch(currentAppUserProvider);
+  final canCreateByFlag = ref.watch(canCreateLNProvider);
+  
   return currentUser.maybeWhen(
-    data: (user) => user != null && 
-                    (user.rolle == UserRole.admin || 
-                     user.rolle == UserRole.lehrer ||
-                     user.rolle == UserRole.ausbilder),
+    data: (user) {
+      if (user == null) return false;
+      
+      // Feature-Flag Check
+      if (!canCreateByFlag) return false;
+      
+      return user.rolle == UserRole.admin || 
+             user.rolle == UserRole.lehrer ||
+             user.rolle == UserRole.ausbilder;
+    },
     orElse: () => false,
   );
 });

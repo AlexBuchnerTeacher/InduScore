@@ -281,26 +281,30 @@ class _LeistungsnachweiseScreenState
                     ),
                   ),
                   // Actions - nur Icons auf kleinen Screens (mit Permission Check)
-                  Consumer(
-                    builder: (context, ref, _) {
+                  Builder(
+                    builder: (context) {
                       final canEdit = ref.watch(canEditLeistungsnachweisProvider(ln));
-                      if (!canEdit) return const SizedBox.shrink();
+                      final canDelete = ref.watch(canDeleteLeistungsnachweisProvider(ln));
+                      
+                      if (!canEdit && !canDelete) return const SizedBox.shrink();
                       
                       if (!isSmallScreen) {
                         return Row(
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 20),
-                              onPressed: () => _showLeistungsnachweisDialog(context, leistungsnachweis: ln),
-                              tooltip: 'Bearbeiten',
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 20),
-                              onPressed: () => _confirmDelete(context, ln),
-                              tooltip: 'Löschen',
-                              visualDensity: VisualDensity.compact,
-                            ),
+                            if (canEdit)
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 20),
+                                onPressed: () => _showLeistungsnachweisDialog(context, leistungsnachweis: ln),
+                                tooltip: 'Bearbeiten',
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            if (canDelete)
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 20),
+                                onPressed: () => _confirmDelete(context, ln),
+                                tooltip: 'Löschen',
+                                visualDensity: VisualDensity.compact,
+                              ),
                           ],
                         );
                       } else {
@@ -314,26 +318,28 @@ class _LeistungsnachweiseScreenState
                             }
                           },
                           itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit_outlined, size: 20),
-                                  SizedBox(width: 8),
-                                  Text('Bearbeiten'),
-                                ],
+                            if (canEdit)
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit_outlined, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Bearbeiten'),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text('Löschen', style: TextStyle(color: Colors.red)),
-                                ],
+                            if (canDelete)
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                                    SizedBox(width: 8),
+                                    Text('Löschen', style: TextStyle(color: Colors.red)),
+                                  ],
+                                ),
                               ),
-                            ),
                           ],
                         );
                       }

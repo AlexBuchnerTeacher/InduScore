@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:induscore/core/theme/rbs_theme.dart';
 import 'package:induscore/core/widgets/rbs_components.dart';
 import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/providers/permissions_providers.dart';
 import 'package:induscore/services/noi_export_service.dart';
 import 'package:induscore/services/pdf_export_service.dart';
 import 'package:induscore/models/klasse.dart';
@@ -72,38 +73,43 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
                 ),
                 const SizedBox(height: RBSSpacing.md),
                 
-                // Export-Typ Karten
+                // Export-Typ Karten - mit Feature-Flag Guards
                 Row(
                   children: [
-                    Expanded(
-                      child: _buildExportTypeCard(
-                        type: 'noi',
-                        icon: Icons.upload_file,
-                        title: 'Zeugnisnoten',
-                        subtitle: 'NOI-Format / CSV',
-                        color: RBSColors.dynamicRed,
+                    if (ref.watch(canExportNOIProvider))
+                      Expanded(
+                        child: _buildExportTypeCard(
+                          type: 'noi',
+                          icon: Icons.upload_file,
+                          title: 'Zeugnisnoten',
+                          subtitle: 'NOI-Format / CSV',
+                          color: RBSColors.dynamicRed,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: RBSSpacing.md),
-                    Expanded(
-                      child: _buildExportTypeCard(
-                        type: 'pdf_student',
-                        icon: Icons.person,
-                        title: 'Schüler-Notenblatt',
-                        subtitle: 'PDF pro Schüler',
-                        color: RBSColors.courtGreen,
+                    if (ref.watch(canExportNOIProvider) && ref.watch(canExportPDFProvider))
+                      const SizedBox(width: RBSSpacing.md),
+                    if (ref.watch(canExportPDFProvider))
+                      Expanded(
+                        child: _buildExportTypeCard(
+                          type: 'pdf_student',
+                          icon: Icons.person,
+                          title: 'Schüler-Notenblatt',
+                          subtitle: 'PDF pro Schüler',
+                          color: RBSColors.courtGreen,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: RBSSpacing.md),
-                    Expanded(
-                      child: _buildExportTypeCard(
-                        type: 'pdf_subject',
-                        icon: Icons.list_alt,
-                        title: 'Fach-Notenliste',
-                        subtitle: 'PDF pro Fach',
-                        color: RBSColors.growingElder,
+                    if (ref.watch(canExportPDFProvider))
+                      const SizedBox(width: RBSSpacing.md),
+                    if (ref.watch(canExportPDFProvider))
+                      Expanded(
+                        child: _buildExportTypeCard(
+                          type: 'pdf_subject',
+                          icon: Icons.list_alt,
+                          title: 'Fach-Notenliste',
+                          subtitle: 'PDF pro Fach',
+                          color: RBSColors.growingElder,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: RBSSpacing.xl),
