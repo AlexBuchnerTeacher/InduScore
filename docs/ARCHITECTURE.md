@@ -1,7 +1,7 @@
 # InduScore - Architektur-Dokumentation
 
-**Version:** 1.0  
-**Letzte Aktualisierung:** 2025-12-29  
+**Version:** 1.1  
+**Letzte Aktualisierung:** 2025-12-30  
 **Erstellt gemäß:** Issue #51 Finding F03
 
 > **Ziel:** Neue Entwickler verstehen Datenfluss, Layering und Architekturentscheidungen in <2 Tagen (statt 5 Tagen ohne Doku)

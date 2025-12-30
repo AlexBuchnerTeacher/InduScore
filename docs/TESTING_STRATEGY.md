@@ -1,7 +1,7 @@
 # InduScore - Testing-Strategie
 
-**Version:** 1.0  
-**Letzte Aktualisierung:** 2025-12-29  
+**Version:** 1.1  
+**Letzte Aktualisierung:** 2025-12-30  
 **Erstellt gemäß:** Issue #51 Finding F04
 
 ---
@@ -51,12 +51,12 @@
 
 ## 2. IST-Zustand
 
-### 2.1 Statistiken (Stand v0.16.0)
+### 2.1 Statistiken (Stand v0.19.0)
 
-- **Test-Dateien:** 16
-- **Test-LOC:** ~3.000 Zeilen
-- **Test-zu-Code-Ratio:** 14% (3k/21k)
-- **Coverage:** 51.71% (laut README v0.13.4)
+- **Test-Dateien:** 25+
+- **Tests gesamt:** 269
+- **Test-zu-Code-Ratio:** ~15%
+- **Coverage:** >50%
 
 ### 2.2 Vorhandene Tests
 
@@ -77,22 +77,26 @@ test/models/
 test/widgets/profile/
 ├── password_change_dialog_test.dart  ✅ Vorhanden
 └── ...
+test/shared/widgets/
+├── app_snack_bars_test.dart          ✅ NEU (11 Tests)
+└── paginated_firestore_list_test.dart ✅ NEU (5 Tests)
 ```
 
 **Service-Tests:**
 ```
 test/services/
 ├── backup_restore_service_test.dart  ✅ Vorhanden
-└── csv_export_service_test.dart      ✅ Vorhanden
+├── csv_export_service_test.dart      ✅ Vorhanden
+├── csv_import_service_test.dart      ✅ NEU (22 Tests)
+├── noi_export_service_test.dart      ✅ NEU (17 Tests)
+└── pdf_export_service_test.dart      ✅ NEU (16 Tests)
 ```
 
-### 2.3 Fehlende Tests (Kritisch)
+### 2.3 Fehlende Tests (Priorität für Phase 3)
 
-❌ **Keine Tests für:**
-- `lib/screens/klassen_screen.dart` (1268 LOC!) → **KRITISCH**
-- `lib/screens/csv_import_screen.dart` (1094 LOC!) → **KRITISCH**
-- `lib/screens/noten_eingabe_screen.dart` (812 LOC)
-- `lib/services/firestore_service.dart` (829 LOC) → **WICHTIG**
+⏳ **Noch zu erstellen:**
+- `lib/screens/klassen_screen.dart` (1268 LOC!) → Phase 3
+- `lib/screens/csv_import_screen.dart` (1094 LOC!) → Phase 3
 - Integration-Tests (kein `integration_test/` Ordner)
 - Golden-Tests (keine `*.png` in test/)
 

@@ -1,8 +1,8 @@
 # InduScore Refactoring Roadmap
 
 **Erstellt**: 2025-12-29
-**Letzte Aktualisierung**: 2025-12-29
-**Status**: Phase 1 Complete ✅
+**Letzte Aktualisierung**: 2025-12-30
+**Status**: Phase 2.5 Complete ✅
 
 ---
 
@@ -11,7 +11,8 @@
 Basierend auf umfassenden Code-Analysen (PR #51, #52) wurden **20 priorisierte Findings** identifiert und in einen **3-Phasen-Plan** überführt:
 
 - **Phase 1 (v0.17.0)**: Stabilisieren - Code-Qualität, Tests ✅ **COMPLETE**
-- **Phase 2 (v0.18.0)**: Strukturieren - Security, Architecture ⏳ **PLANNED**
+- **Phase 2 (v0.18.0)**: Strukturieren - Security, Architecture ✅ **COMPLETE**
+- **Phase 2.5 (v0.19.0)**: UX & Performance ✅ **COMPLETE**
 - **Phase 3 (v1.0.0)**: Optimieren - Performance, Accessibility ⏳ **PLANNED**
 
 **Ziel**: Repo-Score von 7.25/10 → 9/10

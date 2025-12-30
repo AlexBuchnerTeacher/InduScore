@@ -15,15 +15,11 @@
 ```bash
 git clone https://github.com/AlexBuchnerTeacher/InduScore.git
 cd InduScore
-# 🌐 Web Deployment (GitHub Pages)
-
-Die Web-App ist direkt über GitHub Pages verfügbar:
-https://alexbuchnerteacher.github.io/InduScore/
-
-## Release v0.3.0
-
-Features: Fächerverwaltung, Firestore-Integration, RBS Styleguide, Bugfixes
 ```
+
+🌐 **Web-App URL:** https://alexbuchnerteacher.github.io/InduScore/
+
+> **Aktuelle Version:** v0.19.0
 
 2. **Dependencies installieren**
 ```bash
