@@ -83,7 +83,7 @@ void main() {
       expect(data['canImportCSV'], true);
       expect(data['canDeleteSchueler'], true);
       expect(data['canCreateSchueler'], true); // Default
-      expect(data.length, 17); // Alle 17 Flags
+      expect(data.length, 23); // Alle 23 Flags (17 + 6 neue)
     });
 
     test('copyWith creates modified copy', () {
@@ -119,8 +119,8 @@ void main() {
   });
 
   group('FeatureFlagInfo', () {
-    test('all contains 17 flags', () {
-      expect(FeatureFlagInfo.all.length, 17);
+    test('all contains 23 flags', () {
+      expect(FeatureFlagInfo.all.length, 23);
     });
 
     test('byCategory groups flags correctly', () {
@@ -133,6 +133,8 @@ void main() {
         'Leistungsnachweise',
         'Import/Export',
         'Sonstige',
+        'Screens',
+        'Funktionen',
       ]));
       
       // Schüler hat 3 Flags
@@ -140,6 +142,12 @@ void main() {
       
       // Import/Export hat 4 Flags
       expect(byCategory['Import/Export']!.length, 4);
+      
+      // Screens hat 4 Flags
+      expect(byCategory['Screens']!.length, 4);
+      
+      // Funktionen hat 2 Flags
+      expect(byCategory['Funktionen']!.length, 2);
     });
 
     test('all flags have required properties', () {

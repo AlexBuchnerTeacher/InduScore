@@ -29,6 +29,16 @@ class FeatureFlags {
   final bool canEditLeistungsnachweise;
   final bool canDeleteLeistungsnachweise;
   
+  // Screen-Zugriff
+  final bool canAccessKlassen;
+  final bool canAccessSchueler;
+  final bool canAccessFaecher;
+  final bool canAccessNoten;
+  
+  // Funktionen
+  final bool canUseFilter;
+  final bool canUseNachschreiber;
+  
   // Sonstige
   final bool canToggleFavorites;
   final bool canExportPDF;
@@ -50,6 +60,12 @@ class FeatureFlags {
     this.canCreateLeistungsnachweise = true,
     this.canEditLeistungsnachweise = true,
     this.canDeleteLeistungsnachweise = false, // Nur Admin
+    this.canAccessKlassen = true,
+    this.canAccessSchueler = true,
+    this.canAccessFaecher = true,
+    this.canAccessNoten = true,
+    this.canUseFilter = true,
+    this.canUseNachschreiber = true,
     this.canToggleFavorites = true,
     this.canExportPDF = true,
     this.canExportExcel = false,          // Nur Admin
@@ -71,6 +87,12 @@ class FeatureFlags {
         canCreateLeistungsnachweise = true,
         canEditLeistungsnachweise = true,
         canDeleteLeistungsnachweise = true,
+        canAccessKlassen = true,
+        canAccessSchueler = true,
+        canAccessFaecher = true,
+        canAccessNoten = true,
+        canUseFilter = true,
+        canUseNachschreiber = true,
         canToggleFavorites = true,
         canExportPDF = true,
         canExportExcel = true,
@@ -94,6 +116,12 @@ class FeatureFlags {
       canCreateLeistungsnachweise: data['canCreateLeistungsnachweise'] as bool? ?? true,
       canEditLeistungsnachweise: data['canEditLeistungsnachweise'] as bool? ?? true,
       canDeleteLeistungsnachweise: data['canDeleteLeistungsnachweise'] as bool? ?? false,
+      canAccessKlassen: data['canAccessKlassen'] as bool? ?? true,
+      canAccessSchueler: data['canAccessSchueler'] as bool? ?? true,
+      canAccessFaecher: data['canAccessFaecher'] as bool? ?? true,
+      canAccessNoten: data['canAccessNoten'] as bool? ?? true,
+      canUseFilter: data['canUseFilter'] as bool? ?? true,
+      canUseNachschreiber: data['canUseNachschreiber'] as bool? ?? true,
       canToggleFavorites: data['canToggleFavorites'] as bool? ?? true,
       canExportPDF: data['canExportPDF'] as bool? ?? true,
       canExportExcel: data['canExportExcel'] as bool? ?? false,
@@ -117,6 +145,12 @@ class FeatureFlags {
       'canCreateLeistungsnachweise': canCreateLeistungsnachweise,
       'canEditLeistungsnachweise': canEditLeistungsnachweise,
       'canDeleteLeistungsnachweise': canDeleteLeistungsnachweise,
+      'canAccessKlassen': canAccessKlassen,
+      'canAccessSchueler': canAccessSchueler,
+      'canAccessFaecher': canAccessFaecher,
+      'canAccessNoten': canAccessNoten,
+      'canUseFilter': canUseFilter,
+      'canUseNachschreiber': canUseNachschreiber,
       'canToggleFavorites': canToggleFavorites,
       'canExportPDF': canExportPDF,
       'canExportExcel': canExportExcel,
@@ -139,6 +173,12 @@ class FeatureFlags {
     bool? canCreateLeistungsnachweise,
     bool? canEditLeistungsnachweise,
     bool? canDeleteLeistungsnachweise,
+    bool? canAccessKlassen,
+    bool? canAccessSchueler,
+    bool? canAccessFaecher,
+    bool? canAccessNoten,
+    bool? canUseFilter,
+    bool? canUseNachschreiber,
     bool? canToggleFavorites,
     bool? canExportPDF,
     bool? canExportExcel,
@@ -158,6 +198,12 @@ class FeatureFlags {
       canCreateLeistungsnachweise: canCreateLeistungsnachweise ?? this.canCreateLeistungsnachweise,
       canEditLeistungsnachweise: canEditLeistungsnachweise ?? this.canEditLeistungsnachweise,
       canDeleteLeistungsnachweise: canDeleteLeistungsnachweise ?? this.canDeleteLeistungsnachweise,
+      canAccessKlassen: canAccessKlassen ?? this.canAccessKlassen,
+      canAccessSchueler: canAccessSchueler ?? this.canAccessSchueler,
+      canAccessFaecher: canAccessFaecher ?? this.canAccessFaecher,
+      canAccessNoten: canAccessNoten ?? this.canAccessNoten,
+      canUseFilter: canUseFilter ?? this.canUseFilter,
+      canUseNachschreiber: canUseNachschreiber ?? this.canUseNachschreiber,
       canToggleFavorites: canToggleFavorites ?? this.canToggleFavorites,
       canExportPDF: canExportPDF ?? this.canExportPDF,
       canExportExcel: canExportExcel ?? this.canExportExcel,
@@ -182,6 +228,12 @@ class FeatureFlags {
         other.canCreateLeistungsnachweise == canCreateLeistungsnachweise &&
         other.canEditLeistungsnachweise == canEditLeistungsnachweise &&
         other.canDeleteLeistungsnachweise == canDeleteLeistungsnachweise &&
+        other.canAccessKlassen == canAccessKlassen &&
+        other.canAccessSchueler == canAccessSchueler &&
+        other.canAccessFaecher == canAccessFaecher &&
+        other.canAccessNoten == canAccessNoten &&
+        other.canUseFilter == canUseFilter &&
+        other.canUseNachschreiber == canUseNachschreiber &&
         other.canToggleFavorites == canToggleFavorites &&
         other.canExportPDF == canExportPDF &&
         other.canExportExcel == canExportExcel &&
@@ -189,7 +241,9 @@ class FeatureFlags {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode {
+    // Split into multiple Object.hash calls due to 20 param limit
+    final hash1 = Object.hash(
         canImportCSV,
         canCreateSchueler,
         canEditSchueler,
@@ -200,14 +254,24 @@ class FeatureFlags {
         canCreateKlassen,
         canEditKlassen,
         canDeleteKlassen,
+    );
+    final hash2 = Object.hash(
         canCreateLeistungsnachweise,
         canEditLeistungsnachweise,
         canDeleteLeistungsnachweise,
+        canAccessKlassen,
+        canAccessSchueler,
+        canAccessFaecher,
+        canAccessNoten,
+        canUseFilter,
+        canUseNachschreiber,
         canToggleFavorites,
         canExportPDF,
         canExportExcel,
         canExportNOI,
-      );
+    );
+    return Object.hash(hash1, hash2);
+  }
 }
 
 /// Einzelnes Feature-Flag mit Metadaten für UI
@@ -323,6 +387,50 @@ class FeatureFlagInfo {
       description: 'Leistungsnachweise entfernen',
       category: 'Leistungsnachweise',
       defaultValue: false,
+    ),
+    // Screen-Zugriff
+    FeatureFlagInfo(
+      key: 'canAccessKlassen',
+      label: 'Klassen-Screen',
+      description: 'Zugriff auf die Klassen-Übersicht',
+      category: 'Screens',
+      defaultValue: true,
+    ),
+    FeatureFlagInfo(
+      key: 'canAccessSchueler',
+      label: 'Schüler-Screen',
+      description: 'Zugriff auf die Schüler-Übersicht',
+      category: 'Screens',
+      defaultValue: true,
+    ),
+    FeatureFlagInfo(
+      key: 'canAccessFaecher',
+      label: 'Fächer-Screen',
+      description: 'Zugriff auf die Fächer-Übersicht',
+      category: 'Screens',
+      defaultValue: true,
+    ),
+    FeatureFlagInfo(
+      key: 'canAccessNoten',
+      label: 'Noten-Screen',
+      description: 'Zugriff auf die Notenübersicht',
+      category: 'Screens',
+      defaultValue: true,
+    ),
+    // Funktionen
+    FeatureFlagInfo(
+      key: 'canUseFilter',
+      label: 'Filter-Funktion',
+      description: 'Allgemeine Filter in Listen verwenden',
+      category: 'Funktionen',
+      defaultValue: true,
+    ),
+    FeatureFlagInfo(
+      key: 'canUseNachschreiber',
+      label: 'Nachschreiber-Funktion',
+      description: 'Nachschreiber-Management nutzen',
+      category: 'Funktionen',
+      defaultValue: true,
     ),
     // Sonstige
     FeatureFlagInfo(
