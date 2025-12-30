@@ -534,6 +534,27 @@ final currentAppUserProvider = FutureProvider<AppUser?>((ref) async {
   return appUser;
 });
 
+/// Zentraler Provider für das Kürzel des aktuellen Benutzers
+/// 
+/// Verwendet das kuerzel-Feld aus dem AppUser-Profil.
+/// Fallback auf E-Mail-Extraktion, falls kein Kürzel gesetzt ist.
+final currentUserKuerzelProvider = Provider<String>((ref) {
+  final appUser = ref.watch(currentAppUserProvider).value;
+  
+  // Primär: Kürzel aus AppUser
+  if (appUser != null && appUser.kuerzel.isNotEmpty) {
+    return appUser.kuerzel;
+  }
+  
+  // Fallback: Aus E-Mail extrahieren
+  final firebaseUser = ref.watch(currentUserProvider);
+  if (firebaseUser?.email != null) {
+    return _extractKuerzelFromEmail(firebaseUser!.email!);
+  }
+  
+  return '??';
+});
+
 /// Extrahiert Kürzel aus E-Mail (z.B. "MU" aus "mu@induscore.de")
 String _extractKuerzelFromEmail(String email) {
   if (email.isEmpty) return 'XX';

@@ -865,8 +865,8 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
-      final user = ref.read(currentUserProvider);
-      final userKuerzel = _getUserKuerzel(user?.email);
+      // Kürzel aus zentralem Provider
+      final userKuerzel = ref.read(currentUserKuerzelProvider);
 
       if (eingabe.note != null) {
         final grade = Grade(
@@ -910,15 +910,6 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     } finally {
       _savingGrades.remove(key);
     }
-  }
-
-  String _getUserKuerzel(String? email) {
-    if (email == null || email.isEmpty) return '??';
-    final namePart = email.split('@').first;
-    if (namePart.length >= 2) {
-      return namePart.substring(0, 2).toLowerCase();
-    }
-    return namePart.toLowerCase();
   }
 
   /// Gibt die Farbe für eine Note zurück (verwendet zentrale Konstanten)

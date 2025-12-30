@@ -116,7 +116,7 @@ void main() {
 
       expect(find.byType(DropdownButton<int?>), findsOneWidget);
       final sizedBox = tester.widget<SizedBox>(find.byType(SizedBox).first);
-      expect(sizedBox.width, 42); // Compact width (NotenTableDimensions.noteDropdownWidth)
+      expect(sizedBox.width, 36); // Compact width (NotenTableDimensions.noteDropdownWidth)
     });
   });
 

@@ -62,11 +62,11 @@ void main() {
 
   group('NotenTableDimensions', () {
     test('dimension values are correct', () {
-      expect(NotenTableDimensions.rowHeightMin, equals(40.0));
-      expect(NotenTableDimensions.rowHeightMax, equals(40.0));
-      expect(NotenTableDimensions.headerHeight, equals(48.0));
-      expect(NotenTableDimensions.columnSpacing, equals(6.0));
-      expect(NotenTableDimensions.noteDropdownWidth, equals(42.0));
+      expect(NotenTableDimensions.rowHeightMin, equals(36.0));
+      expect(NotenTableDimensions.rowHeightMax, equals(36.0));
+      expect(NotenTableDimensions.headerHeight, equals(44.0));
+      expect(NotenTableDimensions.columnSpacing, equals(4.0));
+      expect(NotenTableDimensions.noteDropdownWidth, equals(36.0));
     });
   });
 

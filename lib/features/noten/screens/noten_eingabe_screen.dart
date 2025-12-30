@@ -115,17 +115,6 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
     }
   }
 
-  /// Generiert Kürzel aus Email (z.B. "buchner@schule.de" -> "bu")
-  String _getUserKuerzel(String? email) {
-    if (email == null || email.isEmpty) return '??';
-    final namePart = email.split('@').first;
-    // Erste 2 Buchstaben des Login-Namens
-    if (namePart.length >= 2) {
-      return namePart.substring(0, 2).toLowerCase();
-    }
-    return namePart.toLowerCase();
-  }
-
   Widget _buildNotenTabelle(List<Student> students) {
     // Sortiere Schüler nach Nachname
     final sortedStudents = List<Student>.from(students)
@@ -704,9 +693,8 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
-      final user = ref.read(currentUserProvider);
-      // Kürzel aus Email generieren (z.B. "alex.buchner@schule.de" -> "AB")
-      final userKuerzel = _getUserKuerzel(user?.email);
+      // Kürzel aus zentralem Provider
+      final userKuerzel = ref.read(currentUserKuerzelProvider);
 
       if (eingabe.note != null) {
         final grade = Grade(

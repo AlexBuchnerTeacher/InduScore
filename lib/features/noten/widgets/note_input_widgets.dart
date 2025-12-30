@@ -71,6 +71,8 @@ class NoteDropdown extends StatelessWidget {
 }
 
 /// Widget für Note-Dropdown (kompakt für Tabellen)
+/// 
+/// v0.31.0: Minimalistisches Design ohne Rahmen
 class CompactNoteDropdown extends StatelessWidget {
   final String inputKey;
   final NotenEingabe eingabe;
@@ -90,10 +92,13 @@ class CompactNoteDropdown extends StatelessWidget {
       height: NotenTableDimensions.rowHeightMin - 8,
       child: Stack(
         children: [
+          // Minimalistisches Dropdown ohne Rahmen
           Container(
             decoration: BoxDecoration(
-              // v0.29.0: Dezenterer Rahmen
-              border: Border.all(color: NotenColors.border),
+              // Nur bei kritischen Noten dezenten Hintergrund
+              color: (eingabe.note != null && eingabe.note! >= 5) 
+                  ? NotenColors.criticalBackground 
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
             ),
             child: DropdownButton<int?>(
@@ -101,12 +106,13 @@ class CompactNoteDropdown extends StatelessWidget {
               isExpanded: true,
               underline: const SizedBox(),
               padding: const EdgeInsets.symmetric(horizontal: NotenSpacing.xs),
-              iconSize: 14,
+              iconSize: 12,
+              icon: Icon(Icons.arrow_drop_down, color: Colors.grey[400], size: 12),
               style: const TextStyle(fontSize: NotenFontSizes.noteValue),
               items: [
                 const DropdownMenuItem<int?>(
                   value: null,
-                  child: Text('-', style: TextStyle(color: Colors.black)),
+                  child: Text('-', style: TextStyle(color: Colors.grey)),
                 ),
                 ...List.generate(6, (i) => i + 1).map(
                   (note) => DropdownMenuItem<int>(
@@ -124,6 +130,7 @@ class CompactNoteDropdown extends StatelessWidget {
               onChanged: (value) => onNoteChanged(inputKey, studentId, lnId, value),
             ),
           ),
+          // Kürzel oben rechts
           if (eingabe.updatedBy != null)
             Positioned(
               right: 1,
@@ -194,6 +201,8 @@ class TendenzButtons extends StatelessWidget {
 }
 
 /// Widget für Tendenz-Buttons (kompakt für Tabellen)
+/// 
+/// v0.31.0: Vertikales Layout für kompaktere Darstellung
 class CompactTendenzButtons extends StatelessWidget {
   final String inputKey;
   final NotenEingabe eingabe;
@@ -207,40 +216,70 @@ class CompactTendenzButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    // Vertikales Layout für kompaktere Darstellung
+    return Column(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _TendenzButton(
-          inputKey: inputKey,
-          eingabe: eingabe,
-          studentId: studentId,
-          lnId: lnId,
+        _CompactTendenzIcon(
           tendenz: Tendenz.plus,
           label: '+',
-          onTendenzChanged: onTendenzChanged,
-          compact: true,
+          isSelected: eingabe.tendenz == Tendenz.plus,
+          onTap: () => onTendenzChanged(inputKey, studentId, lnId, Tendenz.plus),
         ),
-        _TendenzButton(
-          inputKey: inputKey,
-          eingabe: eingabe,
-          studentId: studentId,
-          lnId: lnId,
+        _CompactTendenzIcon(
           tendenz: Tendenz.keine,
           label: '·',
-          onTendenzChanged: onTendenzChanged,
-          compact: true,
+          isSelected: eingabe.tendenz == Tendenz.keine,
+          onTap: () => onTendenzChanged(inputKey, studentId, lnId, Tendenz.keine),
         ),
-        _TendenzButton(
-          inputKey: inputKey,
-          eingabe: eingabe,
-          studentId: studentId,
-          lnId: lnId,
+        _CompactTendenzIcon(
           tendenz: Tendenz.minus,
           label: '-',
-          onTendenzChanged: onTendenzChanged,
-          compact: true,
+          isSelected: eingabe.tendenz == Tendenz.minus,
+          onTap: () => onTendenzChanged(inputKey, studentId, lnId, Tendenz.minus),
         ),
       ],
+    );
+  }
+}
+
+/// Minimalistischer Tendenz-Icon für vertikales Layout
+class _CompactTendenzIcon extends StatelessWidget {
+  final Tendenz tendenz;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CompactTendenzIcon({
+    required this.tendenz,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 16,
+        height: 10,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? RBSColors.dynamicRed : Colors.transparent,
+          borderRadius: BorderRadius.circular(2),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 9,
+            height: 1.0,
+            color: isSelected ? Colors.white : Colors.grey[400],
+          ),
+        ),
+      ),
     );
   }
 }

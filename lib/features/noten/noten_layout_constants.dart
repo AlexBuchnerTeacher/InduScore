@@ -93,31 +93,31 @@ class NotenTableDimensions {
   NotenTableDimensions._();
   
   /// Minimale Zeilenhöhe für Daten-Rows (kompakt)
-  static const double rowHeightMin = 40.0;
+  static const double rowHeightMin = 36.0;
   
   /// Maximale Zeilenhöhe für Daten-Rows (kompakt)
-  static const double rowHeightMax = 40.0;
+  static const double rowHeightMax = 36.0;
   
   /// Header-Zeilenhöhe
-  static const double headerHeight = 48.0;
+  static const double headerHeight = 44.0;
   
   /// Column-Spacing in DataTables
-  static const double columnSpacing = 6.0;
+  static const double columnSpacing = 4.0;
   
-  /// Breite für Noten-Dropdown (kompakt)
-  static const double noteDropdownWidth = 42.0;
+  /// Breite für Noten-Dropdown (kompakt, ohne Rahmen)
+  static const double noteDropdownWidth = 36.0;
   
-  /// Breite für Noten-Dropdown mit Tendenz
-  static const double noteDropdownWithTendenzWidth = 55.0;
+  /// Breite für Tendenz-Buttons (vertikal = schmaler)
+  static const double tendenzWidth = 18.0;
   
   /// Breite für Schüler-Name Spalte
-  static const double nameColumnWidth = 140.0;
+  static const double nameColumnWidth = 130.0;
   
-  /// Breite für LN-Spalten
-  static const double lnColumnWidth = 50.0;
+  /// Breite für LN-Spalten (Note + Tendenz)
+  static const double lnColumnWidth = 32.0;
   
   /// Breite für Durchschnitt-Spalte
-  static const double avgColumnWidth = 45.0;
+  static const double avgColumnWidth = 40.0;
 }
 
 /// Font-Größen für die Notenübersicht
