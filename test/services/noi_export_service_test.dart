@@ -24,7 +24,7 @@ void main() {
         jahrgangsstufe: 3,
         zeitgruppe: Zeitgruppe.zwei,
         laufendeNummer: 1,
-        schuljahr: Schuljahr(2024, 2025),
+        schuljahr: const Schuljahr(2024, 2025),
         createdAt: now,
         updatedAt: now,
       );

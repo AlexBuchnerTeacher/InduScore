@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:induscore/services/csv_import_service.dart';
-import 'package:induscore/models/klasse.dart';
 
 void main() {
   group('CsvImportService', () {
