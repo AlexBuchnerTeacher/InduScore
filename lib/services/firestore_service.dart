@@ -25,8 +25,28 @@ class MergeResult {
   bool get hasAdded => added.isNotEmpty;
 }
 
+/// Service für Firestore Datenbankoperationen
+/// 
+/// Verwendet Constructor Dependency Injection für bessere Testbarkeit.
+/// 
+/// **Usage:**
+/// ```dart
+/// // Produktion (mit echtem Firebase):
+/// final firestoreService = FirestoreService();
+/// 
+/// // Tests (mit Mock):
+/// final firestoreService = FirestoreService(firestore: mockFirestore);
+/// ```
 class FirestoreService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
+
+  /// Erstellt einen FirestoreService
+  /// 
+  /// [firestore] - Optional: FirebaseFirestore Instance.
+  /// Defaults to FirebaseFirestore.instance für Production.
+  /// Kann mit Mock überschrieben werden für Tests.
+  FirestoreService({FirebaseFirestore? firestore})
+      : _db = firestore ?? FirebaseFirestore.instance;
 
   // Collection references
   CollectionReference get _students => _db.collection('students');
