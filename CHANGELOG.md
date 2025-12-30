@@ -10,6 +10,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.30.0] - 2025-12-31 - Phase 8: Feature-Flags & Notenübersicht kompakter
+
+### Added - Feature-Flags System (Issue #46)
+- **FeatureFlags Model** - 17 granulare Lehrer-Berechtigungen
+  - Stammdaten: canCreate/Edit/DeleteSchueler, canCreate/Edit/DeleteKlassen, canCreate/Edit/DeleteFaecher
+  - Leistungsnachweise: canCreate/Edit/DeleteLeistungsnachweise
+  - Export: canExportPDF, canExportExcel, canExportNOI
+  - Sonstiges: canImportCSV, canToggleFavorites
+- **FeatureFlagsProvider** - Firestore-Stream (`/settings/features`)
+- **Admin Feature-Flags Screen** - Toggle-UI für alle 17 Flags mit Kategorien
+- **Permission Guards** - Alle Stammdaten-Screens mit Feature-Flag Prüfung
+- **11 Tests** für FeatureFlags Model
+
+### Added - Notenübersicht kompakter (Issue #47)
+- **NotenLayoutConstants** - Zentralisierte Layout-Werte
+  - `NotenSpacing`: xs=4, sm=6, md=8, lg=12
+  - `NotenTableDimensions`: Kompakte Zeilen (40px statt 52px)
+  - `NotenFontSizes`: Kleinere Schriftgrößen (13px statt 14px)
+- **NotenColors** - Reduzierte Farbpalette
+  - Nur kritische Noten (5, 6) in Rot hervorgehoben
+  - Andere Noten (1-4) neutral (dunkelgrau)
+  - Dezentere Rahmenfarben
+- **10 Tests** für NotenLayoutConstants
+
+### Changed
+- **Notenübersicht** - 30% kompaktere Darstellung
+- **Verteilungs-Chips** - Nur kritische Noten farbig
+- **Alle _getNoteColor Methoden** - Verwenden jetzt zentrale NotenColors
+
+### Version History in this Release
+- v0.25.0: Feature-Flags System (Model + Provider + Admin UI)
+- v0.26.0: Permission Guards in Stammdaten-Screens
+- v0.27.0: Complete Feature-Flags Integration (LN + Export)
+- v0.28.0: Notenübersicht kompakteres Spacing
+- v0.29.0: Notenübersicht Farben reduziert
+- v0.30.0: Final Release (merge to main)
+
 ## [0.24.0] - 2025-12-30 - Phase 7: Provider Map Optimizations
 
 ### Added
