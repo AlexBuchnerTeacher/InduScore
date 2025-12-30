@@ -1,48 +1,151 @@
 rules_version = '2';
+
+// InduScore Firestore Security Rules v0.18.0
+// F-004: Rollenbasierte Zugriffskontrolle
+// F-005: Field-Level Security
+
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // App Users Collection - Kürzel-Login ermöglichen
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+    
+    // Prüft ob User eingeloggt ist
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Holt die App-User Daten des aktuellen Users
+    function getAppUser() {
+      return get(/databases/$(database)/documents/app_users/$(request.auth.uid)).data;
+    }
+    
+    // Prüft ob User Admin ist
+    function isAdmin() {
+      return isAuthenticated() && getAppUser().rolle == 'admin';
+    }
+    
+    // Prüft ob User Lehrer ist
+    function isLehrer() {
+      return isAuthenticated() && getAppUser().rolle == 'lehrer';
+    }
+    
+    // Prüft ob User aktiven Status hat
+    function isAktiv() {
+      return isAuthenticated() && getAppUser().status == 'aktiv';
+    }
+    
+    // Prüft ob User Zugriff auf eine Klasse hat (via favoriteKlassenIds)
+    function hasAccessToKlasse(klasseId) {
+      return isAdmin() || klasseId in getAppUser().favoriteKlassenIds;
+    }
+    
+    // ============================================================
+    // APP_USERS COLLECTION
+    // ============================================================
     match /app_users/{userId} {
-      // Lesezugriff für Kürzel-zu-Email-Lookup (vor Login erlaubt!)
-      // ODER für eingeloggte User (eigene Daten oder Admin)
-      allow read: if request.auth == null  // Wichtig für Kürzel-Login!
+      // Lesezugriff:
+      // - Unauthentifiziert: Erlaubt für Kürzel-zu-Email-Lookup (Login-Flow)
+      // - Eigene Daten lesen
+      // - Admins können alle User lesen
+      allow read: if request.auth == null  // Kürzel-Login Lookup
                   || request.auth.uid == userId 
-                  || (request.auth != null && get(/databases/$(database)/documents/app_users/$(request.auth.uid)).data.rolle == 'admin');
+                  || isAdmin();
       
-      // Schreibzugriff nur für Admins
-      allow create, update, delete: if request.auth != null 
-                                    && get(/databases/$(database)/documents/app_users/$(request.auth.uid)).data.rolle == 'admin';
+      // Create: Nur Admins können neue User anlegen
+      allow create: if isAdmin();
+      
+      // Update: Admin kann alles, User nur eigene nicht-geschützte Felder
+      allow update: if isAdmin()
+                    || (request.auth.uid == userId 
+                        && !request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['rolle', 'status', 'email', 'kuerzel']));
+      
+      // Delete: Nur Admins
+      allow delete: if isAdmin();
     }
     
-    // Subjects Collection
+    // ============================================================
+    // SUBJECTS (Fächer) COLLECTION
+    // ============================================================
     match /subjects/{subjectId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null 
-                   && get(/databases/$(database)/documents/app_users/$(request.auth.uid)).data.rolle == 'admin';
+      // Lesen: Alle authentifizierten User
+      allow read: if isAuthenticated() && isAktiv();
+      
+      // Schreiben: Nur Admins (Fächer sind Stammdaten)
+      allow create, update, delete: if isAdmin();
     }
     
-    // Klassen Collection
+    // ============================================================
+    // KLASSEN COLLECTION
+    // ============================================================
     match /klassen/{klasseId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      // Lesen: Alle authentifizierten aktiven User
+      allow read: if isAuthenticated() && isAktiv();
+      
+      // Create: Admins und Lehrer
+      allow create: if isAuthenticated() && isAktiv();
+      
+      // Update/Delete: Admin oder Lehrer mit Zugriff auf die Klasse
+      allow update, delete: if isAdmin() || hasAccessToKlasse(klasseId);
     }
     
-    // Grades Collection
-    match /grades/{gradeId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+    // ============================================================
+    // STUDENTS (Schüler) COLLECTION
+    // ============================================================
+    match /students/{studentId} {
+      // Lesen: Authentifizierte aktive User
+      allow read: if isAuthenticated() && isAktiv();
+      
+      // Create: Admins und Lehrer
+      allow create: if isAuthenticated() && isAktiv();
+      
+      // Update/Delete: Admin oder Lehrer mit Zugriff auf die Klasse des Schülers
+      allow update, delete: if isAdmin() 
+                            || hasAccessToKlasse(resource.data.klasseId);
     }
     
-    // Leistungsnachweise Collection
+    // ============================================================
+    // LEISTUNGSNACHWEISE COLLECTION
+    // ============================================================
     match /leistungsnachweise/{lnId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      // Lesen: Authentifizierte aktive User
+      allow read: if isAuthenticated() && isAktiv();
+      
+      // Create: Admins und Lehrer
+      allow create: if isAuthenticated() && isAktiv();
+      
+      // Update: Admin oder Ersteller des LN
+      allow update: if isAdmin() 
+                    || (resource.data.createdBy == getAppUser().kuerzel);
+      
+      // Delete: Nur Admins
+      allow delete: if isAdmin();
     }
     
-    // Alle anderen Collections - nur für eingeloggte User
+    // ============================================================
+    // GRADES (Noten) COLLECTION
+    // ============================================================
+    match /grades/{gradeId} {
+      // Lesen: Authentifizierte aktive User
+      allow read: if isAuthenticated() && isAktiv();
+      
+      // Schreiben: Authentifizierte aktive User
+      // (Field-Level: updatedBy wird automatisch gesetzt)
+      allow create, update: if isAuthenticated() && isAktiv();
+      
+      // Delete: Nur Admins
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================================
+    // CATCH-ALL RULE (Fallback)
+    // ============================================================
+    // Alle anderen Collections: Nur für authentifizierte aktive User
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read: if isAuthenticated() && isAktiv();
+      allow write: if isAdmin();
     }
   }
 }
