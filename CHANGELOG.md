@@ -10,6 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.19.0] - 2025-12-30 - Phase 2.5: UX & Performance
+
+### Added
+- **AppSnackBars Utility** (Issue #69 F-018) - Einheitliches Error-Handling ✅
+  - `lib/shared/widgets/app_snack_bars.dart` - 4 Typen: Success, Error, Warning, Info
+  - 11 Tests für alle SnackBar-Varianten
+  - Migriert: faecher_screen, schueler_screen, settings_screen
+
+- **PaginatedFirestoreList Widget** (Issue #69 F-009) - Lazy Loading ✅
+  - `lib/shared/widgets/paginated_firestore_list.dart` - Generisches Pagination-Widget
+  - Unterstützt: Initial Load, Load More Button, Infinite Scroll
+  - 5 Controller-Tests
+
+### Changed
+- **Test-Suite erweitert**: 269 Tests gesamt (+16 seit v0.18.0)
+
+### Deferred to Phase 3 (v1.0.0)
+- F-016: Migration screens → features (zu umfangreich für Minor Release)
+
 ## [0.18.0] - 2025-12-30 - Phase 2: Testing & Security
 
 ### Added
