@@ -1,9 +1,11 @@
-// InduScore v0.20.0 - Phase 3 Architecture Migration
+// InduScore v0.21.0 - Phase 4 Quality (TODOs, Integration-Tests, Crashlytics)
 // Feature-based architecture with proper screen organization
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -65,6 +67,18 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    
+    // Crashlytics initialisieren (nur in Release-Builds)
+    if (!kDebugMode) {
+      // Alle Flutter-Fehler an Crashlytics weiterleiten
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      
+      // Async-Fehler abfangen (z.B. aus Futures, Streams)
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');
     debugPrint('Run `flutterfire configure` to set up Firebase');
