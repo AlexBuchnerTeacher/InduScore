@@ -79,29 +79,32 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell> {
   }
 
   Widget _buildNoteDropdown() {
-    final size = widget.compact ? 45.0 : 60.0;
-    final iconSize = widget.compact ? 16.0 : 20.0;
-    final fontSize = widget.compact ? 14.0 : 16.0;
-    final kuerzelFontSize = widget.compact ? 7.0 : 8.0;
+    // v0.30.1: Kompakteres Design ohne Rahmen
+    final size = widget.compact ? NotenTableDimensions.noteDropdownWidth : 50.0;
+    final iconSize = widget.compact ? 12.0 : 16.0;
+    final fontSize = widget.compact ? NotenFontSizes.noteValue : 14.0;
+    final kuerzelFontSize = widget.compact ? NotenFontSizes.kuerzel : 8.0;
 
     return SizedBox(
       width: size,
-      height: widget.compact ? 32 : null,
+      height: widget.compact ? NotenTableDimensions.rowHeightMin - 8 : null,
       child: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
-              border: Border.all(
-                color: widget.compact ? Colors.grey[300]! : Colors.grey[400]!,
-              ),
+              // v0.30.1: Kein Rahmen mehr, nur bei kritischen Noten Hintergrund
+              color: (widget.note != null && widget.note! >= 5)
+                  ? NotenColors.criticalBackground
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(4),
             ),
             child: DropdownButton<int?>(
               value: widget.note,
               isExpanded: true,
               underline: const SizedBox(),
-              padding: EdgeInsets.symmetric(horizontal: widget.compact ? 4 : 6),
+              padding: EdgeInsets.symmetric(horizontal: widget.compact ? NotenSpacing.xs : 6),
               iconSize: iconSize,
+              icon: Icon(Icons.arrow_drop_down, color: Colors.grey[400], size: iconSize),
               style: TextStyle(fontSize: fontSize),
               items: [
                 DropdownMenuItem<int?>(
@@ -133,13 +136,13 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell> {
           ),
           if (widget.updatedBy != null)
             Positioned(
-              right: widget.compact ? 1 : 2,
-              top: widget.compact ? 0 : 1,
+              right: 1,
+              top: 0,
               child: Text(
                 widget.updatedBy!,
                 style: TextStyle(
                   fontSize: kuerzelFontSize,
-                  color: widget.compact ? Colors.grey[400] : Colors.grey[500],
+                  color: Colors.grey[400],
                 ),
               ),
             ),
@@ -149,18 +152,58 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell> {
   }
 
   Widget _buildTendenzButtons() {
-    final buttonSize = widget.compact ? 18.0 : 28.0;
-    final spacing = widget.compact ? 1.0 : 2.0;
+    // v0.30.1: Vertikales Layout für kompaktere Darstellung
+    if (widget.compact) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildCompactTendenzIcon(Tendenz.plus, '+'),
+          _buildCompactTendenzIcon(Tendenz.keine, '·'),
+          _buildCompactTendenzIcon(Tendenz.minus, '-'),
+        ],
+      );
+    }
+    
+    // Normal: Horizontal für größere Ansichten
+    const buttonSize = 28.0;
+    const spacing = 2.0;
     
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildTendenzButton(Tendenz.plus, '+', buttonSize),
-        SizedBox(width: spacing),
+        const SizedBox(width: spacing),
         _buildTendenzButton(Tendenz.keine, '·', buttonSize),
-        SizedBox(width: spacing),
+        const SizedBox(width: spacing),
         _buildTendenzButton(Tendenz.minus, '-', buttonSize),
       ],
+    );
+  }
+
+  /// Kompakter Tendenz-Icon für vertikales Layout
+  Widget _buildCompactTendenzIcon(Tendenz tendenz, String label) {
+    final isSelected = widget.tendenz == tendenz;
+    return InkWell(
+      onTap: () => widget.onTendenzChanged(tendenz),
+      child: Container(
+        width: 16,
+        height: 10,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? RBSColors.dynamicRed : Colors.transparent,
+          borderRadius: BorderRadius.circular(2),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 9,
+            height: 1.0,
+            color: isSelected ? Colors.white : Colors.grey[400],
+          ),
+        ),
+      ),
     );
   }
 
