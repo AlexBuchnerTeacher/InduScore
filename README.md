@@ -177,9 +177,10 @@ service cloud.firestore {
 - Production Build: `flutter build web` (Output in `build/web/`)
 
 ### Versionierung & Releases
-- Version-Quelle: `pubspec.yaml` (`version`), `VERSION`, `lib/version.dart` (müssen gleich sein)
+- **Release-Checkliste:** [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) - Vollständiger Prozess
+- Version-Quelle: `pubspec.yaml` und `version.json` (müssen synchron sein)
 - Releases: Tags `v*` triggern `.github/workflows/release.yml` (Web-Build + Asset)
-- CI: `.github/workflows/ci.yml` (analyze, test, Versions-Check)
+- CI: `.github/workflows/ci.yml` (analyze, test, Coverage-Check)
 
 ## Features (Geplant)
 - Benutzer-Authentifizierung (Firebase Auth)
