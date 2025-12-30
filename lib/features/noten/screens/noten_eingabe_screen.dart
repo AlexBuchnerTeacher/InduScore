@@ -8,6 +8,7 @@ import 'package:induscore/models/student.dart';
 import 'package:induscore/models/tendenz.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
 
 class NotenEingabeScreen extends ConsumerStatefulWidget {
   final String leistungsnachweisId;
@@ -507,18 +508,18 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
         // Der Provider wird automatisch aktualisiert durch StreamProvider
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$studentDisplayName als nicht relevant markiert'),
-              action: SnackBarAction(
-                label: 'Rückgängig',
-                onPressed: () async {
-                  await firestoreService.deleteLnExemption(
-                    studentId,
-                    widget.leistungsnachweisId,
-                  );
-                },
-              ),
+          AppSnackBars.showSuccess(
+            context,
+            '$studentDisplayName als nicht relevant markiert',
+            action: SnackBarAction(
+              label: 'Rückgängig',
+              textColor: Colors.white,
+              onPressed: () async {
+                await firestoreService.deleteLnExemption(
+                  studentId,
+                  widget.leistungsnachweisId,
+                );
+              },
             ),
           );
         }
@@ -540,10 +541,9 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
       );
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${student.displayName} wieder als relevant markiert'),
-          ),
+        AppSnackBars.showInfo(
+          context,
+          '${student.displayName} wieder als relevant markiert',
         );
       }
     } catch (e) {
@@ -728,12 +728,11 @@ class _NotenEingabeScreenState extends ConsumerState<NotenEingabeScreen> {
       ref.invalidate(gradesByLeistungsnachweisProvider(widget.leistungsnachweisId));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fehler beim Speichern: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
-          ),
+        AppSnackBars.showError(
+          context,
+          'Fehler beim Speichern',
+          error: e,
+          duration: const Duration(seconds: 2),
         );
       }
     } finally {

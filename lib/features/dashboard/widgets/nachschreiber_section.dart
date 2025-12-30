@@ -189,9 +189,11 @@ class _NachschreiberCard extends ConsumerWidget {
             ),
           ],
         ),
-        onTap: () {
-          context.go('/noten/klasse/${ln.klasseId}');
-        },
+        onTap: ref.watch(canAccessNotenProvider)
+            ? () {
+                context.go('/noten/klasse/${ln.klasseId}');
+              }
+            : null,
       ),
     );
   }

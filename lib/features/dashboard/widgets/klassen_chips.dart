@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../models/klasse.dart';
+import '../../../shared/widgets/feature_guard.dart';
 
 /// Einzelner Klassen-Chip
 class KlasseChip extends StatelessWidget {
@@ -92,10 +93,13 @@ class KlassenChipsList extends ConsumerWidget {
             );
           }
           final klasse = klassen[index];
+          final canAccessNoten = ref.watch(canAccessNotenProvider);
           return KlasseChip(
             name: klasse.name,
             color: _getBerufColor(klasse.beruf),
-            onTap: () => context.go('/noten/klasse/${klasse.id}'),
+            onTap: canAccessNoten
+                ? () => context.go('/noten/klasse/${klasse.id}')
+                : () {},
           );
         },
       ),

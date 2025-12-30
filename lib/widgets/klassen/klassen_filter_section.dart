@@ -4,6 +4,7 @@ import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
 import '../../models/beruf.dart';
 import '../../providers/app_providers.dart';
+import '../../shared/widgets/feature_guard.dart';
 
 /// Filter-Section für Klassenverwaltung
 ///
@@ -14,6 +15,8 @@ import '../../providers/app_providers.dart';
 ///
 /// Verwendet Riverpod für Zeitgruppen-Filter (global),
 /// lokale Callbacks für Beruf/Schuljahr-Filter.
+/// 
+/// Wird ausgeblendet wenn canUseFilter = false.
 class KlassenFilterSection extends ConsumerWidget {
   /// Aktuell ausgewählte Berufe
   final Set<String> selectedBerufe;
@@ -37,6 +40,12 @@ class KlassenFilterSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Feature-Flag Check
+    final canUseFilter = ref.watch(canUseFilterProvider);
+    if (!canUseFilter) {
+      return const SizedBox.shrink();
+    }
+    
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
     final currentSchuljahr = ref.watch(currentSchuljahrProvider);
 

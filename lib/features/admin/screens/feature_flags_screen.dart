@@ -5,6 +5,7 @@ import '../../../core/widgets/rbs_components.dart';
 import '../../../models/feature_flags.dart';
 import '../../../providers/feature_flags_provider.dart';
 import '../../../widgets/rbs_drawer.dart';
+import '../../../shared/widgets/app_snack_bars.dart';
 
 /// Admin-Screen für Feature-Flag-Verwaltung
 /// 
@@ -222,9 +223,7 @@ class FeatureFlagsScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(featureFlagsNotifierProvider.notifier).resetToDefaults();
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feature-Flags zurückgesetzt')),
-              );
+              AppSnackBars.showInfo(context, 'Feature-Flags zurückgesetzt');
             },
             style: ElevatedButton.styleFrom(backgroundColor: RBSColors.dynamicRed),
             child: const Text('Zurücksetzen'),

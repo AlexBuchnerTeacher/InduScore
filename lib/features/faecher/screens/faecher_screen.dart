@@ -9,6 +9,7 @@ import 'package:induscore/models/subject.dart';
 import 'package:induscore/models/beruf.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/shared/widgets/app_snack_bars.dart';
+import 'package:induscore/shared/widgets/feature_guard.dart';
 import 'package:induscore/widgets/dialogs/common_dialogs.dart';
 import 'package:induscore/widgets/rbs_drawer.dart';
 import 'package:induscore/providers/permissions_providers.dart';
@@ -109,11 +110,12 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
       drawer: const RBSDrawer(),
       body: Column(
         children: [
-          // Filter Section
-          Container(
-            padding: const EdgeInsets.all(RBSSpacing.md),
-            color: RBSColors.paper,
-            child: Wrap(
+          // Filter Section - nur wenn canUseFilter aktiv
+          if (ref.watch(canUseFilterProvider))
+            Container(
+              padding: const EdgeInsets.all(RBSSpacing.md),
+              color: RBSColors.paper,
+              child: Wrap(
               spacing: RBSSpacing.sm,
               runSpacing: RBSSpacing.sm,
               children: [

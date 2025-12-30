@@ -11,6 +11,7 @@ import 'package:induscore/models/klasse.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/features/noten/widgets/noten_matrix_view.dart';
 import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/shared/widgets/feature_guard.dart';
 
 /// Klassen-Detail Screen mit Matrix-Ansicht
 /// 
@@ -213,9 +214,11 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
             onSubjectTap: (subjectId) {
               context.go('/faecher/$subjectId');
             },
-            onLNTap: (lnId) {
-              context.go('/noten/$lnId');
-            },
+            onLNTap: ref.watch(canAccessNotenProvider)
+                ? (lnId) {
+                    context.go('/noten/$lnId');
+                  }
+                : null,
           ),
         ),
       ],

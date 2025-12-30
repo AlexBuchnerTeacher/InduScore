@@ -19,6 +19,7 @@ import 'package:induscore/models/subject.dart';
 import 'package:induscore/models/tendenz.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
 
 /// Zentrale Notenübersicht mit flexiblen Filtern
 ///
@@ -901,9 +902,7 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       ref.invalidate(gradesProvider);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red),
-        );
+        AppSnackBars.showError(context, 'Fehler', error: e);
       }
     } finally {
       _savingGrades.remove(key);

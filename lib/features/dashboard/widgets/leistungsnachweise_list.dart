@@ -5,6 +5,7 @@ import '../../../core/theme/rbs_theme.dart';
 import '../../../models/leistungsnachweis.dart';
 import '../../../models/subject.dart';
 import '../../../providers/app_providers.dart';
+import '../../../shared/widgets/feature_guard.dart';
 
 /// Karte für einzelnen Leistungsnachweis
 class LeistungsnachweisCard extends ConsumerWidget {
@@ -55,7 +56,10 @@ class LeistungsnachweisCard extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        onTap: () => context.go('/noten/${ln.id}'),
+        // Noten-Link nur wenn canAccessNoten aktiv
+        onTap: ref.watch(canAccessNotenProvider) 
+            ? () => context.go('/noten/${ln.id}')
+            : null,
         leading: Container(
           width: 48,
           height: 48,

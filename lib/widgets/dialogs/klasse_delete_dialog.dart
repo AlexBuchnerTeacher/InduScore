@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
 import '../../models/klasse.dart';
+import '../../shared/widgets/app_snack_bars.dart';
 
 /// Bestätigungsdialog zum Löschen einer Klasse
 ///
@@ -41,21 +42,11 @@ class KlasseDeleteDialog extends StatelessWidget {
 
               if (context.mounted) {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Klasse gelöscht'),
-                    backgroundColor: RBSColors.courtGreen,
-                  ),
-                );
+                AppSnackBars.showSuccess(context, 'Klasse gelöscht');
               }
             } catch (e) {
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Fehler: $e'),
-                    backgroundColor: RBSColors.dynamicRed,
-                  ),
-                );
+                AppSnackBars.showError(context, 'Fehler', error: e);
               }
             }
           },

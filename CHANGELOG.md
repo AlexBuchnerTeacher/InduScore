@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.32.0] - 2025-12-31 - Feature-Guards Polish & SnackBar Refactoring
+
+### Added
+- **canUseFilter Guard** - Filter-Bereiche in Klassen/Schüler/Fächer-Screens werden bei `canUseFilter = false` ausgeblendet
+- **canAccessNoten Guard** - Alle Links zu Noten-Ansichten (Dashboard, Klassen-Chips, Leistungsnachweise-Liste) werden bei `canAccessNoten = false` deaktiviert
+
+### Changed
+- **AppSnackBars statt ScaffoldMessenger** - Einheitliche SnackBar-Nutzung in 8 Dateien
+  - `noten_eingabe_screen.dart` - Erfolgs-/Fehler-Meldungen
+  - `noten_uebersicht_screen.dart` - Fehler-Meldungen
+  - `feature_flags_screen.dart` - Info-Meldungen
+  - `klasse_edit_dialog.dart` - Erfolgs-/Fehler-Meldungen
+  - `klasse_delete_dialog.dart` - Erfolgs-/Fehler-Meldungen
+
+### Technical
+- Guards für Filter: `KlassenFilterSection`, `SchuelerScreen`, `FaecherScreen`
+- Guards für Noten: `klassen_chips.dart`, `klassen_detail_screen.dart`, `nachschreiber_section.dart`, `leistungsnachweise_list.dart`
+
 ## [0.31.0] - 2025-12-30 - Feature-Flag Guards
 
 ### Added

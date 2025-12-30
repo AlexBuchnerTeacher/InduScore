@@ -9,6 +9,7 @@ import 'package:induscore/models/klasse.dart';
 import 'package:induscore/models/beruf.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/shared/widgets/app_snack_bars.dart';
+import 'package:induscore/shared/widgets/feature_guard.dart';
 import 'package:induscore/widgets/rbs_drawer.dart';
 import 'package:induscore/providers/permissions_providers.dart';
 import 'package:induscore/widgets/dialogs/common_dialogs.dart';
@@ -127,22 +128,23 @@ class _SchuelerScreenState extends ConsumerState<SchuelerScreen> {
       drawer: const RBSDrawer(),
       body: Column(
         children: [
-          // Filter Section
-          Container(
-            padding: const EdgeInsets.all(RBSSpacing.md),
-            color: RBSColors.paper,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Beruf-Filter
-                Row(
-                  children: [
-                    Text(
-                      'Beruf:',
-                      style: RBSTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.bold,
+          // Filter Section - nur wenn canUseFilter aktiv
+          if (ref.watch(canUseFilterProvider))
+            Container(
+              padding: const EdgeInsets.all(RBSSpacing.md),
+              color: RBSColors.paper,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Beruf-Filter
+                  Row(
+                    children: [
+                      Text(
+                        'Beruf:',
+                        style: RBSTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
                     const SizedBox(width: RBSSpacing.sm),
                     Expanded(
                       child: Wrap(

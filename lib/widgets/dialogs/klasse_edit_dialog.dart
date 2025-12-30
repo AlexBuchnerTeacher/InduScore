@@ -4,6 +4,7 @@ import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
 import '../../models/klasse.dart';
 import '../../models/beruf.dart';
+import '../../shared/widgets/app_snack_bars.dart';
 
 /// Dialog zum Erstellen oder Bearbeiten einer Klasse
 ///
@@ -196,11 +197,9 @@ class _KlasseEditDialogState extends ConsumerState<KlasseEditDialog> {
 
       if (context.mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isEdit ? 'Klasse aktualisiert' : 'Klasse erstellt'),
-            backgroundColor: RBSColors.courtGreen,
-          ),
+        AppSnackBars.showSuccess(
+          context,
+          isEdit ? 'Klasse aktualisiert' : 'Klasse erstellt',
         );
       }
     } catch (e) {
@@ -211,11 +210,6 @@ class _KlasseEditDialogState extends ConsumerState<KlasseEditDialog> {
   }
 
   void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: RBSColors.dynamicRed,
-      ),
-    );
+    AppSnackBars.showError(context, message);
   }
 }
