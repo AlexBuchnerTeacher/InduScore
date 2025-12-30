@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.23.1] - 2025-12-30 - CI Fix
+
+### Fixed
+- **Sealed Class Mocking entfernt** - MockDocumentSnapshot Tests entfernt (cloud_firestore sealed class)
+- **Deprecated Color API** - `Color.value` → `toARGB32()` für Flutter 3.x Kompatibilität
+- **Const Declarations** - `final` → `const` für String-Literale
+
+### Changed
+- Tests: 342 → 340 (fromFirestore Tests entfernt, da sealed class nicht mockbar)
+
 ## [0.23.0] - 2025-12-30 - Phase 6: Documentation & Coverage
 
 ### Added
