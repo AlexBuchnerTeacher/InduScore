@@ -32,7 +32,7 @@ class _LeistungsnachweiseScreenState
     final klassenAsync = ref.watch(klassenProvider);
     final filteredKlassen = ref.watch(filteredKlassenProvider);
     final zeitgruppenFilter = ref.watch(zeitgruppenFilterProvider);
-    final subjectsAsync = ref.watch(subjectsProvider);
+    // Note: subjectsMapProvider is used directly in _buildLeistungsnachweisCard
 
     return Scaffold(
       appBar: AppBar(
@@ -217,8 +217,8 @@ class _LeistungsnachweiseScreenState
                     return _buildLeistungsnachweisCard(
                       context,
                       ln,
-                      klassenAsync.value ?? [],
-                      subjectsAsync.value ?? [],
+                      ref.watch(klassenMapProvider),
+                      ref.watch(subjectsMapProvider),
                     );
                   },
                 );
@@ -235,11 +235,12 @@ class _LeistungsnachweiseScreenState
   Widget _buildLeistungsnachweisCard(
     BuildContext context,
     Leistungsnachweis ln,
-    List<Klasse> klassen,
-    List<Subject> subjects,
+    Map<String, Klasse> klassenMap,
+    Map<String, Subject> subjectsMap,
   ) {
-    final klasse = klassen.where((k) => k.id == ln.klasseId).firstOrNull;
-    final subject = subjects.where((s) => s.id == ln.subjectId).firstOrNull;
+    // O(1) lookup instead of .where().firstOrNull
+    final klasse = klassenMap[ln.klasseId];
+    final subject = subjectsMap[ln.subjectId];
     final dateFormat = DateFormat('dd.MM.yyyy');
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
@@ -476,11 +477,9 @@ class _LeistungsnachweiseScreenState
                     const SizedBox(height: RBSSpacing.xs),
                     subjectsAsync.when(
                       data: (subjects) {
-                        // Finde die gewählte Klasse um den Beruf zu ermitteln
-                        final selectedKlasse = klassenAsync.maybeWhen(
-                          data: (klassen) => klassen.where((k) => k.id == selectedKlasseId).firstOrNull,
-                          orElse: () => null,
-                        );
+                        // O(1) lookup using Map provider
+                        final klassenMap = ref.watch(klassenMapProvider);
+                        final selectedKlasse = klassenMap[selectedKlasseId];
                         
                         // Filtere Fächer nach Beruf der Klasse
                         final filteredSubjects = selectedKlasse != null

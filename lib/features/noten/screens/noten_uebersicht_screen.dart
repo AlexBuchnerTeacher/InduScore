@@ -424,11 +424,12 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       lnBySubject.putIfAbsent(ln.subjectId, () => []).add(ln);
     }
 
-    // Sortiere Fächer
+    // Sortiere Fächer - use Map for O(1) lookup
     final sortedSubjectIds = lnBySubject.keys.toList();
+    final subjectsMap = {for (final s in subjects) s.id: s};
     sortedSubjectIds.sort((a, b) {
-      final subjectA = subjects.where((s) => s.id == a).firstOrNull;
-      final subjectB = subjects.where((s) => s.id == b).firstOrNull;
+      final subjectA = subjectsMap[a];
+      final subjectB = subjectsMap[b];
       return (subjectA?.name ?? '').compareTo(subjectB?.name ?? '');
     });
 
@@ -564,12 +565,15 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
       lnByKlasse.putIfAbsent(ln.klasseId, () => []).add(ln);
     }
 
+    // O(1) lookup map
+    final klassenMap = {for (final k in klassen) k.id: k};
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: lnByKlasse.length,
       itemBuilder: (context, index) {
         final klasseId = lnByKlasse.keys.elementAt(index);
-        final klasse = klassen.where((k) => k.id == klasseId).firstOrNull;
+        final klasse = klassenMap[klasseId];
         final klasseLN = lnByKlasse[klasseId]!;
 
         // Schüler dieser Klasse
@@ -638,6 +642,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
     for (final ln in leistungsnachweise) {
       lnBySubject.putIfAbsent(ln.subjectId, () => []).add(ln);
     }
+
+    // O(1) lookup map for subjects
+    final subjectsMap = {for (final s in subjects) s.id: s};
 
     // Berechne Gesamt-Statistik
     double gesamtSumme = 0;
@@ -792,9 +799,9 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
         ),
         const SizedBox(height: 16),
 
-        // Fächer mit Noten
+        // Fächer mit Noten - O(1) lookup
         ...lnBySubject.entries.map((entry) {
-          final subject = subjects.where((s) => s.id == entry.key).firstOrNull;
+          final subject = subjectsMap[entry.key];
           return StudentSubjectCard(
             student: student,
             subject: subject,

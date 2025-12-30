@@ -10,6 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.24.0] - 2025-12-30 - Phase 7: Provider Map Optimizations
+
+### Added
+- **Map Providers für O(1) Lookups** ✅
+  - `klassenMapProvider` - Map<String, Klasse> statt List-Iteration
+  - `subjectsMapProvider` - Map<String, Subject> für schnelle Fach-Lookups
+  - `studentsMapProvider` - Map<String, Student> für Schüler-Lookups
+  - `leistungsnachweiseMapProvider` - Map<String, Leistungsnachweis>
+
+### Changed
+- **LeistungsnachweiseScreen optimiert** - O(1) Map-Lookups statt O(n) `.where().firstOrNull`
+- **NotenUebersichtScreen optimiert** - Lokale Maps für Sortierung und Lookups
+- **LeistungsnachweisCard** - Verwendet `klassenMapProvider` direkt
+
+### Performance
+- Lookup-Komplexität von O(n) auf O(1) reduziert
+- Besonders bei großen Listen (100+ Einträge) spürbare Verbesserung
+- Weniger Rebuilds durch granulare Provider
+
 ## [0.23.1] - 2025-12-30 - CI Fix
 
 ### Fixed
