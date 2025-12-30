@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/features/noten/noten_layout_constants.dart';
 import 'package:induscore/features/noten/widgets/note_input_widgets.dart';
 import 'package:induscore/models/leistungsnachweis.dart';
 import 'package:induscore/models/noten_eingabe.dart';
@@ -31,7 +32,8 @@ class NotenTableWidget extends StatelessWidget {
     }
 
     // Berechne Mindestbreite für horizontales Scrollen
-    final tableWidth = 160.0 + (leistungsnachweise.length * 120.0);
+    final tableWidth = NotenTableDimensions.nameColumnWidth + 
+        (leistungsnachweise.length * NotenTableDimensions.lnColumnWidth * 2);
 
     // Berechne Statistiken pro LN
     final lnStats = _calculateLNStats();
@@ -49,8 +51,8 @@ class NotenTableWidget extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(minWidth: tableWidth),
             child: DataTable(
-              columnSpacing: 8,
-              headingRowHeight: 64,
+              columnSpacing: NotenTableDimensions.columnSpacing,
+              headingRowHeight: NotenTableDimensions.headerHeight,
               dataRowMinHeight: 0,
               dataRowMaxHeight: 0,
               columns: _buildColumns(),
@@ -71,10 +73,10 @@ class NotenTableWidget extends StatelessWidget {
                   children: [
                     // Nur die Daten-Rows
                     DataTable(
-                      columnSpacing: 8,
+                      columnSpacing: NotenTableDimensions.columnSpacing,
                       headingRowHeight: 0,
-                      dataRowMinHeight: 52,
-                      dataRowMaxHeight: 52,
+                      dataRowMinHeight: NotenTableDimensions.rowHeightMin,
+                      dataRowMaxHeight: NotenTableDimensions.rowHeightMax,
                       columns: _buildColumns()
                           .map(
                             (col) => const DataColumn(label: SizedBox.shrink()),
@@ -159,32 +161,41 @@ class NotenTableWidget extends StatelessWidget {
 
   List<DataColumn> _buildColumns() {
     return [
-      const DataColumn(
+      DataColumn(
         label: SizedBox(
-          width: 140,
-          child: Text('Schüler', style: TextStyle(fontWeight: FontWeight.bold)),
+          width: NotenTableDimensions.nameColumnWidth,
+          child: Text(
+            'Schüler',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: NotenFontSizes.header,
+            ),
+          ),
         ),
       ),
       ...leistungsnachweise.map(
         (ln) => DataColumn(
           label: SizedBox(
-            width: 110,
+            width: NotenTableDimensions.lnColumnWidth * 2,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   ln.bezeichnung,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontSize: NotenFontSizes.header,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
                 Text(
                   '${ln.typ.label} ${ln.gewichtung}x',
-                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: NotenFontSizes.kuerzel + 2,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),
@@ -192,12 +203,15 @@ class NotenTableWidget extends StatelessWidget {
         ),
       ),
       // Spalte für Schüler-Durchschnitt
-      const DataColumn(
+      DataColumn(
         label: SizedBox(
-          width: 70,
+          width: NotenTableDimensions.avgColumnWidth,
           child: Text(
             '⌀',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: NotenFontSizes.average + 2,
+            ),
           ),
         ),
       ),
@@ -210,8 +224,12 @@ class NotenTableWidget extends StatelessWidget {
         cells: [
           DataCell(
             SizedBox(
-              width: 140,
-              child: Text(student.displayName, overflow: TextOverflow.ellipsis),
+              width: NotenTableDimensions.nameColumnWidth,
+              child: Text(
+                student.displayName,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: NotenFontSizes.studentName),
+              ),
             ),
           ),
           ...leistungsnachweise.map((ln) {
@@ -223,7 +241,7 @@ class NotenTableWidget extends StatelessWidget {
 
             return DataCell(
               SizedBox(
-                width: 110,
+                width: NotenTableDimensions.lnColumnWidth * 2,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -235,7 +253,7 @@ class NotenTableWidget extends StatelessWidget {
                       onNoteChanged: onNoteChanged,
                       getNoteColor: getNoteColor,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: NotenSpacing.xs),
                     CompactTendenzButtons(
                       inputKey: key,
                       eingabe: eingabe,
@@ -251,12 +269,13 @@ class NotenTableWidget extends StatelessWidget {
           // Schüler-Durchschnitt
           DataCell(
             SizedBox(
-              width: 70,
+              width: NotenTableDimensions.avgColumnWidth,
               child: studentStats[student.id] != null
                   ? Text(
                       studentStats[student.id]!.toStringAsFixed(1),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        fontSize: NotenFontSizes.average,
                         color: getNoteColor(studentStats[student.id]!.round()),
                       ),
                     )

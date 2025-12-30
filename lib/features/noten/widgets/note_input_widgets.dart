@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/features/noten/noten_layout_constants.dart';
 import 'package:induscore/models/noten_eingabe.dart';
 import 'package:induscore/models/tendenz.dart';
 
@@ -85,8 +86,8 @@ class CompactNoteDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 45,
-      height: 32,
+      width: NotenTableDimensions.noteDropdownWidth,
+      height: NotenTableDimensions.rowHeightMin - 8,
       child: Stack(
         children: [
           Container(
@@ -98,9 +99,9 @@ class CompactNoteDropdown extends StatelessWidget {
               value: eingabe.note,
               isExpanded: true,
               underline: const SizedBox(),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              iconSize: 16,
-              style: const TextStyle(fontSize: 14),
+              padding: EdgeInsets.symmetric(horizontal: NotenSpacing.xs),
+              iconSize: 14,
+              style: TextStyle(fontSize: NotenFontSizes.noteValue),
               items: [
                 const DropdownMenuItem<int?>(
                   value: null,
@@ -128,7 +129,7 @@ class CompactNoteDropdown extends StatelessWidget {
               top: 0,
               child: Text(
                 eingabe.updatedBy!,
-                style: TextStyle(fontSize: 7, color: Colors.grey[400]),
+                style: TextStyle(fontSize: NotenFontSizes.kuerzel, color: Colors.grey[400]),
               ),
             ),
         ],
