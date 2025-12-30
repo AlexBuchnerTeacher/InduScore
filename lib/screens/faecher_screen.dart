@@ -8,6 +8,7 @@ import '../core/widgets/rbs_components.dart';
 import '../models/subject.dart';
 import '../models/beruf.dart';
 import '../providers/app_providers.dart';
+import '../shared/widgets/app_snack_bars.dart';
 import '../widgets/dialogs/common_dialogs.dart';
 import '../widgets/rbs_drawer.dart';
 import '../providers/permissions_providers.dart';
@@ -237,12 +238,7 @@ class _FaecherScreenState extends ConsumerState<FaecherScreen> {
       onDelete: () async {
         await ref.read(firestoreServiceProvider).deleteSubject(subject.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${subject.name} wurde gelöscht'),
-              backgroundColor: RBSColors.success,
-            ),
-          );
+          AppSnackBars.showSuccess(context, '${subject.name} wurde gelöscht');
         }
       },
     );
@@ -678,12 +674,7 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedBerufe.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bitte mindestens einen Beruf auswählen'),
-          backgroundColor: RBSColors.error,
-        ),
-      );
+      AppSnackBars.showError(context, 'Bitte mindestens einen Beruf auswählen');
       return;
     }
 
@@ -723,15 +714,11 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
         // SnackBar nach kurzem Delay, damit das Dialog-Widget sicher disposed ist
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  widget.subject == null
-                      ? 'Fach "${subject.name}" erstellt'
-                      : 'Fach "${subject.name}" aktualisiert',
-                ),
-                backgroundColor: RBSColors.success,
-              ),
+            AppSnackBars.showSuccess(
+              context,
+              widget.subject == null
+                  ? 'Fach "${subject.name}" erstellt'
+                  : 'Fach "${subject.name}" aktualisiert',
             );
           }
         });
@@ -742,12 +729,7 @@ class _SubjectDialogState extends ConsumerState<_SubjectDialog> {
         Navigator.pop(context);
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Fehler beim Speichern: $e'),
-                backgroundColor: RBSColors.error,
-              ),
-            );
+            AppSnackBars.showError(context, 'Fehler beim Speichern', error: e);
           }
         });
       }
