@@ -250,6 +250,34 @@ final leistungsnachweiseProvider = StreamProvider<List<Leistungsnachweis>>((
   return firestoreService.getLeistungsnachweise();
 });
 
+// ============ OPTIMIZED LOOKUP PROVIDERS ============
+// Pre-computed maps for O(1) lookups - prevents repeated list iterations
+// Use these instead of .firstWhere() in widgets for better performance
+
+/// Map of all Klassen by ID for O(1) lookup
+final klassenMapProvider = Provider<Map<String, Klasse>>((ref) {
+  final klassen = ref.watch(klassenProvider).value ?? [];
+  return {for (final k in klassen) k.id: k};
+});
+
+/// Map of all Subjects by ID for O(1) lookup
+final subjectsMapProvider = Provider<Map<String, Subject>>((ref) {
+  final subjects = ref.watch(subjectsProvider).value ?? [];
+  return {for (final s in subjects) s.id: s};
+});
+
+/// Map of all Students by ID for O(1) lookup
+final studentsMapProvider = Provider<Map<String, Student>>((ref) {
+  final students = ref.watch(studentsProvider).value ?? [];
+  return {for (final s in students) s.id: s};
+});
+
+/// Map of all Leistungsnachweise by ID for O(1) lookup
+final leistungsnachweiseMapProvider = Provider<Map<String, Leistungsnachweis>>((ref) {
+  final lnList = ref.watch(leistungsnachweiseProvider).value ?? [];
+  return {for (final ln in lnList) ln.id: ln};
+});
+
 // ============ DASHBOARD STATISTICS PROVIDER ============
 // Computed provider for dashboard statistics - avoids unnecessary rebuilds
 // by only providing counts instead of full lists

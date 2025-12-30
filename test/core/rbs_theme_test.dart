@@ -19,9 +19,8 @@ void main() {
     test('fromHex parst 6-stelligen Hex-Code', () {
       final color = RBSColors.fromHex('#FF5E35');
       expect(color, isNotNull);
-      expect(color!.red, 255);
-      expect(color.green, 94);
-      expect(color.blue, 53);
+      // Using toARGB32 for ARGB check (avoid deprecated accessors)
+      expect(color!.toARGB32(), 0xFFFF5E35);
     });
 
     test('fromHex parst ohne Hash-Zeichen', () {

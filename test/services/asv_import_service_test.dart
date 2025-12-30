@@ -71,13 +71,13 @@ void main() {
       });
 
       test('erkennt kein ASV-Format', () {
-        final csv = 'Name;Vorname;Email\nMuster;Max;max@test.de';
+        const csv = 'Name;Vorname;Email\nMuster;Max;max@test.de';
         final result = AsvImportService.parseAsvCsv(csv);
         expect(result.error, 'Kein ASV-Format erkannt');
       });
 
       test('parst gültige ASV-Datei', () {
-        final csv = '''lokales Differenzierungsmerkmal;Familienname;Vornamen;Klasse;M/W.Kurzform;Religionszugehörigkeit.Kurzform
+        const csv = '''lokales Differenzierungsmerkmal;Familienname;Vornamen;Klasse;M/W.Kurzform;Religionszugehörigkeit.Kurzform
 12345;Muster;Max;12IT11;M;ev''';
         final result = AsvImportService.parseAsvCsv(csv);
         expect(result.error, isNull);

@@ -81,4 +81,23 @@ void main() {
       expect(NachschreiberStufe.stufe3.index, 2);
     });
   });
+
+  group('Map Provider Pattern', () {
+    test('klassenMapProvider existiert', () {
+      // Provider ist definiert und kann referenziert werden
+      expect(klassenMapProvider, isNotNull);
+    });
+
+    test('subjectsMapProvider existiert', () {
+      expect(subjectsMapProvider, isNotNull);
+    });
+
+    test('studentsMapProvider existiert', () {
+      expect(studentsMapProvider, isNotNull);
+    });
+
+    test('leistungsnachweiseMapProvider existiert', () {
+      expect(leistungsnachweiseMapProvider, isNotNull);
+    });
+  });
 }

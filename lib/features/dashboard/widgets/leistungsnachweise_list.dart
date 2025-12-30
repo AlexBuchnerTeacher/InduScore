@@ -35,16 +35,16 @@ class LeistungsnachweisCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final klassenAsync = ref.watch(klassenProvider);
+    // Optimized: Use map provider for O(1) lookup instead of list iteration
+    final klassenMap = ref.watch(klassenMapProvider);
 
     String klasseName = '...';
     String fachName = '...';
     Color fachColor = RBSColors.dynamicRed;
 
-    klassenAsync.whenData((klassen) {
-      final klasse = klassen.where((k) => k.id == ln.klasseId).firstOrNull;
-      if (klasse != null) klasseName = klasse.name;
-    });
+    // O(1) lookup instead of .where().firstOrNull
+    final klasse = klassenMap[ln.klasseId];
+    if (klasse != null) klasseName = klasse.name;
 
     final subject = subjects.where((s) => s.id == ln.subjectId).firstOrNull;
     if (subject != null) {
