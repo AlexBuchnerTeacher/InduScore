@@ -10,6 +10,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.31.0] - 2025-12-30 - Feature-Flag Guards
+
+### Added
+- **6 neue Feature-Flags** für granulare Steuerung
+  - Screen-Zugriff: `canAccessKlassen`, `canAccessSchueler`, `canAccessFaecher`, `canAccessNoten`
+  - Funktionen: `canUseFilter`, `canUseNachschreiber`
+- **FeatureVisible Widget** für bedingte Sichtbarkeit basierend auf Flags
+- **Provider für Feature-Checks**:
+  - `canUseFeatureProvider` - generischer Check
+  - `canAccessKlassenProvider`, `canAccessSchuelerProvider`, etc.
+- **16 neue Tests** für Feature-Guard Logik
+
+### Changed
+- **Drawer Navigation** - Items werden basierend auf Feature-Flags ausgeblendet
+  - Klassen, Schüler, Fächer nur sichtbar wenn entsprechender Flag aktiviert
+- **Nachschreiber-Section** - wird ausgeblendet wenn `canUseNachschreiber = false`
+- **Gesamt 23 Feature-Flags** (vorher 17)
+
+### Technical
+- `lib/shared/widgets/feature_guard.dart` - Neue Guard-Widgets und Provider
+- `lib/widgets/rbs_drawer.dart` - Feature-Flag Integration
+- `lib/features/dashboard/widgets/nachschreiber_section.dart` - Guard eingebaut
+- `test/shared/widgets/feature_guard_test.dart` - 16 Unit-Tests
+
 ## [0.30.1] - 2025-12-30 - Bugfix: Tendenzen & Noteneingabe
 
 ### Fixed
