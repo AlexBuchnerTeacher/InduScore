@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/app_providers.dart';
 import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
+import '../../shared/widgets/app_snack_bars.dart';
 
 /// Favoriten-Klassen Manager für Profil
 /// 
@@ -62,23 +63,13 @@ class _FavoritesManagerState extends ConsumerState<FavoritesManager> {
         _hasChanges = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Favoriten erfolgreich gespeichert'),
-          backgroundColor: RBSColors.success,
-        ),
-      );
+      AppSnackBars.showSuccess(context, 'Favoriten erfolgreich gespeichert');
     } catch (e) {
       setState(() => _isLoading = false);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Fehler beim Speichern: $e'),
-          backgroundColor: RBSColors.error,
-        ),
-      );
+      AppSnackBars.showError(context, 'Fehler beim Speichern', error: e);
     }
   }
 

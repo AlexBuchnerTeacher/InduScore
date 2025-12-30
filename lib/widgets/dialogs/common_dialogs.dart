@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/rbs_theme.dart';
+import '../../shared/widgets/app_snack_bars.dart';
 
 /// Wiederverwendbare Dialog-Builder für häufige Dialog-Muster
 class CommonDialogs {
@@ -81,12 +82,7 @@ class CommonDialogs {
               } catch (e) {
                 if (ctx.mounted) {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Fehler beim Löschen: $e'),
-                      backgroundColor: RBSColors.error,
-                    ),
-                  );
+                  AppSnackBars.showError(context, 'Fehler beim Löschen', error: e);
                 }
               }
             },

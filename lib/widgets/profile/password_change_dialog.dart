@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../core/theme/rbs_theme.dart';
 import '../../core/widgets/rbs_components.dart';
+import '../../shared/widgets/app_snack_bars.dart';
 
 /// Dialog zum Passwort ändern mit Re-Authentifizierung
 /// 
@@ -51,21 +52,14 @@ class _PasswordChangeDialogState extends State<PasswordChangeDialog> {
 
       // Erfolg - Dialog schließen und SnackBar zeigen
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Passwort erfolgreich geändert'),
-          backgroundColor: RBSColors.success,
-        ),
-      );
+      AppSnackBars.showSuccess(context, 'Passwort erfolgreich geändert');
     } catch (e) {
       setState(() => _isLoading = false);
 
       if (!mounted) return;
 
       // Fehler anzeigen
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: RBSColors.error),
-      );
+      AppSnackBars.showError(context, e.toString());
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:induscore/models/app_user.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/providers/permissions_providers.dart';
 import 'package:induscore/widgets/dialogs/common_dialogs.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
 
 /// Benutzerverwaltung - nur für Admins
 class UserVerwaltungScreen extends ConsumerStatefulWidget {
@@ -308,17 +309,13 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
       case 'activate':
         await firestoreService.activateAppUser(user.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${user.name} aktiviert')),
-          );
+          AppSnackBars.showSuccess(context, '${user.name} aktiviert');
         }
         break;
       case 'deactivate':
         await firestoreService.deactivateAppUser(user.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${user.name} deaktiviert')),
-          );
+          AppSnackBars.showInfo(context, '${user.name} deaktiviert');
         }
         break;
       case 'delete':
@@ -562,15 +559,14 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
 
       if (context.mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(user != null ? 'Benutzer aktualisiert' : 'Benutzer angelegt')),
+        AppSnackBars.showSuccess(
+          context,
+          user != null ? 'Benutzer aktualisiert' : 'Benutzer angelegt',
         );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e'), backgroundColor: Colors.red),
-        );
+        AppSnackBars.showError(context, 'Fehler', error: e);
       }
     }
   }

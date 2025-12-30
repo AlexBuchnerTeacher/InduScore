@@ -16,6 +16,7 @@ import 'package:induscore/models/student.dart';
 import 'package:induscore/models/subject.dart';
 import 'package:induscore/models/leistungsnachweis.dart';
 import 'package:induscore/models/grade.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
 
 /// Export Screen - NOI/CSV/PDF Export
 class NoiExportScreen extends ConsumerStatefulWidget {
@@ -593,12 +594,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Export fehlgeschlagen: $e'),
-            backgroundColor: RBSColors.dynamicRed,
-          ),
-        );
+        AppSnackBars.showError(context, 'Export fehlgeschlagen', error: e);
       }
     } finally {
       if (mounted) {
@@ -708,12 +704,7 @@ class _NoiExportScreenState extends ConsumerState<NoiExportScreen> {
     web.URL.revokeObjectURL(url);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Export "$filename" erfolgreich!'),
-          backgroundColor: RBSColors.courtGreen,
-        ),
-      );
+      AppSnackBars.showSuccess(context, 'Export "$filename" erfolgreich!');
     }
   }
 }

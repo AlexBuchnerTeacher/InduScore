@@ -4,27 +4,28 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.20.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.32.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 [![CI](https://github.com/AlexBuchnerTeacher/InduScore/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexBuchnerTeacher/InduScore/actions/workflows/ci.yml)
 
-## Features (v0.20.0)
+## Features (v0.32.0)
 
-### Neu in v0.20.0 - Phase 3: Architecture & Accessibility
-- **Feature-based Architecture** - Komplette Migration screens/ → features/
-- **Accessibility** - Semantics-Labels für RBSButton, RBSCard, Drawer
-- **Clean Code** - 14 Screens in 12 Feature-Module organisiert
+### Neu in v0.32.0 - Feature-Guards Polish & SnackBar Refactoring
+- **canUseFilter Guard** - Filter in Klassen/Schüler/Fächer ausblendbar
+- **canAccessNoten Guard** - Noten-Navigation deaktivierbar
+- **AppSnackBars überall** - Einheitliche SnackBars in allen Screens
+- **386 Tests gesamt** (alle bestanden)
 
-### Neu in v0.19.0 - Phase 2.5: UX & Performance
-- **AppSnackBars** - Einheitliches Error-Handling mit 4 Typen
-- **PaginatedFirestoreList** - Widget für Lazy Loading großer Listen
-- **269 Tests gesamt** (alle bestanden)
+### Neu in v0.31.0 - Feature-Flag Guards
+- **6 neue Feature-Flags** - canAccessKlassen/Schueler/Faecher/Noten, canUseFilter, canUseNachschreiber
+- **FeatureVisible Widget** - Bedingte Sichtbarkeit basierend auf Flags
+- **23 Feature-Flags gesamt** für granulare Admin-Kontrolle
 
-### Neu in v0.18.0 - Phase 2: Testing & Security
-- **50 neue Unit-Tests** für Export-Services (CSV, NOI, PDF)
-- **Dependency Injection** für AuthService und FirestoreService
-- **Firestore Security Rules** mit rollenbasierter Zugriffskontrolle
+### Neu in v0.30.0 - Feature-Flags & Notenübersicht kompakter
+- **17 Feature-Flags** für granulare Lehrer-Berechtigungen
+- **Admin Feature-Flags Screen** mit Toggle-UI
+- **NotenLayoutConstants** für kompaktere Darstellung
 
 ## Features (v0.13.4)
 

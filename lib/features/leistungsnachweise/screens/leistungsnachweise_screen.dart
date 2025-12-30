@@ -11,6 +11,7 @@ import 'package:induscore/models/beruf.dart';
 import 'package:induscore/models/subject.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/providers/permissions_providers.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
 
 class LeistungsnachweiseScreen extends ConsumerStatefulWidget {
   const LeistungsnachweiseScreen({super.key});
@@ -672,25 +673,16 @@ class _LeistungsnachweiseScreenState
 
                     if (context.mounted) {
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isEdit
-                                ? 'Leistungsnachweis aktualisiert'
-                                : 'Leistungsnachweis erstellt',
-                          ),
-                          backgroundColor: RBSColors.courtGreen,
-                        ),
+                      AppSnackBars.showSuccess(
+                        context,
+                        isEdit
+                            ? 'Leistungsnachweis aktualisiert'
+                            : 'Leistungsnachweis erstellt',
                       );
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Fehler: $e'),
-                          backgroundColor: RBSColors.dynamicRed,
-                        ),
-                      );
+                      AppSnackBars.showError(context, 'Fehler', error: e);
                     }
                   }
                 },
@@ -726,21 +718,11 @@ class _LeistungsnachweiseScreenState
 
                 if (context.mounted) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Leistungsnachweis gelöscht'),
-                      backgroundColor: RBSColors.courtGreen,
-                    ),
-                  );
+                  AppSnackBars.showSuccess(context, 'Leistungsnachweis gelöscht');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Fehler: $e'),
-                      backgroundColor: RBSColors.dynamicRed,
-                    ),
-                  );
+                  AppSnackBars.showError(context, 'Fehler', error: e);
                 }
               }
             },

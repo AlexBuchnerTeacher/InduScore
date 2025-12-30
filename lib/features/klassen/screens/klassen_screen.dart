@@ -13,6 +13,7 @@ import 'package:induscore/providers/permissions_providers.dart';
 import 'package:induscore/widgets/klassen/klassen_filter_section.dart';
 import 'package:induscore/widgets/klassen/klasse_card.dart';
 import 'package:induscore/widgets/dialogs/klasse_edit_dialog.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
 import 'package:induscore/widgets/dialogs/klasse_delete_dialog.dart';
 
 class KlassenScreen extends ConsumerStatefulWidget {
@@ -271,9 +272,7 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
       final Uint8List? bytes = file.bytes;
       if (bytes == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('PDF konnte nicht gelesen werden.')),
-          );
+          AppSnackBars.showError(context, 'PDF konnte nicht gelesen werden.');
         }
         return;
       }
@@ -284,17 +283,14 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
       if (!mounted) return;
       
       // ImportPreviewDialog geplant für Issue #21 (Premium PDF Import Pipeline)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${preview.students.length} Schüler gefunden. Import-Dialog wird noch implementiert.'),
-          duration: const Duration(seconds: 3),
-        ),
+      AppSnackBars.showInfo(
+        context,
+        '${preview.students.length} Schüler gefunden. Import-Dialog wird noch implementiert.',
+        duration: const Duration(seconds: 3),
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Import fehlgeschlagen: $e')));
+        AppSnackBars.showError(context, 'Import fehlgeschlagen', error: e);
       }
     } finally {
       if (mounted) setState(() => _isImporting = false);

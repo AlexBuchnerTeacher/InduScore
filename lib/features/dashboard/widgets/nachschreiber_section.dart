@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../providers/app_providers.dart';
 import '../../../shared/widgets/feature_guard.dart';
+import '../../../shared/widgets/app_snack_bars.dart';
 
 /// Nachschreiber-Section mit Stufen-Gruppierung
 class NachschreiberSection extends ConsumerWidget {
@@ -255,15 +256,15 @@ class _NachschreiberCard extends ConsumerWidget {
         grund: 'Nicht relevant',
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${student.displayName} von "${ln.bezeichnung}" befreit'),
-            action: SnackBarAction(
-              label: 'Rückgängig',
-              onPressed: () async {
-                await firestoreService.deleteLnExemption(student.id, ln.id);
-              },
-            ),
+        AppSnackBars.showSuccess(
+          context,
+          '${student.displayName} von "${ln.bezeichnung}" befreit',
+          action: SnackBarAction(
+            label: 'Rückgängig',
+            textColor: Colors.white,
+            onPressed: () async {
+              await firestoreService.deleteLnExemption(student.id, ln.id);
+            },
           ),
         );
       }

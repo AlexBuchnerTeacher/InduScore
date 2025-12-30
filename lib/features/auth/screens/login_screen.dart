@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:induscore/core/theme/rbs_theme.dart';
 import 'package:induscore/core/widgets/rbs_components.dart';
 import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
 
 /// Login Screen - RBS Cover-Ebene Design
 ///
@@ -142,23 +143,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   if (context.mounted) {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Passwort-Reset-Link wurde gesendet. Bitte prüfen Sie Ihre E-Mails.',
-                        ),
-                        backgroundColor: RBSColors.courtGreen,
-                      ),
+                    AppSnackBars.showSuccess(
+                      context,
+                      'Passwort-Reset-Link wurde gesendet. Bitte prüfen Sie Ihre E-Mails.',
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(e.toString()),
-                        backgroundColor: RBSColors.dynamicRed,
-                      ),
-                    );
+                    AppSnackBars.showError(context, e.toString());
                   }
                 }
               }
@@ -257,23 +249,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               if (mounted) {
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Konto erfolgreich erstellt!'),
-                    backgroundColor: RBSColors.success,
-                  ),
-                );
+                AppSnackBars.showSuccess(context, 'Konto erfolgreich erstellt!');
                 context.go('/'); // Navigate to home
               }
             } catch (e) {
               if (mounted) {
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(e.toString()),
-                    backgroundColor: RBSColors.error,
-                  ),
-                );
+                AppSnackBars.showError(context, e.toString());
               }
             }
           },
