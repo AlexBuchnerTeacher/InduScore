@@ -20,5 +20,6 @@
     "activate_group_17",
     "activate_group_18",
     "activate_group_19"
-  ]
+  ],
+  "chat.agent.maxRequests": 200
 }

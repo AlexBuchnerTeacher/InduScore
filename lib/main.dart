@@ -1,4 +1,4 @@
-// InduScore v0.22.0 - Phase 5 Performance (Provider .select(), Lazy Loading)
+// InduScore v0.23.0 - Phase 6 Documentation & Coverage
 // Feature-based architecture with proper screen organization
 import 'dart:async';
 
