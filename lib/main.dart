@@ -1,4 +1,4 @@
-// InduScore v0.21.0 - Phase 4 Quality (TODOs, Integration-Tests, Crashlytics)
+// InduScore v0.22.0 - Phase 5 Performance (Provider .select(), Lazy Loading)
 // Feature-based architecture with proper screen organization
 import 'dart:async';
 
@@ -88,6 +88,7 @@ void main() async {
 }
 
 // Router configuration with auth redirect
+// Using pageBuilder for lazy loading - widgets are only built when navigated to
 final _router = GoRouter(
   initialLocation: '/login',
   refreshListenable: GoRouterRefreshStream(
@@ -102,98 +103,104 @@ final _router = GoRouter(
     return null;
   },
   routes: [
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-    GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+    GoRoute(
+      path: '/login',
+      pageBuilder: (context, state) => const NoTransitionPage(child: LoginScreen()),
+    ),
+    GoRoute(
+      path: '/',
+      pageBuilder: (context, state) => const NoTransitionPage(child: HomeScreen()),
+    ),
     GoRoute(
       path: '/klassen',
-      builder: (context, state) => const KlassenScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: KlassenScreen()),
     ),
     GoRoute(
       path: '/klassen/:id',
-      builder: (context, state) => KlassenDetailScreen(
-        klasseId: state.pathParameters['id']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: KlassenDetailScreen(klasseId: state.pathParameters['id']!),
       ),
     ),
     GoRoute(
       path: '/faecher',
-      builder: (context, state) => const FaecherScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: FaecherScreen()),
     ),
     GoRoute(
       path: '/faecher/:id',
-      builder: (context, state) => FaecherDetailScreen(
-        subjectId: state.pathParameters['id']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: FaecherDetailScreen(subjectId: state.pathParameters['id']!),
       ),
     ),
     GoRoute(
       path: '/schueler',
-      builder: (context, state) => const SchuelerScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: SchuelerScreen()),
     ),
     GoRoute(
       path: '/schueler/:id',
-      builder: (context, state) => SchuelerDetailScreen(
-        schuelerId: state.pathParameters['id']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: SchuelerDetailScreen(schuelerId: state.pathParameters['id']!),
       ),
     ),
     GoRoute(
       path: '/leistungsnachweise',
-      builder: (context, state) => const LeistungsnachweiseScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: LeistungsnachweiseScreen()),
     ),
     GoRoute(
       path: '/leistungsnachweis/:id/edit',
-      builder: (context, state) => LNEditorScreen(
-        leistungsnachweisId: state.pathParameters['id']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: LNEditorScreen(leistungsnachweisId: state.pathParameters['id']!),
       ),
     ),
     // Noten-Übersicht Routen (müssen vor /noten/:id stehen wegen Routing-Priorität)
     GoRoute(
       path: '/noten/klasse/:klasseId',
-      builder: (context, state) => NotenUebersichtScreen(
-        klasseId: state.pathParameters['klasseId']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: NotenUebersichtScreen(klasseId: state.pathParameters['klasseId']!),
       ),
     ),
     GoRoute(
       path: '/noten/fach/:fachId',
-      builder: (context, state) => NotenUebersichtScreen(
-        fachId: state.pathParameters['fachId']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: NotenUebersichtScreen(fachId: state.pathParameters['fachId']!),
       ),
     ),
     GoRoute(
       path: '/noten/schueler/:studentId',
-      builder: (context, state) => NotenUebersichtScreen(
-        studentId: state.pathParameters['studentId']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: NotenUebersichtScreen(studentId: state.pathParameters['studentId']!),
       ),
     ),
     // Noten-Eingabe für einzelnen Leistungsnachweis
     GoRoute(
       path: '/noten/:leistungsnachweisId',
-      builder: (context, state) => NotenEingabeScreen(
-        leistungsnachweisId: state.pathParameters['leistungsnachweisId']!,
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: NotenEingabeScreen(leistungsnachweisId: state.pathParameters['leistungsnachweisId']!),
       ),
     ),
     // NOI Export
     GoRoute(
       path: '/export',
-      builder: (context, state) => const NoiExportScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: NoiExportScreen()),
     ),
     // CSV Import
     GoRoute(
       path: '/import',
-      builder: (context, state) => const CsvImportScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: CsvImportScreen()),
     ),
     // Benutzerverwaltung (nur Admins)
     GoRoute(
       path: '/einstellungen/benutzer',
-      builder: (context, state) => const UserVerwaltungScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: UserVerwaltungScreen()),
     ),
     // Admin Einstellungen (nur Admins) - Berufe & Fächer
     GoRoute(
       path: '/einstellungen',
-      builder: (context, state) => const SettingsScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: SettingsScreen()),
     ),
     // User-Profil (alle User-Rollen)
     GoRoute(
       path: '/profil',
-      builder: (context, state) => const ProfileScreen(),
+      pageBuilder: (context, state) => const NoTransitionPage(child: ProfileScreen()),
     ),
   ],
 );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
-import '../../../models/student.dart';
+import '../../../providers/app_providers.dart';
 
 /// Statistik-Kachel für Dashboard
 class DashboardStatCard extends StatelessWidget {
@@ -59,18 +59,23 @@ class DashboardStatCard extends StatelessWidget {
 }
 
 /// Grid mit 4 Statistik-Kacheln (responsive)
+/// Optimiert mit DashboardStatsProvider - rebuilt nur wenn Counts sich ändern
 class DashboardStatisticsGrid extends ConsumerWidget {
-  final AsyncValue klassenAsync;
-  final AsyncValue studentsAsync;
-  final AsyncValue subjectsAsync;
-  final AsyncValue gradesAsync;
+  // Legacy parameters - kept for backwards compatibility but now unused
+  final AsyncValue? klassenAsync;
+  final AsyncValue? studentsAsync;
+  final AsyncValue? subjectsAsync;
+  final AsyncValue? gradesAsync;
 
   const DashboardStatisticsGrid({
-    required this.klassenAsync, required this.studentsAsync, required this.subjectsAsync, required this.gradesAsync, super.key,
+    this.klassenAsync, this.studentsAsync, this.subjectsAsync, this.gradesAsync, super.key,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Use optimized DashboardStatsProvider instead of individual AsyncValues
+    final stats = ref.watch(dashboardStatsProvider);
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -99,44 +104,28 @@ class DashboardStatisticsGrid extends ConsumerWidget {
             DashboardStatCard(
               icon: Icons.school,
               label: 'Klassen',
-              value: klassenAsync.when(
-                data: (data) => '${(data as List).length}',
-                loading: () => '...',
-                error: (e, s) => '-',
-              ),
+              value: stats.isLoading ? '...' : '${stats.klassenCount}',
               color: RBSColors.dynamicRed,
               onTap: () => context.go('/klassen'),
             ),
             DashboardStatCard(
               icon: Icons.people,
               label: 'Schüler',
-              value: studentsAsync.when(
-                data: (data) => '${(data as List<dynamic>).cast<Student>().where((s) => s.isAktiv).length}',
-                loading: () => '...',
-                error: (e, s) => '-',
-              ),
+              value: stats.isLoading ? '...' : '${stats.studentsCount}',
               color: RBSColors.courtGreen,
               onTap: () => context.go('/schueler'),
             ),
             DashboardStatCard(
               icon: Icons.book,
               label: 'Fächer',
-              value: subjectsAsync.when(
-                data: (data) => '${(data as List).length}',
-                loading: () => '...',
-                error: (e, s) => '-',
-              ),
+              value: stats.isLoading ? '...' : '${stats.subjectsCount}',
               color: RBSColors.growingElder,
               onTap: () => context.go('/faecher'),
             ),
             DashboardStatCard(
               icon: Icons.grade,
               label: 'Noten',
-              value: gradesAsync.when(
-                data: (data) => '${(data as List).length}',
-                loading: () => '...',
-                error: (e, s) => '-',
-              ),
+              value: stats.isLoading ? '...' : '${stats.gradesCount}',
               color: const Color(0xFF2E7BB5),
               onTap: () => context.go('/leistungsnachweise'),
             ),

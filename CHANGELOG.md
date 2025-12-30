@@ -10,6 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.22.0] - 2025-12-30 - Phase 5: Performance
+
+### Added
+- **DashboardStatsProvider** (F-010) - Optimierte Statistik-Berechnung ✅
+  - `lib/providers/app_providers.dart`: `DashboardStats` Klasse + Provider
+  - Computed values statt volle Listen - reduziert Widget-Rebuilds
+  - `DashboardStatisticsGrid` nutzt jetzt internen Provider
+
+- **Integration Tests erweitert** ✅
+  - `integration_test/app_test.dart`: 4 neue Test-Gruppen
+  - Login-Flow Tests (Validierung, Email-Eingabe)
+  - UI-Component Tests (Theme, Scaffold)
+
+### Changed
+- **Lazy Loading für Routes** (F-020) ✅
+  - Alle GoRoutes nutzen jetzt `pageBuilder` statt `builder`
+  - `NoTransitionPage` für alle Screens - schnellere Navigation
+  - Widgets werden erst bei Navigation gebaut
+
+- **Dashboard Performance** ✅
+  - `HomeScreen`: Reduzierte Provider-Watches
+  - `DashboardStatisticsGrid`: Konstante Widget-Instanz möglich
+
+### Performance Improvements
+- Weniger Widget-Rebuilds durch computed DashboardStatsProvider
+- Lazy Route-Building reduziert Initial Load Time
+- Optimierte Provider-Watch-Struktur im Dashboard
+
 ## [0.21.0] - 2025-12-30 - Phase 4: Quality & Observability
 
 ### Added
