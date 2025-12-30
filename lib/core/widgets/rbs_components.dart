@@ -8,37 +8,44 @@ class RBSButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final IconData? icon;
+  final String? semanticLabel;
 
   const RBSButton({
     required this.label, super.key,
     this.onPressed,
     this.isLoading = false,
     this.icon,
+    this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: isLoading ? null : onPressed,
-      child: isLoading
-          ? const SizedBox(
-              height: 16,
-              width: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: RBSColors.textOnRed,
-              ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 20),
-                  const SizedBox(width: RBSSpacing.sm),
+    return Semantics(
+      button: true,
+      enabled: !isLoading && onPressed != null,
+      label: semanticLabel ?? label,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        child: isLoading
+            ? const SizedBox(
+                height: 16,
+                width: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: RBSColors.textOnRed,
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 20),
+                    const SizedBox(width: RBSSpacing.sm),
+                  ],
+                  Text(label),
                 ],
-                Text(label),
-              ],
-            ),
+              ),
+      ),
     );
   }
 }
@@ -104,17 +111,19 @@ class RBSCard extends StatelessWidget {
   final EdgeInsets? padding;
   final VoidCallback? onTap;
   final Color? backgroundColor;
+  final String? semanticLabel;
 
   const RBSCard({
     required this.child, super.key,
     this.padding,
     this.onTap,
     this.backgroundColor,
+    this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final card = Card(
       color: backgroundColor,
       child: InkWell(
         onTap: onTap,
@@ -125,6 +134,15 @@ class RBSCard extends StatelessWidget {
         ),
       ),
     );
+    
+    if (semanticLabel != null) {
+      return Semantics(
+        label: semanticLabel,
+        button: onTap != null,
+        child: card,
+      );
+    }
+    return card;
   }
 }
 

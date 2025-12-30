@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/beruf.dart';
-import '../models/subject.dart';
-import '../providers/app_providers.dart';
-import '../core/theme/rbs_theme.dart';
-import '../shared/widgets/app_snack_bars.dart';
-import '../widgets/dialogs/common_dialogs.dart';
+import 'package:induscore/models/beruf.dart';
+import 'package:induscore/models/subject.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
+import 'package:induscore/widgets/dialogs/common_dialogs.dart';
 
 /// Settings-Screen für globale Verwaltung von Berufen und Fächern
 class SettingsScreen extends ConsumerStatefulWidget {

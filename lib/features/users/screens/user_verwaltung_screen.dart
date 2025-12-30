@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../core/theme/rbs_theme.dart';
-import '../core/widgets/rbs_components.dart';
-import '../widgets/rbs_drawer.dart';
-import '../models/app_user.dart';
-import '../providers/app_providers.dart';
-import '../providers/permissions_providers.dart';
-import '../widgets/dialogs/common_dialogs.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/models/app_user.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/providers/permissions_providers.dart';
+import 'package:induscore/widgets/dialogs/common_dialogs.dart';
 
 /// Benutzerverwaltung - nur für Admins
 class UserVerwaltungScreen extends ConsumerStatefulWidget {

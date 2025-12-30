@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/theme/rbs_theme.dart';
-import '../core/widgets/rbs_components.dart';
-import '../providers/app_providers.dart';
-import '../models/app_user.dart';
-import '../widgets/profile/profile_info_section.dart';
-import '../widgets/profile/password_change_dialog.dart';
-import '../widgets/profile/favorites_manager.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/models/app_user.dart';
+import 'package:induscore/widgets/profile/profile_info_section.dart';
+import 'package:induscore/widgets/profile/password_change_dialog.dart';
+import 'package:induscore/widgets/profile/favorites_manager.dart';
 import 'package:intl/intl.dart';
 
 /// User-Profilscreen für persönliche Einstellungen

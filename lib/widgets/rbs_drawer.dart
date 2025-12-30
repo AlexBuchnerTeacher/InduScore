@@ -196,31 +196,37 @@ class RBSDrawer extends ConsumerWidget {
   }) {
     final isCurrentRoute = GoRouterState.of(context).uri.path == route;
 
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: disabled
-            ? RBSColors.textOnLight.withValues(alpha: 0.3)
-            : (isCurrentRoute ? RBSColors.dynamicRed : null),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
+    return Semantics(
+      button: true,
+      enabled: !disabled,
+      selected: isCurrentRoute,
+      label: disabled ? '$title (nicht verfügbar)' : title,
+      child: ListTile(
+        leading: Icon(
+          icon,
           color: disabled
               ? RBSColors.textOnLight.withValues(alpha: 0.3)
               : (isCurrentRoute ? RBSColors.dynamicRed : null),
-          fontWeight: isCurrentRoute ? FontWeight.bold : null,
         ),
-      ),
-      selected: isCurrentRoute,
-      selectedTileColor: RBSColors.redLight,
-      enabled: !disabled,
-      onTap: disabled
-          ? null
-          : () {
+        title: Text(
+          title,
+          style: TextStyle(
+            color: disabled
+                ? RBSColors.textOnLight.withValues(alpha: 0.3)
+                : (isCurrentRoute ? RBSColors.dynamicRed : null),
+            fontWeight: isCurrentRoute ? FontWeight.bold : null,
+          ),
+        ),
+        selected: isCurrentRoute,
+        selectedTileColor: RBSColors.redLight,
+        enabled: !disabled,
+        onTap: disabled
+            ? null
+            : () {
               Navigator.pop(context); // Drawer schließen
               context.go(route);
             },
+      ),
     );
   }
 

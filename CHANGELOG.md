@@ -10,6 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.20.0] - 2025-12-30 - Phase 3: Architecture & Accessibility
+
+### Added
+- **Feature-based Architecture** (F-016) - Komplette Migration ✅
+  - 14 Screens von `screens/` nach `features/` migriert
+  - 12 neue Feature-Ordner: auth, dashboard, klassen, faecher, schueler, leistungsnachweise, noten, export, import, users, settings, profile
+  - Alle Imports auf Package-Imports umgestellt
+  - Klare Modularität und bessere Wartbarkeit
+
+- **Accessibility Verbesserungen** (F-017) ✅
+  - `RBSButton`: Neuer `semanticLabel` Parameter für Screen Reader
+  - `RBSCard`: Neuer `semanticLabel` Parameter für Karten-Beschreibung
+  - `RBSDrawer`: Semantics-Labels für alle Navigations-Items
+
+### Changed
+- **Projektstruktur**: `lib/screens/` vollständig entfernt
+- **Test-Suite**: 269 Tests (alle bestanden)
+- **Imports**: Relative Imports → Package-Imports in allen Feature-Dateien
+
+### Removed
+- `lib/screens/test_matrix_screen.dart` - Entwicklungs-Screen entfernt
+- `/test-matrix` Route - Entfernt aus main.dart
+
+### Breaking Changes
+- **Import-Pfade**: Alle Screen-Imports haben sich geändert
+  - Alt: `package:induscore/screens/home_screen.dart`
+  - Neu: `package:induscore/features/dashboard/screens/home_screen.dart`
+
 ## [0.19.0] - 2025-12-30 - Phase 2.5: UX & Performance
 
 ### Added
