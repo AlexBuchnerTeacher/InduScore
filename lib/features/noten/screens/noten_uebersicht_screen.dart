@@ -826,15 +826,13 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
   // - FaecherMatrixWidget: _buildFaecherMatrix (~530 Zeilen)
   // - _LNStatistik, _buildCompact* Methoden (~50 Zeilen)
 
+  /// Gibt die Note als double zurück
+  /// 
+  /// HINWEIS: Tendenzen werden NICHT in die Berechnung einbezogen!
+  /// Sie dienen nur als visueller Indikator.
   double _getNoteWithTendenz(int note, Tendenz tendenz) {
-    switch (tendenz) {
-      case Tendenz.plus:
-        return note - 0.3; // 2+ = 1.7
-      case Tendenz.minus:
-        return note + 0.3; // 2- = 2.3
-      case Tendenz.keine:
-        return note.toDouble();
-    }
+    // Tendenz wird ignoriert - nur Indikator, keine Berechnung
+    return note.toDouble();
   }
 
   void _updateNote(String key, String studentId, String lnId, int? value) {

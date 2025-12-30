@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.30.1] - 2025-12-30 - Bugfix: Tendenzen & Noteneingabe
+
+### Fixed
+- **Tendenzen nur Indikator** - Tendenzen (+/-) fließen nicht mehr in Durchschnittsberechnungen ein
+  - Tendenzen sind rein visuelle Indikatoren für die Lehrkraft
+  - Durchschnitt verwendet nur die Ganzzahl-Note (2+ = 2.0, nicht 1.7)
+- **Kürzel aus AppUser-Profil** - Kürzel wird jetzt aus `AppUser.kuerzel` gelesen
+  - Neuer `currentUserKuerzelProvider` für zentrale Kürzel-Logik
+  - Kein Extrahieren mehr aus E-Mail-Adresse
+
+### Changed
+- **Noteneingabe kompakter**
+  - Dropdown ohne Rahmen, minimalistisches Design
+  - Nur kritische Noten (5,6) mit rotem Hintergrund
+  - Tendenzen vertikal statt horizontal (spart 44px Breite)
+  - Kompaktere Dimensionen: rowHeight 36px, Dropdown 36px
+
+### Added
+- 9 neue Tests für Tendenz-Berechnung (`tendenz_calculation_test.dart`)
+
 ## [0.30.0] - 2025-12-31 - Phase 8: Feature-Flags & Notenübersicht kompakter
 
 ### Added - Feature-Flags System (Issue #46)
