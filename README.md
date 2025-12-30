@@ -4,21 +4,27 @@
 
 Eine moderne Flutter-Webanwendung zur effizienten Verwaltung von Schülernoten, Leistungsnachweisen und Zeugnisnoten an Berufsschulen.
 
-![Version](https://img.shields.io/badge/version-0.14.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.18.0-blue.svg)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.2-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
+[![CI](https://github.com/AlexBuchnerTeacher/InduScore/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexBuchnerTeacher/InduScore/actions/workflows/ci.yml)
 
+## Features (v0.18.0)
 
-## Features (v0.14.0)
+### Neu in v0.18.0 - Phase 2: Testing & Security
+- **50 neue Unit-Tests** für Export-Services (CSV, NOI, PDF)
+- **Dependency Injection** für AuthService und FirestoreService
+- **Firestore Security Rules** mit rollenbasierter Zugriffskontrolle
+- **253 Tests gesamt** (alle bestanden)
 
-### Neu in v0.14.0
-- **Berechtigungssystem**: 4 Benutzerrollen (Admin, Lehrer, Ausbilder, Schüler)
-- **Permission Guards**: Alle Screens mit rollenbasierter Zugriffskontrolle
-- **Favoriten-Klassen**: Lehrer können Klassen als Favoriten markieren
-- **Dashboard-Filter**: Automatische Filterung nach Favoriten-Klassen
-- **Kürzel Case-Insensitivity**: Login funktioniert unabhängig von Groß-/Kleinschreibung
-- **Leistungsnachweis-Ownership**: Tracking wer welchen LN erstellt hat
-- **Erweiterte Benutzerverwaltung**: Email-Bearbeitung, Favoriten-Auswahl
+### Neu in v0.17.0 - Phase 1: Code Quality
+- **Common Dialog Library** mit 6 wiederverwendbaren Dialogen
+- **Konsistente Namenskonventionen** (ScreenEnums, Feature-Patterns)
+- **Verbesserte Testabdeckung** (+23 Tests)
+
+### Neu in v0.16.0
+- **User-Profilscreen** mit Passwort-Änderung
+- **Verbesserte Benutzerverwaltung**
 
 ## Features (v0.13.4)
 
