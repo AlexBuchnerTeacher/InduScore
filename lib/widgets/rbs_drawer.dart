@@ -5,6 +5,7 @@ import '../core/theme/rbs_theme.dart';
 import '../core/widgets/rbs_components.dart';
 import '../providers/app_providers.dart';
 import '../providers/permissions_providers.dart';
+import '../shared/widgets/feature_guard.dart';
 
 class RBSDrawer extends ConsumerWidget {
   const RBSDrawer({super.key});
@@ -54,6 +55,12 @@ class RBSDrawer extends ConsumerWidget {
                 final canImportCSV = ref.watch(canImportCSVProvider);
                 final canManageUsers = ref.watch(canManageUsersProvider);
                 
+                // Feature-Flag basierte Sichtbarkeit
+                final canAccessKlassen = ref.watch(canAccessKlassenProvider);
+                final canAccessSchueler = ref.watch(canAccessSchuelerProvider);
+                final canAccessFaecher = ref.watch(canAccessFaecherProvider);
+                // canUseFilter wird später für Filter-Sections verwendet
+                
                 return ListView(
                   padding: EdgeInsets.zero,
                   children: [
@@ -64,27 +71,28 @@ class RBSDrawer extends ConsumerWidget {
                       route: '/',
                     ),
                     const Divider(),
-                    // Datenverwaltung (Admin + Lehrer + Ausbilder)
-                    if (canManageData) ...[
+                    // Datenverwaltung - jetzt mit Feature-Flags
+                    if (canManageData && canAccessKlassen)
                       _buildDrawerItem(
                         context,
                         icon: Icons.school_outlined,
                         title: 'Klassen',
                         route: '/klassen',
                       ),
+                    if (canManageData && canAccessSchueler)
                       _buildDrawerItem(
                         context,
                         icon: Icons.person_outline,
                         title: 'Schüler',
                         route: '/schueler',
                       ),
+                    if (canManageData && canAccessFaecher)
                       _buildDrawerItem(
                         context,
                         icon: Icons.book_outlined,
                         title: 'Fächer',
                         route: '/faecher',
                       ),
-                    ],
                     _buildDrawerItem(
                       context,
                       icon: Icons.assignment_outlined,

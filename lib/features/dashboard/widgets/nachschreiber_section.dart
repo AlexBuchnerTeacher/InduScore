@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../providers/app_providers.dart';
+import '../../../shared/widgets/feature_guard.dart';
 
 /// Nachschreiber-Section mit Stufen-Gruppierung
 class NachschreiberSection extends ConsumerWidget {
@@ -10,6 +11,12 @@ class NachschreiberSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Feature-Flag Check: Wenn deaktiviert, Section ausblenden
+    final canUseNachschreiber = ref.watch(canUseNachschreiberProvider);
+    if (!canUseNachschreiber) {
+      return const SizedBox.shrink();
+    }
+    
     final nachschreiber = ref.watch(filteredNachschreiberProvider);
 
     if (nachschreiber.isEmpty) {
