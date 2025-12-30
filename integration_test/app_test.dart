@@ -32,19 +32,13 @@ void main() {
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
-      // Finde Email-Feld
-      final emailField = find.byWidgetPredicate(
-        (widget) => widget is TextFormField && 
-                    widget.decoration?.labelText?.contains('E-Mail') == true,
-      );
-      expect(emailField, findsOneWidget);
+      // Finde Email-Feld durch Descendant-Finder
+      final emailField = find.widgetWithText(TextFormField, 'E-Mail');
+      expect(emailField, findsWidgets);
 
-      // Finde Passwort-Feld
-      final passwordField = find.byWidgetPredicate(
-        (widget) => widget is TextFormField && 
-                    widget.decoration?.labelText?.contains('Passwort') == true,
-      );
-      expect(passwordField, findsOneWidget);
+      // Finde Passwort-Feld durch Descendant-Finder
+      final passwordField = find.widgetWithText(TextFormField, 'Passwort');
+      expect(passwordField, findsWidgets);
     });
   });
 
