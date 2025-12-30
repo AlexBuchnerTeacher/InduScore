@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../core/theme/rbs_theme.dart';
-import '../widgets/rbs_drawer.dart';
-import '../core/widgets/rbs_components.dart';
-import '../models/leistungsnachweis.dart';
-import '../models/klasse.dart';
-import '../models/beruf.dart';
-import '../models/subject.dart';
-import '../providers/app_providers.dart';
-import '../providers/permissions_providers.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/models/leistungsnachweis.dart';
+import 'package:induscore/models/klasse.dart';
+import 'package:induscore/models/beruf.dart';
+import 'package:induscore/models/subject.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/providers/permissions_providers.dart';
 
 class LeistungsnachweiseScreen extends ConsumerStatefulWidget {
   const LeistungsnachweiseScreen({super.key});

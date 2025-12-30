@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:induscore/screens/profile_screen.dart';
+import 'package:induscore/features/profile/screens/profile_screen.dart';
 import 'package:induscore/models/app_user.dart';
 import 'package:induscore/core/theme/rbs_theme.dart';
 import 'package:induscore/providers/app_providers.dart';

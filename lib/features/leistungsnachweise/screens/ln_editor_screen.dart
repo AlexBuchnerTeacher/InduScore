@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../providers/app_providers.dart';
-import '../../widgets/rbs_drawer.dart';
-import '../noten/widgets/noten_matrix_view.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/features/noten/widgets/noten_matrix_view.dart';
 
 /// Leistungsnachweis-Editor Screen
 /// 

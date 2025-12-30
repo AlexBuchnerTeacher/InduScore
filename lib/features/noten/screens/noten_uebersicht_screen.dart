@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/theme/rbs_theme.dart';
-import '../core/widgets/rbs_components.dart';
-import '../features/noten/widgets/faecher_matrix_widget.dart';
-import '../features/noten/widgets/noten_table_widget.dart';
-import '../features/noten/widgets/student_subject_card.dart';
-import '../models/grade.dart';
-import '../models/klasse.dart';
-import '../models/leistungsnachweis.dart';
-import '../models/noten_eingabe.dart';
-import '../models/student.dart';
-import '../models/subject.dart';
-import '../models/tendenz.dart';
-import '../providers/app_providers.dart';
-import '../widgets/rbs_drawer.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/features/noten/widgets/faecher_matrix_widget.dart';
+import 'package:induscore/features/noten/widgets/noten_table_widget.dart';
+import 'package:induscore/features/noten/widgets/student_subject_card.dart';
+import 'package:induscore/models/grade.dart';
+import 'package:induscore/models/klasse.dart';
+import 'package:induscore/models/leistungsnachweis.dart';
+import 'package:induscore/models/noten_eingabe.dart';
+import 'package:induscore/models/student.dart';
+import 'package:induscore/models/subject.dart';
+import 'package:induscore/models/tendenz.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
 
 /// Zentrale Notenübersicht mit flexiblen Filtern
 ///

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/grade.dart';
-import '../models/leistungsnachweis.dart';
-import '../models/student.dart';
-import '../models/tendenz.dart';
-import '../providers/app_providers.dart';
-import '../core/theme/rbs_theme.dart';
+import 'package:induscore/models/grade.dart';
+import 'package:induscore/models/leistungsnachweis.dart';
+import 'package:induscore/models/student.dart';
+import 'package:induscore/models/tendenz.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
 
 class NotenEingabeScreen extends ConsumerStatefulWidget {
   final String leistungsnachweisId;

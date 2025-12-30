@@ -3,15 +3,15 @@ import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/theme/rbs_theme.dart';
-import '../core/widgets/rbs_components.dart';
-import '../models/subject.dart';
-import '../models/beruf.dart';
-import '../providers/app_providers.dart';
-import '../shared/widgets/app_snack_bars.dart';
-import '../widgets/dialogs/common_dialogs.dart';
-import '../widgets/rbs_drawer.dart';
-import '../providers/permissions_providers.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/models/subject.dart';
+import 'package:induscore/models/beruf.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/shared/widgets/app_snack_bars.dart';
+import 'package:induscore/widgets/dialogs/common_dialogs.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/providers/permissions_providers.dart';
 
 /// Fächerverwaltung Screen
 /// - Listet alle Fächer (Subjects) mit Filter nach Beruf

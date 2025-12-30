@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../core/theme/rbs_theme.dart';
-import '../widgets/rbs_drawer.dart';
-import '../core/widgets/rbs_components.dart';
-import '../providers/app_providers.dart';
-import '../features/dashboard/widgets/statistics_cards.dart';
-import '../features/dashboard/widgets/klassen_chips.dart';
-import '../features/dashboard/widgets/nachschreiber_section.dart';
-import '../features/dashboard/widgets/leistungsnachweise_list.dart';
-import '../features/dashboard/widgets/dashboard_widgets.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/features/dashboard/widgets/statistics_cards.dart';
+import 'package:induscore/features/dashboard/widgets/klassen_chips.dart';
+import 'package:induscore/features/dashboard/widgets/nachschreiber_section.dart';
+import 'package:induscore/features/dashboard/widgets/leistungsnachweise_list.dart';
+import 'package:induscore/features/dashboard/widgets/dashboard_widgets.dart';
 
 /// Haupt-Dashboard Screen
 class HomeScreen extends ConsumerWidget {

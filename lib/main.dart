@@ -1,5 +1,5 @@
-// InduScore Entwicklungsstand 0.11.3 - 10.12.2025
-// UI optimiert, Chips zentriert, LN-Hinweis verbessert
+// InduScore v0.20.0 - Phase 3 Architecture Migration
+// Feature-based architecture with proper screen organization
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,24 +9,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
-import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/klassen_screen.dart';
-import 'screens/faecher_screen.dart';
-import 'screens/schueler_screen.dart';
-import 'screens/leistungsnachweise_screen.dart';
-import 'screens/noten_eingabe_screen.dart';
-import 'screens/noten_uebersicht_screen.dart';
-import 'screens/noi_export_screen.dart';
-import 'screens/csv_import_screen.dart';
-import 'screens/user_verwaltung_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/profile_screen.dart';
-import 'screens/test_matrix_screen.dart';
-import 'features/klassen/klassen_detail_screen.dart';
-import 'features/schueler/schueler_detail_screen.dart';
-import 'features/leistungsnachweise/ln_editor_screen.dart';
-import 'features/faecher/faecher_detail_screen.dart';
+// Feature imports - organized by domain
+import 'features/auth/screens/login_screen.dart';
+import 'features/dashboard/screens/home_screen.dart';
+import 'features/klassen/screens/klassen_screen.dart';
+import 'features/klassen/screens/klassen_detail_screen.dart';
+import 'features/faecher/screens/faecher_screen.dart';
+import 'features/faecher/screens/faecher_detail_screen.dart';
+import 'features/schueler/screens/schueler_screen.dart';
+import 'features/schueler/screens/schueler_detail_screen.dart';
+import 'features/leistungsnachweise/screens/leistungsnachweise_screen.dart';
+import 'features/leistungsnachweise/screens/ln_editor_screen.dart';
+import 'features/noten/screens/noten_eingabe_screen.dart';
+import 'features/noten/screens/noten_uebersicht_screen.dart';
+import 'features/export/screens/noi_export_screen.dart';
+import 'features/import/screens/csv_import_screen.dart';
+import 'features/users/screens/user_verwaltung_screen.dart';
+import 'features/settings/screens/settings_screen.dart';
+import 'features/profile/screens/profile_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -180,13 +180,6 @@ final _router = GoRouter(
     GoRoute(
       path: '/profil',
       builder: (context, state) => const ProfileScreen(),
-    ),
-    // TEST: Matrix View (Development only)
-    GoRoute(
-      path: '/test-matrix',
-      builder: (context, state) => TestMatrixScreen(
-        klasseId: state.uri.queryParameters['klasseId'],
-      ),
     ),
   ],
 );

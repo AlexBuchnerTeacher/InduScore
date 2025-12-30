@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme/rbs_theme.dart';
-import '../../core/widgets/rbs_components.dart';
-import '../../providers/app_providers.dart';
-import '../../services/csv_import_service.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/services/csv_import_service.dart';
 
 /// Gemeinsame Widgets für CSV Import Screen
 class CsvImportWidgets {

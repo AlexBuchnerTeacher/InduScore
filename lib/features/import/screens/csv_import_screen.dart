@@ -5,14 +5,14 @@ import 'package:web/web.dart' as web;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../core/theme/rbs_theme.dart';
-import '../core/widgets/rbs_components.dart';
-import '../providers/app_providers.dart';
-import '../services/csv_import_service.dart';
-import '../services/asv_import_service.dart';
-import '../models/student.dart';
-import '../providers/permissions_providers.dart';
-import 'widgets/csv_import_widgets.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/services/csv_import_service.dart';
+import 'package:induscore/services/asv_import_service.dart';
+import 'package:induscore/models/student.dart';
+import 'package:induscore/providers/permissions_providers.dart';
+import 'package:induscore/features/import/widgets/csv_import_widgets.dart';
 
 /// CSV Import Screen - Schülerlisten importieren (nur Admin)
 class CsvImportScreen extends ConsumerStatefulWidget {

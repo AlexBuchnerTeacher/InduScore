@@ -3,17 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:typed_data';
-import '../core/theme/rbs_theme.dart';
-import '../widgets/rbs_drawer.dart';
-import '../core/widgets/rbs_components.dart';
-import '../models/klasse.dart';
-import '../providers/app_providers.dart';
-import '../services/pdf_import_service.dart';
-import '../providers/permissions_providers.dart';
-import '../widgets/klassen/klassen_filter_section.dart';
-import '../widgets/klassen/klasse_card.dart';
-import '../widgets/dialogs/klasse_edit_dialog.dart';
-import '../widgets/dialogs/klasse_delete_dialog.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/models/klasse.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/services/pdf_import_service.dart';
+import 'package:induscore/providers/permissions_providers.dart';
+import 'package:induscore/widgets/klassen/klassen_filter_section.dart';
+import 'package:induscore/widgets/klassen/klasse_card.dart';
+import 'package:induscore/widgets/dialogs/klasse_edit_dialog.dart';
+import 'package:induscore/widgets/dialogs/klasse_delete_dialog.dart';
 
 class KlassenScreen extends ConsumerStatefulWidget {
   const KlassenScreen({super.key});

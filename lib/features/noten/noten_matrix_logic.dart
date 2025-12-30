@@ -1,7 +1,7 @@
-import '../../models/grade.dart';
-import '../../models/leistungsnachweis.dart';
-import '../../models/student.dart';
-import '../../models/tendenz.dart';
+import 'package:induscore/models/grade.dart';
+import 'package:induscore/models/leistungsnachweis.dart';
+import 'package:induscore/models/student.dart';
+import 'package:induscore/models/tendenz.dart';
 
 /// Business Logic für NotenMatrixView
 /// 

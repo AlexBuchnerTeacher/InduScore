@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/theme/rbs_theme.dart';
-import '../../core/widgets/rbs_components.dart';
-import '../../models/leistungsnachweis.dart';
-import '../../models/subject.dart';
-import '../../models/student.dart';
-import '../../models/grade.dart';
-import '../../models/klasse.dart';
-import '../../models/beruf.dart';
-import '../../providers/app_providers.dart';
-import '../../widgets/rbs_drawer.dart';
+import 'package:induscore/core/theme/rbs_theme.dart';
+import 'package:induscore/core/widgets/rbs_components.dart';
+import 'package:induscore/models/leistungsnachweis.dart';
+import 'package:induscore/models/subject.dart';
+import 'package:induscore/models/student.dart';
+import 'package:induscore/models/grade.dart';
+import 'package:induscore/models/klasse.dart';
+import 'package:induscore/models/beruf.dart';
+import 'package:induscore/providers/app_providers.dart';
+import 'package:induscore/widgets/rbs_drawer.dart';
 
 /// Fächer-Detail Screen mit Klassen-Übersicht
 /// 
