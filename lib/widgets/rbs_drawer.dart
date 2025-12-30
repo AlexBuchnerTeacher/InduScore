@@ -132,6 +132,12 @@ class RBSDrawer extends ConsumerWidget {
                       ),
                       _buildDrawerItem(
                         context,
+                        icon: Icons.toggle_on_outlined,
+                        title: 'Feature-Flags',
+                        route: '/einstellungen/feature-flags',
+                      ),
+                      _buildDrawerItem(
+                        context,
                         icon: Icons.people_outlined,
                         title: 'Benutzerverwaltung',
                         route: '/einstellungen/benutzer',

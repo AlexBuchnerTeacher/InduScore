@@ -29,6 +29,7 @@ import 'features/import/screens/csv_import_screen.dart';
 import 'features/users/screens/user_verwaltung_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'features/admin/screens/feature_flags_screen.dart';
 import 'core/theme/rbs_theme.dart';
 
 /// Converts a [Stream] into a [Listenable] for use with GoRouter's refreshListenable.
@@ -196,6 +197,11 @@ final _router = GoRouter(
     GoRoute(
       path: '/einstellungen',
       pageBuilder: (context, state) => const NoTransitionPage(child: SettingsScreen()),
+    ),
+    // Feature-Flags (nur Admins)
+    GoRoute(
+      path: '/einstellungen/feature-flags',
+      pageBuilder: (context, state) => const NoTransitionPage(child: FeatureFlagsScreen()),
     ),
     // User-Profil (alle User-Rollen)
     GoRoute(

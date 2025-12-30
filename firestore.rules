@@ -1,8 +1,9 @@
 rules_version = '2';
 
-// InduScore Firestore Security Rules v0.18.0
+// InduScore Firestore Security Rules v0.25.0
 // F-004: Rollenbasierte Zugriffskontrolle
 // F-005: Field-Level Security
+// F-046: Feature-Flags für Lehrer-Berechtigungen
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -137,6 +138,17 @@ service cloud.firestore {
       
       // Delete: Nur Admins
       allow delete: if isAdmin();
+    }
+    
+    // ============================================================
+    // SETTINGS COLLECTION (Feature-Flags, App-Konfiguration)
+    // ============================================================
+    match /settings/{docId} {
+      // Lesen: Alle authentifizierten User (für Feature-Flags)
+      allow read: if isAuthenticated();
+      
+      // Schreiben: Nur Admins
+      allow create, update, delete: if isAdmin();
     }
     
     // ============================================================
