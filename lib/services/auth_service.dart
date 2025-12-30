@@ -1,7 +1,27 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
+/// Service für Firebase Authentication
+/// 
+/// Verwendet Constructor Dependency Injection für bessere Testbarkeit.
+/// 
+/// **Usage:**
+/// ```dart
+/// // Produktion (mit echtem Firebase):
+/// final authService = AuthService();
+/// 
+/// // Tests (mit Mock):
+/// final authService = AuthService(firebaseAuth: mockAuth);
+/// ```
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth;
+
+  /// Erstellt einen AuthService
+  /// 
+  /// [firebaseAuth] - Optional: FirebaseAuth Instance. 
+  /// Defaults to FirebaseAuth.instance für Production.
+  /// Kann mit Mock überschrieben werden für Tests.
+  AuthService({FirebaseAuth? firebaseAuth})
+      : _auth = firebaseAuth ?? FirebaseAuth.instance;
 
   // Get current user
   User? get currentUser => _auth.currentUser;
