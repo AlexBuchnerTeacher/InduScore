@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Kürzel-Caching Problem** - Noteneingabe zeigt nun korrekt das Kürzel aus AppUser-Profil
+  - `currentUserKuerzelProvider` als `FutureProvider` mit robustem Async-Handling
+  - Debug-Logging für bessere Nachverfolgung der Kürzel-Auflösung
+  - Automatische Provider-Invalidierung bei Login/Logout
+  - Verbesserte Fallback-Logik (AppUser.kuerzel → E-Mail-Extraktion → '??')
+  - Korrekte Verwendung in `noten_eingabe_screen.dart` und `noten_uebersicht_screen.dart`
+
 <!-- Next release content goes here -->
 
 ## [0.32.0] - 2025-12-31 - Feature-Guards Polish & SnackBar Refactoring
