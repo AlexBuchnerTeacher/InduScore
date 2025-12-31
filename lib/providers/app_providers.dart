@@ -551,29 +551,11 @@ final currentUserKuerzelProvider = FutureProvider<String>((ref) async {
   // Warte auf AppUser-Daten (invalidiert automatisch bei Änderungen)
   final appUserAsync = ref.watch(currentAppUserProvider);
   
-  // Während AppUser lädt, versuche Fallback auf Firebase User
-  if (appUserAsync.isLoading) {
-    debugPrint('[currentUserKuerzelProvider] AppUser is loading, using fallback...');
-    final firebaseUser = ref.watch(currentUserProvider);
-    if (firebaseUser?.email != null) {
-      final kuerzel = _extractKuerzelFromEmail(firebaseUser!.email!);
-      debugPrint('[currentUserKuerzelProvider] Fallback kuerzel from email: $kuerzel');
-      return kuerzel;
-    }
-    debugPrint('[currentUserKuerzelProvider] No Firebase user, returning ??');
-    return '??';
-  }
-  
-  // Bei Fehler, Fallback auf E-Mail-Extraktion
-  if (appUserAsync.hasError) {
-    debugPrint('[currentUserKuerzelProvider] AppUser has error: ${appUserAsync.error}');
-    final firebaseUser = ref.watch(currentUserProvider);
-    if (firebaseUser?.email != null) {
-      final kuerzel = _extractKuerzelFromEmail(firebaseUser!.email!);
-      debugPrint('[currentUserKuerzelProvider] Fallback kuerzel from email (error case): $kuerzel');
-      return kuerzel;
-    }
-    return '??';
+  // Während AppUser lädt oder bei Fehler, versuche Fallback auf Firebase User
+  if (appUserAsync.isLoading || appUserAsync.hasError) {
+    final reason = appUserAsync.isLoading ? 'loading' : 'error: ${appUserAsync.error}';
+    debugPrint('[currentUserKuerzelProvider] AppUser is $reason, using fallback...');
+    return _getFallbackKuerzel(ref);
   }
   
   final appUser = appUserAsync.value;
@@ -585,16 +567,21 @@ final currentUserKuerzelProvider = FutureProvider<String>((ref) async {
   }
   
   // Fallback: Aus E-Mail extrahieren (wenn AppUser.kuerzel leer ist)
+  debugPrint('[currentUserKuerzelProvider] AppUser.kuerzel is empty, using fallback...');
+  return _getFallbackKuerzel(ref);
+});
+
+/// Helper: Fallback-Kürzel aus Firebase User E-Mail extrahieren
+String _getFallbackKuerzel(Ref ref) {
   final firebaseUser = ref.watch(currentUserProvider);
   if (firebaseUser?.email != null) {
     final kuerzel = _extractKuerzelFromEmail(firebaseUser!.email!);
-    debugPrint('[currentUserKuerzelProvider] AppUser.kuerzel is empty, using email extraction: $kuerzel');
+    debugPrint('[currentUserKuerzelProvider] Fallback kuerzel from email: $kuerzel');
     return kuerzel;
   }
-  
-  debugPrint('[currentUserKuerzelProvider] No kuerzel available, returning ??');
+  debugPrint('[currentUserKuerzelProvider] No Firebase user, returning ??');
   return '??';
-});
+}
 
 /// Extrahiert Kürzel aus E-Mail (z.B. "MU" aus "mu@induscore.de")
 String _extractKuerzelFromEmail(String email) {
