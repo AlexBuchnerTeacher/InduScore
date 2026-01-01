@@ -35,9 +35,13 @@ class MockFirebaseUser extends Fake implements firebase_auth.User {
   });
 }
 
-/// Helper function to wait for providers to settle
+/// Helper function to wait for provider dependency updates to propagate
+/// 
+/// After a FutureProvider completes, dependent providers may not immediately
+/// reflect the new state. This function waits for microtasks to complete,
+/// allowing the Riverpod system to propagate updates through the dependency graph.
 Future<void> waitForProviders(ProviderContainer container) async {
-  // Give microtasks a chance to complete
+  // Give microtasks a chance to complete so provider updates propagate
   await Future.microtask(() {});
 }
 
