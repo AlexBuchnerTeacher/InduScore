@@ -575,6 +575,12 @@ final currentUserKuerzelProvider = FutureProvider<String>((ref) async {
 
 /// Helper: Fallback-Kürzel aus Firebase User E-Mail extrahieren
 String _getFallbackKuerzel(Ref ref) {
+  // Safety check in case ref was disposed
+  if (!ref.mounted) {
+    debugPrint('[_getFallbackKuerzel] Ref disposed, returning ??');
+    return '??';
+  }
+  
   final firebaseUser = ref.watch(currentUserProvider);
   if (firebaseUser?.email != null) {
     final kuerzel = _extractKuerzelFromEmail(firebaseUser!.email!);

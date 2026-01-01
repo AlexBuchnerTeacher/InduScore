@@ -239,8 +239,7 @@ void main() {
         // Assert
         expect(kuerzel, expectedKuerzel, reason: 'Für E-Mail: $email');
         
-        // Important: Dispose container after test completes
-        await Future.delayed(Duration.zero); // Let async operations complete
+        // Dispose container after test completes
         container.dispose();
       }
     });
