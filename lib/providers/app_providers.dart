@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/auth_service.dart';
@@ -538,22 +539,49 @@ final currentAppUserProvider = FutureProvider<AppUser?>((ref) async {
 /// 
 /// Verwendet das kuerzel-Feld aus dem AppUser-Profil.
 /// Fallback auf E-Mail-Extraktion, falls kein Kürzel gesetzt ist.
-final currentUserKuerzelProvider = Provider<String>((ref) {
-  final appUser = ref.watch(currentAppUserProvider).value;
+/// 
+/// WICHTIG: Dies ist ein FutureProvider, der auf die AppUser-Daten wartet.
+/// Der Provider wird automatisch invalidiert wenn:
+/// - Der Benutzer sich ein-/ausloggt (authStateProvider ändert sich)
+/// - Das AppUser-Profil aktualisiert wird (currentAppUserProvider ändert sich)
+final currentUserKuerzelProvider = FutureProvider<String>((ref) async {
+  // Debug-Logging für bessere Nachverfolgung
+  debugPrint('[currentUserKuerzelProvider] Resolving kuerzel...');
   
-  // Primär: Kürzel aus AppUser
+  // Warte auf AppUser-Daten (invalidiert automatisch bei Änderungen)
+  final appUserAsync = ref.watch(currentAppUserProvider);
+  
+  // Während AppUser lädt oder bei Fehler, versuche Fallback auf Firebase User
+  if (appUserAsync.isLoading || appUserAsync.hasError) {
+    final reason = appUserAsync.isLoading ? 'loading' : 'error: ${appUserAsync.error}';
+    debugPrint('[currentUserKuerzelProvider] AppUser is $reason, using fallback...');
+    return _getFallbackKuerzel(ref);
+  }
+  
+  final appUser = appUserAsync.value;
+  
+  // Primär: Kürzel aus AppUser (wenn nicht leer)
   if (appUser != null && appUser.kuerzel.isNotEmpty) {
+    debugPrint('[currentUserKuerzelProvider] Using AppUser.kuerzel: ${appUser.kuerzel}');
     return appUser.kuerzel;
   }
   
-  // Fallback: Aus E-Mail extrahieren
+  // Fallback: Aus E-Mail extrahieren (wenn AppUser.kuerzel leer ist)
+  debugPrint('[currentUserKuerzelProvider] AppUser.kuerzel is empty, using fallback...');
+  return _getFallbackKuerzel(ref);
+});
+
+/// Helper: Fallback-Kürzel aus Firebase User E-Mail extrahieren
+String _getFallbackKuerzel(Ref ref) {
   final firebaseUser = ref.watch(currentUserProvider);
   if (firebaseUser?.email != null) {
-    return _extractKuerzelFromEmail(firebaseUser!.email!);
+    final kuerzel = _extractKuerzelFromEmail(firebaseUser!.email!);
+    debugPrint('[currentUserKuerzelProvider] Fallback kuerzel from email: $kuerzel');
+    return kuerzel;
   }
-  
+  debugPrint('[currentUserKuerzelProvider] No Firebase user, returning ??');
   return '??';
-});
+}
 
 /// Extrahiert Kürzel aus E-Mail (z.B. "MU" aus "mu@induscore.de")
 String _extractKuerzelFromEmail(String email) {

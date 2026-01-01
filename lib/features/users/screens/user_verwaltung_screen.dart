@@ -537,6 +537,10 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
           favoriteKlassenIds: favoriteKlassenIds,
         );
         await firestoreService.updateAppUser(updated);
+        
+        // Invalidiere Provider um Änderungen zu propagieren
+        ref.invalidate(appUsersProvider);
+        ref.invalidate(currentAppUserProvider);
       } else {
         // Neu anlegen - erst Firebase Auth User erstellen
         final userCredential = await authService.createUserWithEmailAndPassword(
@@ -555,6 +559,9 @@ class _UserVerwaltungScreenState extends ConsumerState<UserVerwaltungScreen> {
           createdAt: DateTime.now(),
         );
         await firestoreService.createAppUserWithId(userCredential.user!.uid, newUser);
+        
+        // Invalidiere Provider um neue User zu laden
+        ref.invalidate(appUsersProvider);
       }
 
       if (context.mounted) {

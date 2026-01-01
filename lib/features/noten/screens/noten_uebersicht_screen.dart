@@ -864,8 +864,8 @@ class _NotenUebersichtScreenState extends ConsumerState<NotenUebersichtScreen> {
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
-      // Kürzel aus zentralem Provider
-      final userKuerzel = ref.read(currentUserKuerzelProvider);
+      // Kürzel aus zentralem Provider (mit await, da es nun FutureProvider ist)
+      final userKuerzel = await ref.read(currentUserKuerzelProvider.future);
 
       if (eingabe.note != null) {
         final grade = Grade(
