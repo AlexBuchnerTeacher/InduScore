@@ -4,6 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/models/app_user.dart';
 
+/// Tests for currentUserKuerzelProvider
+/// 
+/// This provider manages the "Kürzel" (abbreviation) for the current user.
+/// It has the following behavior:
+/// 1. Primary: Uses the kuerzel field from AppUser (if available and non-empty)
+/// 2. Fallback: Extracts kuerzel from email address (first 4 chars of username)
+/// 3. Final fallback: Returns "??" if no data is available
+/// 
+/// The provider handles async state properly:
+/// - While AppUser is loading, falls back to email extraction
+/// - When AppUser errors, falls back to email extraction
+/// - When user is not logged in, returns "??"
+
 /// Mock Firebase User for testing
 class MockFirebaseUser extends Fake implements firebase_auth.User {
   @override
@@ -20,6 +33,12 @@ class MockFirebaseUser extends Fake implements firebase_auth.User {
     required this.uid,
     this.displayName,
   });
+}
+
+/// Helper function to wait for providers to settle
+Future<void> waitForProviders(ProviderContainer container) async {
+  // Give microtasks a chance to complete
+  await Future.microtask(() {});
 }
 
 void main() {
@@ -40,13 +59,16 @@ void main() {
                 uid: 'test-uid',
                 email: 'max.mustermann@example.com',
               )),
-          currentAppUserProvider.overrideWith((ref) async => appUser),
+          currentAppUserProvider.overrideWith((ref) async {
+            return appUser;
+          }),
         ],
       );
       addTearDown(container.dispose);
 
       // Wait for async provider to complete
       await container.read(currentAppUserProvider.future);
+      await waitForProviders(container);
       
       final kuerzel = container.read(currentUserKuerzelProvider);
       expect(kuerzel, equals('MU'));
@@ -68,16 +90,19 @@ void main() {
                 uid: 'test-uid',
                 email: 'john.doe@example.com',
               )),
-          currentAppUserProvider.overrideWith((ref) async => appUser),
+          currentAppUserProvider.overrideWith((ref) async {
+            return appUser;
+          }),
         ],
       );
       addTearDown(container.dispose);
 
       // Wait for async provider to complete
       await container.read(currentAppUserProvider.future);
+      await waitForProviders(container);
       
       final kuerzel = container.read(currentUserKuerzelProvider);
-      // Should extract from email: john.doe -> JOHN (first part before the dot)
+      // Should extract from email: john.doe -> JOHN (first 4 chars of username part)
       expect(kuerzel, equals('JOHN'));
     });
 
@@ -85,13 +110,16 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           currentUserProvider.overrideWith((ref) => null),
-          currentAppUserProvider.overrideWith((ref) async => null),
+          currentAppUserProvider.overrideWith((ref) async {
+            return null;
+          }),
         ],
       );
       addTearDown(container.dispose);
 
       // Wait for async provider to complete
       await container.read(currentAppUserProvider.future);
+      await waitForProviders(container);
 
       final kuerzel = container.read(currentUserKuerzelProvider);
       expect(kuerzel, equals('??'));
@@ -114,19 +142,22 @@ void main() {
                 email: 'test@example.com',
               )),
           currentAppUserProvider.overrideWith((ref) async {
-            await Future.delayed(const Duration(milliseconds: 100));
+            await Future.delayed(const Duration(milliseconds: 50));
             return appUser;
           }),
         ],
       );
       addTearDown(container.dispose);
 
-      // While AppUser is loading (no .value yet), should fall back to email extraction
-      final kuerzel = container.read(currentUserKuerzelProvider);
-      expect(kuerzel, equals('TEST'));
+      // Before AppUser loads, should fall back to email extraction
+      // Read immediately without waiting
+      final kuerzelWhileLoading = container.read(currentUserKuerzelProvider);
+      expect(kuerzelWhileLoading, equals('TEST'));
       
       // After loading completes, should use kuerzel from AppUser
       await container.read(currentAppUserProvider.future);
+      await waitForProviders(container);
+      
       final kuerzelAfterLoad = container.read(currentUserKuerzelProvider);
       expect(kuerzelAfterLoad, equals('TU'));
     });
@@ -147,13 +178,16 @@ void main() {
                 uid: 'test-uid',
                 email: 'abc@example.com',
               )),
-          currentAppUserProvider.overrideWith((ref) async => appUser),
+          currentAppUserProvider.overrideWith((ref) async {
+            return appUser;
+          }),
         ],
       );
       addTearDown(container.dispose);
 
       // Wait for async provider to complete
       await container.read(currentAppUserProvider.future);
+      await waitForProviders(container);
       
       final kuerzel = container.read(currentUserKuerzelProvider);
       // AppUser constructor converts kuerzel to uppercase
@@ -174,12 +208,13 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      // Wait for the future to complete (and error)
+      // Try to wait for the future to complete (will throw)
       try {
         await container.read(currentAppUserProvider.future);
       } catch (e) {
         // Expected to error
       }
+      await waitForProviders(container);
 
       // When AppUser provider errors, should fall back to email extraction
       final kuerzel = container.read(currentUserKuerzelProvider);
@@ -192,10 +227,10 @@ void main() {
       final testCases = [
         // (firebase user email, expected kuerzel)
         ('mu@induscore.de', 'MU'),
-        ('max.mustermann@example.com', 'MAX.'), // Note: includes the dot (first 4 chars of username)
+        ('max.mustermann@example.com', 'MAX.'), // Includes the dot (first 4 chars of username)
         ('john@test.org', 'JOHN'),
         ('a@b.c', 'A'),
-        ('verylongemailaddress@example.com', 'VERY'), // Should truncate to 4 chars
+        ('verylongemailaddress@example.com', 'VERY'), // Truncates to 4 chars
         ('AB@test.com', 'AB'),
         ('test123@example.com', 'TEST'),
       ];
@@ -219,13 +254,16 @@ void main() {
                   uid: 'test-uid',
                   email: email,
                 )),
-            currentAppUserProvider.overrideWith((ref) async => appUser),
+            currentAppUserProvider.overrideWith((ref) async {
+              return appUser;
+            }),
           ],
         );
         addTearDown(container.dispose);
 
         // Wait for async provider to complete
         await container.read(currentAppUserProvider.future);
+        await waitForProviders(container);
         
         final kuerzel = container.read(currentUserKuerzelProvider);
         expect(
@@ -252,13 +290,16 @@ void main() {
                 uid: 'test-uid',
                 email: null, // No email
               )),
-          currentAppUserProvider.overrideWith((ref) async => appUser),
+          currentAppUserProvider.overrideWith((ref) async {
+            return appUser;
+          }),
         ],
       );
       addTearDown(container.dispose);
 
       // Wait for async provider to complete
       await container.read(currentAppUserProvider.future);
+      await waitForProviders(container);
 
       final kuerzel = container.read(currentUserKuerzelProvider);
       expect(kuerzel, equals('??'));
