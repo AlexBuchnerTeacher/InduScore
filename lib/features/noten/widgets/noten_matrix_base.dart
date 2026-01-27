@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../models/grade.dart';
 import '../../../models/tendenz.dart';
 import '../../../models/student.dart';
 import '../../../providers/app_providers.dart';
 import '../noten_layout_constants.dart';
-import '../noten_matrix_logic.dart';
 
 /// Basis-Mixin für gemeinsame Matrix-Funktionalität
 mixin NotenMatrixBaseMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
@@ -22,8 +20,9 @@ mixin NotenMatrixBaseMixin<T extends ConsumerStatefulWidget> on ConsumerState<T>
     List<Grade> grades,
   ) async {
     final firestoreService = ref.read(firestoreServiceProvider);
-    final userEmail = FirebaseAuth.instance.currentUser?.email;
-    final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
+    // v0.33.0: Kürzel aus AppUser (NUR vom Admin gesetzt)
+    final userKuerzel = await ref.read(currentUserKuerzelProvider.future);
+    final effectiveKuerzel = userKuerzel.isNotEmpty && userKuerzel != '—' ? userKuerzel : null;
 
     final existingGrade = grades
         .where((g) => g.studentId == studentId && g.leistungsnachweisId == lnId)
@@ -31,9 +30,9 @@ mixin NotenMatrixBaseMixin<T extends ConsumerStatefulWidget> on ConsumerState<T>
 
     if (note != null) {
       // Optimistic update: Show userKuerzel immediately
-      if (userKuerzel != null) {
+      if (effectiveKuerzel != null) {
         setState(() {
-          optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
+          optimisticUpdatedBy['${studentId}_$lnId'] = effectiveKuerzel;
         });
       }
 
@@ -44,7 +43,7 @@ mixin NotenMatrixBaseMixin<T extends ConsumerStatefulWidget> on ConsumerState<T>
         note: note,
         tendenz: existingGrade?.tendenz ?? Tendenz.keine,
         kommentar: existingGrade?.kommentar,
-        updatedBy: userKuerzel,
+        updatedBy: effectiveKuerzel,
         createdAt: existingGrade?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -77,19 +76,20 @@ mixin NotenMatrixBaseMixin<T extends ConsumerStatefulWidget> on ConsumerState<T>
     if (existingGrade == null) return;
 
     final firestoreService = ref.read(firestoreServiceProvider);
-    final userEmail = FirebaseAuth.instance.currentUser?.email;
-    final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
+    // v0.33.0: Kürzel aus AppUser (NUR vom Admin gesetzt)
+    final userKuerzel = await ref.read(currentUserKuerzelProvider.future);
+    final effectiveKuerzel = userKuerzel.isNotEmpty && userKuerzel != '—' ? userKuerzel : null;
 
     // Optimistic update
-    if (userKuerzel != null) {
+    if (effectiveKuerzel != null) {
       setState(() {
-        optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
+        optimisticUpdatedBy['${studentId}_$lnId'] = effectiveKuerzel;
       });
     }
 
     final updatedGrade = existingGrade.copyWith(
       tendenz: tendenz,
-      updatedBy: userKuerzel,
+      updatedBy: effectiveKuerzel,
       updatedAt: DateTime.now(),
     );
 

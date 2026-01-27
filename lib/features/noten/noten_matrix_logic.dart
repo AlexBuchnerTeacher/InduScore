@@ -172,11 +172,15 @@ class NotenMatrixLogic {
     return note.toDouble();
   }
 
-  /// Extrahiert Benutzer-Kürzel aus Email
-  /// Unterstützt Formate:
+  /// @deprecated Verwende stattdessen `currentUserKuerzelProvider` aus app_providers.dart
+  /// 
+  /// Diese Methode generiert Kürzel aus der Email-Adresse, was NICHT korrekt ist.
+  /// Kürzel werden NUR vom Admin vergeben und im AppUser-Profil gespeichert.
+  /// 
+  /// Alte Formate (nur für Referenz):
   /// - vorname.nachname@domain -> VN
   /// - bu@domain -> BU
-  /// - v.n@domain -> VN
+  @Deprecated('Use currentUserKuerzelProvider instead - Kürzel are admin-assigned only')
   static String? getUserKuerzel(String? email) {
     if (email == null || !email.contains('@')) return null;
     

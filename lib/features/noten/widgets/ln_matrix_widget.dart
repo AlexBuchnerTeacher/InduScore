@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/rbs_theme.dart';
@@ -314,8 +313,9 @@ class _LNMatrixWidgetState extends ConsumerState<LNMatrixWidget> {
     int? note,
   ) async {
     final firestoreService = ref.read(firestoreServiceProvider);
-    final userEmail = FirebaseAuth.instance.currentUser?.email;
-    final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
+    // v0.33.0: Kürzel aus AppUser (NUR vom Admin gesetzt)
+    final userKuerzel = await ref.read(currentUserKuerzelProvider.future);
+    final effectiveKuerzel = userKuerzel.isNotEmpty && userKuerzel != '—' ? userKuerzel : null;
 
     final existingGrade = widget.grades
         .where((g) => g.studentId == studentId && g.leistungsnachweisId == lnId)
@@ -323,9 +323,9 @@ class _LNMatrixWidgetState extends ConsumerState<LNMatrixWidget> {
 
     if (note != null) {
       // Optimistic update
-      if (userKuerzel != null) {
+      if (effectiveKuerzel != null) {
         setState(() {
-          _optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
+          _optimisticUpdatedBy['${studentId}_$lnId'] = effectiveKuerzel;
         });
       }
 
@@ -336,7 +336,7 @@ class _LNMatrixWidgetState extends ConsumerState<LNMatrixWidget> {
         note: note,
         tendenz: existingGrade?.tendenz ?? Tendenz.keine,
         kommentar: existingGrade?.kommentar,
-        updatedBy: userKuerzel,
+        updatedBy: effectiveKuerzel,
         createdAt: existingGrade?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -366,19 +366,20 @@ class _LNMatrixWidgetState extends ConsumerState<LNMatrixWidget> {
     if (existingGrade == null) return;
 
     final firestoreService = ref.read(firestoreServiceProvider);
-    final userEmail = FirebaseAuth.instance.currentUser?.email;
-    final userKuerzel = NotenMatrixLogic.getUserKuerzel(userEmail);
+    // v0.33.0: Kürzel aus AppUser (NUR vom Admin gesetzt)
+    final userKuerzel = await ref.read(currentUserKuerzelProvider.future);
+    final effectiveKuerzel = userKuerzel.isNotEmpty && userKuerzel != '—' ? userKuerzel : null;
 
     // Optimistic update
-    if (userKuerzel != null) {
+    if (effectiveKuerzel != null) {
       setState(() {
-        _optimisticUpdatedBy['${studentId}_$lnId'] = userKuerzel;
+        _optimisticUpdatedBy['${studentId}_$lnId'] = effectiveKuerzel;
       });
     }
 
     final updatedGrade = existingGrade.copyWith(
       tendenz: tendenz,
-      updatedBy: userKuerzel,
+      updatedBy: effectiveKuerzel,
       updatedAt: DateTime.now(),
     );
 
