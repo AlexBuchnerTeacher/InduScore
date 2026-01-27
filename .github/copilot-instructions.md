@@ -163,6 +163,21 @@ flutter test --coverage                  # Coverage-Report generieren
 - **Methode**: GitHub Actions (automatisch bei Push auf `main`)
 - **Workflow**: `.github/workflows/deploy-gh-pages.yml`
 
+### Vor JEDEM Push/Release prüfen
+
+```powershell
+# 1. Keine Compile-Errors oder Warnungen
+flutter analyze                          # Muss "No issues found!" zeigen
+
+# 2. Alle Tests grün
+flutter test                             # Alle Tests müssen passen
+
+# 3. Build erfolgreich
+flutter build web                        # Muss ohne Fehler durchlaufen
+```
+
+**⚠️ STOP**: Wenn einer dieser Befehle fehlschlägt, NICHT pushen! Erst fixen!
+
 ### Schritt-für-Schritt Release-Prozess
 
 #### 1️⃣ Feature-Branch erstellen (bei größeren Änderungen)
