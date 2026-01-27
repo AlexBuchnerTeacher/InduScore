@@ -153,11 +153,11 @@ class ShareStudentGrades {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.share, color: RBSColors.dynamicRed),
-            const SizedBox(width: 8),
-            const Text('Noten teilen'),
+            Icon(Icons.share, color: RBSColors.dynamicRed),
+            SizedBox(width: 8),
+            Text('Noten teilen'),
           ],
         ),
         content: SizedBox(
