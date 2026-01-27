@@ -51,24 +51,32 @@
 
 ## 2. IST-Zustand
 
-### 2.1 Statistiken (Stand v0.19.0)
+### 2.1 Statistiken (Stand v0.32.0)
 
-- **Test-Dateien:** 25+
-- **Tests gesamt:** 269
-- **Test-zu-Code-Ratio:** ~15%
+- **Test-Dateien:** 35
+- **Tests gesamt:** 386
+- **Test-zu-Code-Ratio:** ~20%
 - **Coverage:** >50%
+- **CI Threshold:** 35% (sollte auf 50% erhöht werden - siehe F-007)
 
 ### 2.2 Vorhandene Tests
 
-**Unit-Tests:**
+**Unit-Tests (14 Dateien):**
 ```
 test/models/
+├── app_user_test.dart            ✅ Vorhanden
 ├── beruf_test.dart               ✅ Vorhanden
+├── feature_flags_test.dart       ✅ Vorhanden (11 Tests)
 ├── grade_test.dart               ✅ Vorhanden (wichtig: Rundungslogik)
 ├── klasse_test.dart              ✅ Vorhanden
 ├── leistungsnachweis_test.dart   ✅ Vorhanden
+├── ln_exemption_test.dart        ✅ Vorhanden
+├── noten_eingabe_test.dart       ✅ Vorhanden
+├── noten_statistik_test.dart     ✅ Vorhanden
+├── schueler_unterricht_test.dart ✅ Vorhanden
 ├── student_test.dart             ✅ Vorhanden
 ├── subject_test.dart             ✅ Vorhanden
+├── tendenz_test.dart             ✅ Vorhanden
 └── zeugnisnote_test.dart         ✅ Vorhanden (24 Tests für Rundungslogik)
 ```
 
@@ -78,27 +86,30 @@ test/widgets/profile/
 ├── password_change_dialog_test.dart  ✅ Vorhanden
 └── ...
 test/shared/widgets/
-├── app_snack_bars_test.dart          ✅ NEU (11 Tests)
-└── paginated_firestore_list_test.dart ✅ NEU (5 Tests)
+├── app_snack_bars_test.dart          ✅ Vorhanden (11 Tests)
+├── feature_guard_test.dart           ✅ Vorhanden (16 Tests)
+└── paginated_firestore_list_test.dart ✅ Vorhanden (5 Tests)
 ```
 
-**Service-Tests:**
+**Service-Tests (6 Dateien):**
 ```
 test/services/
-├── backup_restore_service_test.dart  ✅ Vorhanden
-├── csv_export_service_test.dart      ✅ Vorhanden
-├── csv_import_service_test.dart      ✅ NEU (22 Tests)
-├── noi_export_service_test.dart      ✅ NEU (17 Tests)
-└── pdf_export_service_test.dart      ✅ NEU (16 Tests)
+├── asv_import_service_test.dart      ✅ Vorhanden
+├── auth_service_test.dart            ✅ Vorhanden
+├── csv_import_service_test.dart      ✅ Vorhanden (22 Tests)
+├── firestore_service_test.dart       ✅ Vorhanden
+├── noi_export_service_test.dart      ✅ Vorhanden (17 Tests)
+└── pdf_export_service_test.dart      ✅ Vorhanden (16 Tests)
 ```
 
-### 2.3 Fehlende Tests (Priorität für Phase 3)
+### 2.3 Fehlende Tests (Priorität - siehe docs/IMPROVEMENT_ISSUES.md)
 
 ⏳ **Noch zu erstellen:**
-- `lib/screens/klassen_screen.dart` (1268 LOC!) → Phase 3
-- `lib/screens/csv_import_screen.dart` (1094 LOC!) → Phase 3
-- Integration-Tests (kein `integration_test/` Ordner)
-- Golden-Tests (keine `*.png` in test/)
+- `test/features/import/screens/csv_import_screen_test.dart` (F-006)
+- `test/features/noten/screens/noten_eingabe_screen_test.dart` (F-006)
+- `test/features/noten/screens/noten_uebersicht_screen_test.dart` (F-006)
+- Integration-Tests erweitern (F-011)
+- Golden-Tests (F-015)
 
 ---
 
@@ -106,7 +117,7 @@ test/services/
 
 ### 3.1 Aktuelle Coverage
 
-**Gesamt:** 51.71% (v0.13.4)
+**Gesamt:** >50% (v0.32.0)
 
 **Annahmen (basierend auf Codebase-Analyse):**
 - Models: ~80% (gut getestet)
