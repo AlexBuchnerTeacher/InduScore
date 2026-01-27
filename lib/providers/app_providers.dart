@@ -538,7 +538,7 @@ final currentAppUserProvider = FutureProvider<AppUser?>((ref) async {
 /// Zentraler Provider für das Kürzel des aktuellen Benutzers
 /// 
 /// Verwendet das kuerzel-Feld aus dem AppUser-Profil.
-/// Fallback auf E-Mail-Extraktion, falls kein Kürzel gesetzt ist.
+/// Fallback auf E-Mail-Extraktion, falls kein Kürzel gesetzt ist oder bei Fehler.
 /// 
 /// WICHTIG: Dies ist ein FutureProvider, der auf die AppUser-Daten wartet.
 /// Der Provider wird automatisch invalidiert wenn:
@@ -548,31 +548,39 @@ final currentUserKuerzelProvider = FutureProvider<String>((ref) async {
   // Debug-Logging für bessere Nachverfolgung
   debugPrint('[currentUserKuerzelProvider] Resolving kuerzel...');
   
-  // Warte auf AppUser-Daten (invalidiert automatisch bei Änderungen)
-  final appUserAsync = ref.watch(currentAppUserProvider);
-  
-  // Während AppUser lädt oder bei Fehler, versuche Fallback auf Firebase User
-  if (appUserAsync.isLoading || appUserAsync.hasError) {
-    final reason = appUserAsync.isLoading ? 'loading' : 'error: ${appUserAsync.error}';
-    debugPrint('[currentUserKuerzelProvider] AppUser is $reason, using fallback...');
+  try {
+    // Warte auf AppUser-Daten (throws wenn Fehler, wartet wenn loading)
+    final appUser = await ref.watch(currentAppUserProvider.future);
+    
+    // Primär: Kürzel aus AppUser (wenn nicht leer und nicht null)
+    if (appUser != null && appUser.kuerzel.isNotEmpty) {
+      debugPrint('[currentUserKuerzelProvider] Using AppUser.kuerzel: ${appUser.kuerzel}');
+      return appUser.kuerzel;
+    }
+    
+    // Fallback: Aus E-Mail extrahieren (wenn AppUser.kuerzel leer ist oder appUser null)
+    debugPrint('[currentUserKuerzelProvider] AppUser.kuerzel is empty or null, using fallback...');
+    return _getFallbackKuerzel(ref);
+  } catch (error) {
+    // Bei Fehler beim Laden des AppUser: Fallback verwenden
+    debugPrint('[currentUserKuerzelProvider] Error loading AppUser: $error, using fallback...');
+    // Check if ref is still mounted before using it
+    if (!ref.mounted) {
+      debugPrint('[currentUserKuerzelProvider] Ref disposed, cannot get fallback');
+      return '??';
+    }
     return _getFallbackKuerzel(ref);
   }
-  
-  final appUser = appUserAsync.value;
-  
-  // Primär: Kürzel aus AppUser (wenn nicht leer)
-  if (appUser != null && appUser.kuerzel.isNotEmpty) {
-    debugPrint('[currentUserKuerzelProvider] Using AppUser.kuerzel: ${appUser.kuerzel}');
-    return appUser.kuerzel;
-  }
-  
-  // Fallback: Aus E-Mail extrahieren (wenn AppUser.kuerzel leer ist)
-  debugPrint('[currentUserKuerzelProvider] AppUser.kuerzel is empty, using fallback...');
-  return _getFallbackKuerzel(ref);
 });
 
 /// Helper: Fallback-Kürzel aus Firebase User E-Mail extrahieren
 String _getFallbackKuerzel(Ref ref) {
+  // Safety check in case ref was disposed
+  if (!ref.mounted) {
+    debugPrint('[_getFallbackKuerzel] Ref disposed, returning ??');
+    return '??';
+  }
+  
   final firebaseUser = ref.watch(currentUserProvider);
   if (firebaseUser?.email != null) {
     final kuerzel = _extractKuerzelFromEmail(firebaseUser!.email!);

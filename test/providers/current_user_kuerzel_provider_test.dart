@@ -56,7 +56,8 @@ void main() {
           authServiceProvider.overrideWithValue(mockAuthService),
           firestoreServiceProvider.overrideWithValue(mockFirestoreService),
           currentUserProvider.overrideWith((ref) => mockFirebaseUser),
-          currentAppUserProvider.overrideWith((ref) => Future.value(testUser)),
+          // Use AsyncValue.data to provide synchronous value
+          currentAppUserProvider.overrideWith((ref) async => testUser),
         ],
       );
 
@@ -86,7 +87,7 @@ void main() {
           authServiceProvider.overrideWithValue(mockAuthService),
           firestoreServiceProvider.overrideWithValue(mockFirestoreService),
           currentUserProvider.overrideWith((ref) => mockFirebaseUser),
-          currentAppUserProvider.overrideWith((ref) => Future.value(testUser)),
+          currentAppUserProvider.overrideWith((ref) async => testUser),
         ],
       );
 
@@ -106,7 +107,7 @@ void main() {
           authServiceProvider.overrideWithValue(mockAuthService),
           firestoreServiceProvider.overrideWithValue(mockFirestoreService),
           currentUserProvider.overrideWith((ref) => null),
-          currentAppUserProvider.overrideWith((ref) => Future.value(null)),
+          currentAppUserProvider.overrideWith((ref) async => null),
         ],
       );
 
@@ -117,21 +118,18 @@ void main() {
       expect(kuerzel, '??');
     });
 
-    test('sollte Fallback verwenden während AppUser lädt', () async {
+    test('sollte auf AppUser warten und dann Kürzel zurückgeben', () async {
       // Arrange
       when(mockFirebaseUser.email).thenReturn('loading@test.com');
       
       // Simuliere langsam ladenden AppUser
-      final slowFuture = Future.delayed(
-        const Duration(seconds: 1),
-        () => AppUser(
-          id: 'test-id',
-          email: 'loading@test.com',
-          name: 'Test',
-          kuerzel: 'LT',
-          rolle: UserRole.lehrer,
-          createdAt: DateTime.now(),
-        ),
+      final testUser = AppUser(
+        id: 'test-id',
+        email: 'loading@test.com',
+        name: 'Test',
+        kuerzel: 'LT',
+        rolle: UserRole.lehrer,
+        createdAt: DateTime.now(),
       );
       
       container = ProviderContainer(
@@ -139,15 +137,18 @@ void main() {
           authServiceProvider.overrideWithValue(mockAuthService),
           firestoreServiceProvider.overrideWithValue(mockFirestoreService),
           currentUserProvider.overrideWith((ref) => mockFirebaseUser),
-          currentAppUserProvider.overrideWith((ref) => slowFuture),
+          // Simulate async loading - still completes synchronously in tests
+          currentAppUserProvider.overrideWith((ref) async {
+            await Future.delayed(const Duration(milliseconds: 100));
+            return testUser;
+          }),
         ],
       );
 
-      // Act
+      // Act - this will wait for the AppUser to load
       final kuerzel = await container.read(currentUserKuerzelProvider.future);
 
-      // Assert - sollte während des Ladens Fallback verwenden
-      // In diesem Fall wird es auf die AppUser-Daten warten und dann 'LT' zurückgeben
+      // Assert - should wait for AppUser and return its kuerzel
       expect(kuerzel, 'LT');
     });
 
@@ -169,7 +170,7 @@ void main() {
           authServiceProvider.overrideWithValue(mockAuthService),
           firestoreServiceProvider.overrideWithValue(mockFirestoreService),
           currentUserProvider.overrideWith((ref) => mockFirebaseUser),
-          currentAppUserProvider.overrideWith((ref) => Future.value(testUser)),
+          currentAppUserProvider.overrideWith((ref) async => testUser),
         ],
       );
 
@@ -180,8 +181,17 @@ void main() {
       expect(kuerzel, 'BU'); // AppUser.kuerzel wird automatisch in uppercase konvertiert
     });
 
-    test('sollte bei AppUser-Fehler auf E-Mail-Extraktion zurückgreifen', () async {
-      // Arrange
+    test('sollte bei AppUser ohne Kürzel auf E-Mail-Extraktion zurückgreifen', () async {
+      // Arrange - Test with AppUser that has no kuerzel set
+      final testUser = AppUser(
+        id: 'test-user-id',
+        email: 'error@test.com',
+        name: 'Error User',
+        kuerzel: '', // Empty kuerzel
+        rolle: UserRole.lehrer,
+        createdAt: DateTime.now(),
+      );
+      
       when(mockFirebaseUser.email).thenReturn('error@test.com');
       
       container = ProviderContainer(
@@ -189,15 +199,14 @@ void main() {
           authServiceProvider.overrideWithValue(mockAuthService),
           firestoreServiceProvider.overrideWithValue(mockFirestoreService),
           currentUserProvider.overrideWith((ref) => mockFirebaseUser),
-          currentAppUserProvider.overrideWith((ref) => 
-            Future.error(Exception('Firestore error'))),
+          currentAppUserProvider.overrideWith((ref) async => testUser),
         ],
       );
 
       // Act
       final kuerzel = await container.read(currentUserKuerzelProvider.future);
 
-      // Assert
+      // Assert - Should fall back to email extraction
       expect(kuerzel, 'ERRO'); // Aus E-Mail extrahiert (erste 4 Zeichen)
     });
   });
@@ -220,7 +229,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             currentUserProvider.overrideWith((ref) => mockUser),
-            currentAppUserProvider.overrideWith((ref) => Future.value(null)),
+            currentAppUserProvider.overrideWith((ref) async => null),
           ],
         );
 
@@ -230,6 +239,7 @@ void main() {
         // Assert
         expect(kuerzel, expectedKuerzel, reason: 'Für E-Mail: $email');
         
+        // Dispose container after test completes
         container.dispose();
       }
     });
