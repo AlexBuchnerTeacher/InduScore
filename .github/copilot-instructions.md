@@ -225,14 +225,53 @@ gh release create vX.Y.Z --title "vX.Y.Z - Titel" --notes-file RELEASE_NOTES_vX.
 ### Checkliste für AI-Agent (Copilot)
 
 Bei JEDEM Release diese Schritte prüfen:
-- [ ] `pubspec.yaml` Version aktualisiert
+- [ ] `pubspec.yaml` Version aktualisiert (BUILD-Nummer +1)
 - [ ] `version.json` Version aktualisiert  
 - [ ] `CHANGELOG.md` Eintrag hinzugefügt
 - [ ] `RELEASE_NOTES_vX.Y.Z.md` erstellt (bei Minor/Major)
 - [ ] Git Tag erstellt und gepusht
-- [ ] GitHub Release erstellt
-- [ ] Zugehörige Issues geschlossen
-- [ ] GitHub Actions erfolgreich
+- [ ] GitHub Release erstellt (mit `gh release create`)
+- [ ] Zugehörige Issues geschlossen (`gh issue close #NR`)
+- [ ] GitHub Actions erfolgreich (`gh run list --limit 3`)
+
+### Nach dem Release: Cleanup
+
+```powershell
+# Feature-Branches löschen (lokal + remote)
+git branch -d feature/branch-name
+git push origin --delete feature/branch-name
+
+# Stale Branches prüfen und löschen
+git fetch --prune
+git branch -vv | Select-String "gone"
+
+# Dependabot PRs schließen (nach Dependency-Update)
+gh pr list --author "app/dependabot"
+gh pr close #NR --comment "Included in vX.Y.Z"
+```
+
+### Wann was erstellen?
+
+| Änderungstyp | Version | CHANGELOG | RELEASE_NOTES | GitHub Release |
+|--------------|---------|-----------|---------------|----------------|
+| Bugfix | PATCH (+0.0.1) | ✅ | ❌ (optional) | ✅ |
+| Refactoring | PATCH (+0.0.1) | ✅ | ❌ (optional) | ✅ |
+| Neues Feature | MINOR (+0.1.0) | ✅ | ✅ | ✅ |
+| Breaking Change | MAJOR (+1.0.0) | ✅ | ✅ | ✅ |
+| Dependency Update | PATCH (+0.0.1) | ✅ (unter Dependencies) | ❌ | ✅ |
+
+### Issue-Management
+
+```powershell
+# Issues zum Release verknüpfen (im Commit oder PR)
+git commit -m "feat: Feature XYZ (closes #123)"
+
+# Oder manuell schließen
+gh issue close #123 --comment "Fixed in v0.33.2"
+
+# Issue-Labels setzen
+gh issue edit #123 --add-label "done"
+```
 
 ---
 
