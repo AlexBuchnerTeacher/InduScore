@@ -45,9 +45,12 @@ class ShareStudentGrades {
           id: '',
           subjectId: '',
           klasseId: '',
-          name: '',
-          typ: LeistungsnachweisTyp.schulaufgabe,
+          bezeichnung: '',
+          typ: LeistungsnachweisTyp.wochentest,
           datum: DateTime.now(),
+          gewichtung: 1.0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       );
       if (ln.id.isNotEmpty && ln.klasseId == student.klasseId) {
@@ -74,7 +77,7 @@ class ShareStudentGrades {
         final ln = leistungsnachweise.firstWhere(
           (l) => l.id == grade.leistungsnachweisId,
         );
-        buffer.writeln('   • ${ln.name}: ${grade.note}');
+        buffer.writeln('   • ${ln.bezeichnung}: ${grade.note}');
       }
       
       // Fach-Durchschnitt

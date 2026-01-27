@@ -8,7 +8,7 @@
 - **Sprache**: Dart 3.10.0
 - **State Management**: Riverpod 3.1.0 (StreamProvider, StateProvider)
 - **Backend**: Firebase (Firestore für Daten, Auth mit Email/Passwort)
-- **Routing**: go_router 17.0.1 mit eigenem `GoRouterRefreshStream` (siehe [main.dart](../lib/main.dart#L38))
+- **Routing**: go_router 17.0.1 mit eigenem `GoRouterRefreshStream` (siehe `lib/main.dart`)
 - **UI**: Material Design 3 + RBS Styleguide (München Branding)
 - **PDF**: syncfusion_flutter_pdf 32.1.20
 - **Testing**: mockito 5.4.4, 386+ Tests mit >50% Coverage
@@ -83,7 +83,7 @@ lib/features/<domain>/
 
 ## Kritische Patterns & Konventionen
 
-### 1. Namenskonventionen (siehe [CODING_GUIDELINES.md](../CODING_GUIDELINES.md#1-naming-conventions))
+### 1. Namenskonventionen (siehe `CODING_GUIDELINES.md`)
 - **Dateien/Ordner**: `snake_case` (z.B. `noten_eingabe_screen.dart`)
 - **Klassen/Widgets**: `PascalCase` (z.B. `NotenMatrixView`)
 - **Variablen/Methoden**: `camelCase` (z.B. `getStudent(String id)`)

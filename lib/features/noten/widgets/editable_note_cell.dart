@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/rbs_theme.dart';
 import '../../../models/tendenz.dart';
 import '../noten_layout_constants.dart';
 
@@ -41,12 +40,10 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell>
   // v0.33.0: Animation bei Notenänderung
   late AnimationController _animationController;
   late Animation<double> _highlightAnimation;
-  int? _previousNote;
 
   @override
   void initState() {
     super.initState();
-    _previousNote = widget.note;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -61,7 +58,6 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell>
     super.didUpdateWidget(oldWidget);
     // Trigger Animation wenn Note sich ändert
     if (oldWidget.note != widget.note) {
-      _previousNote = oldWidget.note;
       _animationController.forward(from: 0.0);
     }
   }
@@ -208,86 +204,8 @@ class _EditableNoteCellState extends ConsumerState<EditableNoteCell>
     );
   }
 
-  Widget _buildTendenzButtons() {
-    // v0.30.1: Vertikales Layout für kompaktere Darstellung
-    if (widget.compact) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildCompactTendenzIcon(Tendenz.plus, '+'),
-          _buildCompactTendenzIcon(Tendenz.keine, '·'),
-          _buildCompactTendenzIcon(Tendenz.minus, '-'),
-        ],
-      );
-    }
-    
-    // Normal: Horizontal für größere Ansichten
-    const buttonSize = 28.0;
-    const spacing = 2.0;
-    
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildTendenzButton(Tendenz.plus, '+', buttonSize),
-        const SizedBox(width: spacing),
-        _buildTendenzButton(Tendenz.keine, '·', buttonSize),
-        const SizedBox(width: spacing),
-        _buildTendenzButton(Tendenz.minus, '-', buttonSize),
-      ],
-    );
-  }
-
-  /// Kompakter Tendenz-Icon für vertikales Layout
-  Widget _buildCompactTendenzIcon(Tendenz tendenz, String label) {
-    final isSelected = widget.tendenz == tendenz;
-    return InkWell(
-      onTap: () => widget.onTendenzChanged(tendenz),
-      child: Container(
-        width: 16,
-        height: 10,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? RBSColors.dynamicRed : Colors.transparent,
-          borderRadius: BorderRadius.circular(2),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 9,
-            height: 1.0,
-            color: isSelected ? Colors.white : Colors.grey[400],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTendenzButton(Tendenz tendenz, String label, double size) {
-    final isSelected = widget.tendenz == tendenz;
-    return InkWell(
-      onTap: () => widget.onTendenzChanged(tendenz),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: isSelected ? RBSColors.dynamicRed : Colors.grey[200],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: isSelected ? Colors.white : Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // v0.33.0: _buildTendenzButtons und Hilfsmethoden entfernt (F-004)
+  // Tendenz-Buttons sind nicht mehr in der UI sichtbar
 
   /// Gibt die Farbe für eine Note zurück (verwendet zentrale Konstanten)
   Color _getNoteColor(int note) {

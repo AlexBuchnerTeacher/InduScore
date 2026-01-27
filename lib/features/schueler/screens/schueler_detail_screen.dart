@@ -8,6 +8,7 @@ import 'package:induscore/models/student.dart';
 import 'package:induscore/models/subject.dart';
 import 'package:induscore/models/grade.dart';
 import 'package:induscore/models/klasse.dart';
+import 'package:induscore/models/beruf.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/widgets/rbs_drawer.dart';
 import 'package:induscore/features/noten/widgets/noten_matrix_view.dart';
@@ -75,12 +76,13 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
                   (k) => k.id == student.klasseId,
                   orElse: () => Klasse(
                     id: '',
-                    name: 'Unbekannt',
-                    berufCode: '',
+                    beruf: Beruf.ie,
                     jahrgangsstufe: 0,
-                    zeitgruppe: Zeitgruppe.a,
+                    zeitgruppe: Zeitgruppe.eins,
                     laufendeNummer: 0,
-                    schuljahr: '',
+                    schuljahr: Schuljahr.current(),
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
                   ),
                 );
                 ShareStudentGrades.showShareDialog(
@@ -192,12 +194,13 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
       (k) => k.id == student.klasseId,
       orElse: () => Klasse(
         id: '',
-        name: 'Unbekannt',
-        berufCode: '',
+        beruf: Beruf.ie,
         jahrgangsstufe: 0,
-        zeitgruppe: Zeitgruppe.a,
+        zeitgruppe: Zeitgruppe.eins,
         laufendeNummer: 0,
-        schuljahr: '',
+        schuljahr: Schuljahr.current(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       ),
     );
 
