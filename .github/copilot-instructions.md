@@ -143,15 +143,98 @@ if (!canCreate) return SizedBox.shrink(); // Button verstecken
 ```powershell
 flutter run -d chrome                    # Dev Server (Hot Reload)
 flutter build web                        # Production Build
-flutter test                             # Unit + Widget Tests (386+ Tests)
+flutter test                             # Unit + Widget Tests (384+ Tests)
 flutter test --coverage                  # Coverage-Report generieren
 ```
 
 ### Häufige Aufgaben
-- **Deployment**: `firebase deploy` (erfordert Firebase CLI, Ziel: `induscore-71af0.web.app`)
 - **Dart formatieren**: `dart_format` Tool nutzen, NIE manuell formatieren
 - **Alle Issues fixen**: `dart_fix` Tool für automatische Fixes
 - **Admin-User erstellen**: `node scripts/create_admin.js` (erfordert Firebase Admin SDK)
+
+---
+
+## Release & Deployment Prozess
+
+**WICHTIG**: Dieser Prozess muss bei JEDEM Release befolgt werden!
+
+### Deployment-Ziel
+- **URL**: https://alexbuchnerteacher.github.io/InduScore/
+- **Methode**: GitHub Actions (automatisch bei Push auf `main`)
+- **Workflow**: `.github/workflows/deploy-gh-pages.yml`
+
+### Schritt-für-Schritt Release-Prozess
+
+#### 1️⃣ Feature-Branch erstellen (bei größeren Änderungen)
+```powershell
+git checkout -b feature/beschreibung
+# Änderungen durchführen...
+git add -A
+git commit -m "feat: Beschreibung der Änderung"
+git push origin feature/beschreibung
+```
+
+#### 2️⃣ Pull Request erstellen
+```powershell
+gh pr create --title "feat: Beschreibung" --body "Details..."
+# Nach Review:
+gh pr merge --squash
+```
+
+#### 3️⃣ Version hochsetzen (BEIDE Dateien!)
+```powershell
+# pubspec.yaml: version: X.Y.Z+BUILD (BUILD immer +1)
+# version.json: {"version": "X.Y.Z"}
+```
+
+**Versionierung:**
+- **PATCH (Z)**: Bugfixes, Refactoring ohne neue Features → 0.33.1 → 0.33.2
+- **MINOR (Y)**: Neue Features → 0.33.2 → 0.34.0
+- **MAJOR (X)**: Breaking Changes → 0.34.0 → 1.0.0
+
+#### 4️⃣ CHANGELOG.md aktualisieren
+```markdown
+## [X.Y.Z] - YYYY-MM-DD
+
+### Added/Changed/Fixed/Removed
+- Beschreibung der Änderung
+```
+
+#### 5️⃣ Release Notes erstellen
+Neue Datei: `RELEASE_NOTES_vX.Y.Z.md` mit Details zum Release
+
+#### 6️⃣ Commit & Tag erstellen
+```powershell
+git add -A
+git commit -m "chore: Version X.Y.Z"
+git tag -a vX.Y.Z -m "Release vX.Y.Z - Kurzbeschreibung"
+git push origin main --tags
+```
+
+#### 7️⃣ GitHub Release erstellen
+```powershell
+gh release create vX.Y.Z --title "vX.Y.Z - Titel" --notes-file RELEASE_NOTES_vX.Y.Z.md
+```
+
+#### 8️⃣ Verifizierung
+- [ ] GitHub Actions grün: `gh run list --limit 3`
+- [ ] Live-URL testen: https://alexbuchnerteacher.github.io/InduScore/
+- [ ] Version korrekt angezeigt
+- [ ] Zugehörige Issues schließen: `gh issue close #NR`
+
+### Checkliste für AI-Agent (Copilot)
+
+Bei JEDEM Release diese Schritte prüfen:
+- [ ] `pubspec.yaml` Version aktualisiert
+- [ ] `version.json` Version aktualisiert  
+- [ ] `CHANGELOG.md` Eintrag hinzugefügt
+- [ ] `RELEASE_NOTES_vX.Y.Z.md` erstellt (bei Minor/Major)
+- [ ] Git Tag erstellt und gepusht
+- [ ] GitHub Release erstellt
+- [ ] Zugehörige Issues geschlossen
+- [ ] GitHub Actions erfolgreich
+
+---
 
 ### Test-Strategie (siehe `docs/TESTING_STRATEGY.md`)
 - **70% Unit-Tests**: Models, Services, Business-Logik (z.B. `grade_test.dart`, `zeugnisnote_test.dart`)

@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.33.2] - 2026-01-27
+
+### Changed
+- **Doppelte Noten-Screens entfernt**: `NotenUebersichtScreen` und zugehörige Widgets (~2500 LOC) entfernt
+- Route `/noten/klasse/:id` leitet jetzt zu `/klassen/:id` weiter
+- Vereinheitlichte Navigation: Ein Screen pro Funktion
+
+### Removed
+- `lib/features/noten/screens/noten_uebersicht_screen.dart` (951 LOC)
+- `lib/features/noten/widgets/faecher_matrix_widget.dart`
+- `lib/features/noten/widgets/noten_table_widget.dart`
+- `lib/features/noten/widgets/student_subject_card.dart`
+- `lib/features/noten/widgets/note_input_widgets.dart`
+- Route `/noten/fach/:id` (war ungenutzt)
+
+### Dependencies
+- 27 Packages aktualisiert (u.a. Riverpod 3.2.0, Firebase 4.4.0)
+- `file_picker` Breaking Change behoben (`.platform` entfernt)
+
 ## [0.33.1] - 2026-01-27
 
 ### Fixed
