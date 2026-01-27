@@ -23,7 +23,6 @@ import 'features/schueler/screens/schueler_detail_screen.dart';
 import 'features/leistungsnachweise/screens/leistungsnachweise_screen.dart';
 import 'features/leistungsnachweise/screens/ln_editor_screen.dart';
 import 'features/noten/screens/noten_eingabe_screen.dart';
-import 'features/noten/screens/noten_uebersicht_screen.dart';
 import 'features/export/screens/noi_export_screen.dart';
 import 'features/import/screens/csv_import_screen.dart';
 import 'features/users/screens/user_verwaltung_screen.dart';
@@ -152,18 +151,10 @@ final _router = GoRouter(
         child: LNEditorScreen(leistungsnachweisId: state.pathParameters['id']!),
       ),
     ),
-    // Noten-Übersicht Routen (müssen vor /noten/:id stehen wegen Routing-Priorität)
+    // Noten-Übersicht Routen - Redirect zu Detail-Screens (v0.33.1: Navigation vereinheitlicht)
     GoRoute(
       path: '/noten/klasse/:klasseId',
-      pageBuilder: (context, state) => NoTransitionPage(
-        child: NotenUebersichtScreen(klasseId: state.pathParameters['klasseId']!),
-      ),
-    ),
-    GoRoute(
-      path: '/noten/fach/:fachId',
-      pageBuilder: (context, state) => NoTransitionPage(
-        child: NotenUebersichtScreen(fachId: state.pathParameters['fachId']!),
-      ),
+      redirect: (context, state) => '/klassen/${state.pathParameters['klasseId']}',
     ),
     // v0.33.0: Redirect zu SchuelerDetailScreen (Navigation vereinheitlicht)
     GoRoute(
