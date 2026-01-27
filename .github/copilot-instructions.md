@@ -65,7 +65,7 @@ return service.getStudents(); // Service verarbeitet Firestore
 
 ## Feature-basierte Struktur
 
-**Aktuelle Migration**: Von `lib/screens/` → `lib/features/*/` (siehe [REFACTORING_ROADMAP.md](../docs/REFACTORING_ROADMAP.md))
+**Aktuelle Migration**: Von `lib/screens/` → `lib/features/*/` (siehe `docs/REFACTORING_ROADMAP.md`)
 
 ```
 lib/features/<domain>/
@@ -111,7 +111,7 @@ final zeitgruppenFilterProvider = StateProvider<ZeitGruppenFilter>((ref) => Zeit
 ```
 
 ### 3. NotenMatrixView: Universelles Matrix-Widget
-**Komplexeste UI-Komponente** - 3 Anzeigemodi (siehe [noten_matrix_view.dart](../lib/features/noten/widgets/noten_matrix_view.dart)):
+**Komplexeste UI-Komponente** - 3 Anzeigemodi (siehe `lib/features/noten/widgets/noten_matrix_view.dart`):
 - `byKlasse`: Schüler (Zeilen) × Leistungsnachweise gruppiert nach Fach (Spalten)
 - `bySchueler`: LNs nach Fach (Zeilen) × Note/Datum (Spalten) - einzelner Schüler
 - `byLN`: Schüler (Zeilen) × Note/Tendenz (Spalten) - einzelner LN
@@ -122,7 +122,7 @@ Verwendet spezialisierte Widgets: `KlassenMatrixWidget`, `SchuelerMatrixWidget`,
 **WICHTIG**: Kürzel werden NUR vom Admin vergeben und sind fest. Keine automatische Generierung aus Email oder Name!
 
 ### 5. Permission Guards (23 Feature-Flags)
-Provider in [permissions_providers.dart](../lib/providers/permissions_providers.dart) und [feature_flags_provider.dart](../lib/providers/feature_flags_provider.dart):
+Provider in `lib/providers/permissions_providers.dart` und `lib/providers/feature_flags_provider.dart`:
 ```dart
 // Rollenbasiert
 final canManageUsersProvider = Provider<bool>((ref) => ref.watch(isAdminProvider));
@@ -153,14 +153,14 @@ flutter test --coverage                  # Coverage-Report generieren
 - **Alle Issues fixen**: `dart_fix` Tool für automatische Fixes
 - **Admin-User erstellen**: `node scripts/create_admin.js` (erfordert Firebase Admin SDK)
 
-### Test-Strategie (siehe [TESTING_STRATEGY.md](../docs/TESTING_STRATEGY.md))
+### Test-Strategie (siehe `docs/TESTING_STRATEGY.md`)
 - **70% Unit-Tests**: Models, Services, Business-Logik (z.B. `grade_test.dart`, `zeugnisnote_test.dart`)
 - **20% Widget-Tests**: UI-Komponenten (z.B. `app_snack_bars_test.dart`)
 - **10% Integration-Tests**: User-Flows (geplant, noch nicht implementiert)
 - **Mocking**: `mockito` + `build_runner` für Service-Mocks verwenden
 
 ### Sicherheitsregeln
-[firestore.rules](../firestore.rules) implementiert rollenbasierte Zugriffskontrolle:
+`firestore.rules` implementiert rollenbasierte Zugriffskontrolle:
 - **admin**: Voller CRUD-Zugriff auf alle Collections
 - **lehrer**: Lesen: alles, Schreiben: eigene Klassen/Schüler
 - **ausbilder/schueler**: Nur Lesen (eingeschränkt durch favoriteKlassenIds)
@@ -170,13 +170,13 @@ flutter test --coverage                  # Coverage-Report generieren
 
 | Datei | Zweck |
 |-------|-------|
-| [lib/main.dart](../lib/main.dart) | App-Entry, GoRouter mit `GoRouterRefreshStream` |
-| [lib/providers/app_providers.dart](../lib/providers/app_providers.dart) | Alle globalen Riverpod-Provider (students, klassen, subjects, grades) |
-| [lib/services/firestore_service.dart](../lib/services/firestore_service.dart) | Haupt-Firestore-CRUD (850 LOC, Constructor DI für Testbarkeit) |
-| [lib/features/noten/widgets/noten_matrix_view.dart](../lib/features/noten/widgets/noten_matrix_view.dart) | Universelles Matrix-Widget (refactored von 1056 → 102 LOC) |
-| [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) | Vollständige Architektur-Details, Datenfluss-Diagramme |
-| [CODING_GUIDELINES.md](../CODING_GUIDELINES.md) | Namenskonventionen, Layering, Riverpod-Patterns (655 LOC) |
-| [firestore.rules](../firestore.rules) | Sicherheitsregeln (rollenbasiert + field-level) |
+| `lib/main.dart` | App-Entry, GoRouter mit `GoRouterRefreshStream` |
+| `lib/providers/app_providers.dart` | Alle globalen Riverpod-Provider (students, klassen, subjects, grades) |
+| `lib/services/firestore_service.dart` | Haupt-Firestore-CRUD (850 LOC, Constructor DI für Testbarkeit) |
+| `lib/features/noten/widgets/noten_matrix_view.dart` | Universelles Matrix-Widget (refactored von 1056 → 102 LOC) |
+| `docs/ARCHITECTURE.md` | Vollständige Architektur-Details, Datenfluss-Diagramme |
+| `CODING_GUIDELINES.md` | Namenskonventionen, Layering, Riverpod-Patterns (655 LOC) |
+| `firestore.rules` | Sicherheitsregeln (rollenbasiert + field-level) |
 
 ## Häufige Stolperfallen
 
@@ -189,7 +189,7 @@ flutter test --coverage                  # Coverage-Report generieren
 
 ## Datenschutz & Logging
 
-Gemäß [LOGGING_POLICY.md](../docs/LOGGING_POLICY.md):
+Gemäß `docs/LOGGING_POLICY.md`:
 - **NIEMALS** Schülernamen, Lehrernamen oder E-Mails loggen
 - Nur IDs für Debugging verwenden
 - Firebase Crashlytics für Production Error-Logging
