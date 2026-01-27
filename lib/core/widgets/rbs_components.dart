@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/rbs_theme.dart';
 
 /// RBS Button - Dynamic Red, Roboto Condensed Bold
@@ -508,4 +509,60 @@ class RBSSnackBar {
       ),
     );
   }
+}
+
+/// RBS AppBar mit konsistentem Home-Button
+/// 
+/// Erstellt eine AppBar im RBS-Style mit optionalem Home-Button rechts.
+/// Der Home-Button wird automatisch hinzugefügt, außer auf dem Dashboard.
+/// 
+/// Beispiel:
+/// ```dart
+/// appBar: buildRBSAppBar(
+///   context: context,
+///   title: 'Schüler-Detail',
+///   showHomeButton: true,
+///   actions: [IconButton(...)],
+/// ),
+/// ```
+AppBar buildRBSAppBar({
+  required BuildContext context,
+  required String title,
+  Widget? titleWidget,
+  bool showHomeButton = true,
+  bool showBackButton = true,
+  List<Widget>? actions,
+  PreferredSizeWidget? bottom,
+  Color? backgroundColor,
+  Color? foregroundColor,
+  VoidCallback? onBack,
+}) {
+  // Home-Button als letzte Action hinzufügen
+  final allActions = <Widget>[
+    ...?actions,
+    if (showHomeButton)
+      IconButton(
+        icon: const Icon(Icons.home),
+        onPressed: () => context.go('/'),
+        tooltip: 'Zum Dashboard',
+      ),
+  ];
+
+  return AppBar(
+    backgroundColor: backgroundColor,
+    foregroundColor: foregroundColor,
+    leading: showBackButton
+        ? IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: onBack ?? () {
+              if (context.canPop()) {
+                context.pop();
+              }
+            },
+          )
+        : null,
+    title: titleWidget ?? Text(title),
+    actions: allActions.isNotEmpty ? allActions : null,
+    bottom: bottom,
+  );
 }

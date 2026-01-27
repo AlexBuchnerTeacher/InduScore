@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:induscore/core/theme/rbs_theme.dart';
 import 'package:induscore/core/widgets/rbs_components.dart';
 import 'package:induscore/providers/app_providers.dart';
@@ -58,6 +59,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: RBSColors.white,

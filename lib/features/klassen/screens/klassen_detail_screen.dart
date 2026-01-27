@@ -12,6 +12,7 @@ import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/features/noten/widgets/noten_matrix_view.dart';
 import 'package:induscore/widgets/rbs_drawer.dart';
 import 'package:induscore/shared/widgets/feature_guard.dart';
+import 'package:induscore/shared/widgets/breadcrumb_navigation.dart';
 
 /// Klassen-Detail Screen mit Matrix-Ansicht
 /// 
@@ -195,6 +196,15 @@ class _KlassenDetailScreenState extends ConsumerState<KlassenDetailScreen> {
 
     return Column(
       children: [
+        // v0.33.0: Breadcrumb-Navigation
+        BreadcrumbNavigation(
+          items: [
+            const BreadcrumbItem(label: 'Home', route: '/', icon: Icons.home),
+            const BreadcrumbItem(label: 'Klassen', route: '/klassen'),
+            BreadcrumbItem(label: klasse.name),
+          ],
+        ),
+        
         // Filter Bar
         _buildFilterBar(subjects, availableSubjectIds, availableTypen),
         

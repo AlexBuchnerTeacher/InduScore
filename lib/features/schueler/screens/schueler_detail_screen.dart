@@ -11,6 +11,8 @@ import 'package:induscore/models/klasse.dart';
 import 'package:induscore/providers/app_providers.dart';
 import 'package:induscore/widgets/rbs_drawer.dart';
 import 'package:induscore/features/noten/widgets/noten_matrix_view.dart';
+import 'package:induscore/features/schueler/widgets/share_student_grades.dart';
+import 'package:induscore/shared/widgets/breadcrumb_navigation.dart';
 
 /// Schüler-Detail Screen mit NotenMatrixView
 /// 
@@ -63,6 +65,38 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
           error: (_, _) => const Text('Fehler'),
         ),
         actions: [
+          // v0.33.0: Teilen-Button für Schülernoten
+          studentAsync.when(
+            data: (student) => IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: () {
+                final klassen = klassenAsync.value ?? [];
+                final klasse = klassen.firstWhere(
+                  (k) => k.id == student.klasseId,
+                  orElse: () => Klasse(
+                    id: '',
+                    name: 'Unbekannt',
+                    berufCode: '',
+                    jahrgangsstufe: 0,
+                    zeitgruppe: Zeitgruppe.a,
+                    laufendeNummer: 0,
+                    schuljahr: '',
+                  ),
+                );
+                ShareStudentGrades.showShareDialog(
+                  context: context,
+                  student: student,
+                  klasse: klasse,
+                  subjects: subjectsAsync.value ?? [],
+                  grades: gradesAsync.value ?? [],
+                  leistungsnachweise: leistungsnachweiseAsync.value ?? [],
+                );
+              },
+              tooltip: 'Noten teilen',
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
+          ),
           IconButton(
             icon: const Icon(Icons.home),
             onPressed: () => context.go('/'),
@@ -153,8 +187,38 @@ class _SchuelerDetailScreenState extends ConsumerState<SchuelerDetailScreen> {
       );
     }
 
+    // Klasse für Breadcrumb finden
+    final klasse = klassen.firstWhere(
+      (k) => k.id == student.klasseId,
+      orElse: () => Klasse(
+        id: '',
+        name: 'Unbekannt',
+        berufCode: '',
+        jahrgangsstufe: 0,
+        zeitgruppe: Zeitgruppe.a,
+        laufendeNummer: 0,
+        schuljahr: '',
+      ),
+    );
+
     return Column(
       children: [
+        // v0.33.0: Breadcrumb-Navigation
+        BreadcrumbNavigation(
+          items: [
+            const BreadcrumbItem(label: 'Home', route: '/', icon: Icons.home),
+            const BreadcrumbItem(label: 'Schüler', route: '/schueler'),
+            if (klasse.id.isNotEmpty)
+              BreadcrumbItem(
+                label: klasse.name,
+                route: '/klassen/${klasse.id}',
+              ),
+            BreadcrumbItem(
+              label: '${student.lastName}, ${student.firstName}',
+            ),
+          ],
+        ),
+        
         // Filter Bar
         _buildFilterBar(subjects, availableSubjectIds, availableTypen),
 

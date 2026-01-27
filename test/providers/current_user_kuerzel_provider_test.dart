@@ -68,13 +68,14 @@ void main() {
       expect(kuerzel, 'BU'); // Sollte 'BU' sein, nicht 'AL' oder 'ALEX'
     });
 
-    test('sollte auf E-Mail-Extraktion zurückgreifen wenn AppUser.kuerzel leer ist', () async {
+    // v0.33.0: Kürzel wird NUR vom Admin vergeben, keine E-Mail-Extraktion mehr
+    test('sollte "—" zurückgeben wenn AppUser.kuerzel leer ist', () async {
       // Arrange
       final testUser = AppUser(
         id: 'test-user-id',
         email: 'test@example.com',
         name: 'Test User',
-        kuerzel: '', // Leeres Kürzel
+        kuerzel: '', // Leeres Kürzel - Admin muss es setzen
         rolle: UserRole.lehrer,
         createdAt: DateTime.now(),
       );
@@ -94,11 +95,12 @@ void main() {
       // Act
       final kuerzel = await container.read(currentUserKuerzelProvider.future);
 
-      // Assert
-      expect(kuerzel, 'TEST'); // Aus E-Mail extrahiert
+      // Assert - v0.33.0: Kein Fallback auf E-Mail, nur Platzhalter
+      expect(kuerzel, '—'); // Platzhalter, Admin muss Kürzel setzen
     });
 
-    test('sollte "??" zurückgeben wenn kein User eingeloggt ist', () async {
+    // v0.33.0: "—" statt "??" als Platzhalter
+    test('sollte "—" zurückgeben wenn kein User eingeloggt ist', () async {
       // Arrange
       when(mockFirebaseAuth.currentUser).thenReturn(null);
       
@@ -115,7 +117,7 @@ void main() {
       final kuerzel = await container.read(currentUserKuerzelProvider.future);
 
       // Assert
-      expect(kuerzel, '??');
+      expect(kuerzel, '—');
     });
 
     test('sollte auf AppUser warten und dann Kürzel zurückgeben', () async {
@@ -152,13 +154,13 @@ void main() {
       expect(kuerzel, 'LT');
     });
 
-    test('sollte Kürzel in Großbuchstaben konvertieren', () async {
+    test('sollte Kürzel direkt verwenden (Großschreibung wird beim Setzen garantiert)', () async {
       // Arrange
       final testUser = AppUser(
         id: 'test-user-id',
         email: 'test@example.com',
         name: 'Test User',
-        kuerzel: 'bu', // Kleinbuchstaben
+        kuerzel: 'BU', // Admin setzt immer Großbuchstaben
         rolle: UserRole.lehrer,
         createdAt: DateTime.now(),
       );
@@ -178,16 +180,17 @@ void main() {
       final kuerzel = await container.read(currentUserKuerzelProvider.future);
 
       // Assert
-      expect(kuerzel, 'BU'); // AppUser.kuerzel wird automatisch in uppercase konvertiert
+      expect(kuerzel, 'BU');
     });
 
-    test('sollte bei AppUser ohne Kürzel auf E-Mail-Extraktion zurückgreifen', () async {
+    // v0.33.0: Kein E-Mail-Fallback mehr
+    test('sollte "—" zurückgeben bei AppUser ohne Kürzel (kein E-Mail-Fallback)', () async {
       // Arrange - Test with AppUser that has no kuerzel set
       final testUser = AppUser(
         id: 'test-user-id',
         email: 'error@test.com',
         name: 'Error User',
-        kuerzel: '', // Empty kuerzel
+        kuerzel: '', // Empty kuerzel - Admin muss es setzen
         rolle: UserRole.lehrer,
         createdAt: DateTime.now(),
       );
@@ -206,42 +209,42 @@ void main() {
       // Act
       final kuerzel = await container.read(currentUserKuerzelProvider.future);
 
-      // Assert - Should fall back to email extraction
-      expect(kuerzel, 'ERRO'); // Aus E-Mail extrahiert (erste 4 Zeichen)
+      // Assert - v0.33.0: Kein E-Mail-Fallback, nur Platzhalter
+      expect(kuerzel, '—');
     });
   });
 
-  group('_extractKuerzelFromEmail (indirekt)', () {
-    test('sollte Kürzel korrekt extrahieren für verschiedene E-Mail-Formate', () async {
-      final testCases = [
-        ('test@example.com', 'TEST'),
-        ('ab@school.de', 'AB'),
-        ('alexander@example.com', 'ALEX'), // Max 4 Zeichen
-        ('x@test.com', 'X'),
-        ('longusername@example.com', 'LONG'), // Max 4 Zeichen
-      ];
+  // v0.33.0: E-Mail-Extraktion wurde entfernt, diese Tests sind obsolet
+  group('Kürzel Admin-Only (v0.33.0)', () {
+    test('leere Kürzel werden nicht aus E-Mail generiert', () async {
+      // Arrange - User ohne Kürzel
+      final mockUser = MockUser();
+      when(mockUser.email).thenReturn('test@example.com');
+      
+      final testAppUser = AppUser(
+        id: 'test-id',
+        email: 'test@example.com',
+        name: 'Test User',
+        kuerzel: '', // Leer - muss vom Admin gesetzt werden
+        rolle: UserRole.lehrer,
+        createdAt: DateTime.now(),
+      );
+      
+      final container = ProviderContainer(
+        overrides: [
+          currentUserProvider.overrideWith((ref) => mockUser),
+          currentAppUserProvider.overrideWith((ref) async => testAppUser),
+        ],
+      );
 
-      for (final (email, expectedKuerzel) in testCases) {
-        // Arrange - User ohne AppUser-Kürzel
-        final mockUser = MockUser();
-        when(mockUser.email).thenReturn(email);
-        
-        final container = ProviderContainer(
-          overrides: [
-            currentUserProvider.overrideWith((ref) => mockUser),
-            currentAppUserProvider.overrideWith((ref) async => null),
-          ],
-        );
+      // Act
+      final kuerzel = await container.read(currentUserKuerzelProvider.future);
 
-        // Act
-        final kuerzel = await container.read(currentUserKuerzelProvider.future);
-
-        // Assert
-        expect(kuerzel, expectedKuerzel, reason: 'Für E-Mail: $email');
-        
-        // Dispose container after test completes
-        container.dispose();
-      }
+      // Assert - Platzhalter, NICHT aus E-Mail generiert
+      expect(kuerzel, '—');
+      expect(kuerzel, isNot('TEST')); // NICHT aus E-Mail
+      
+      container.dispose();
     });
   });
 }

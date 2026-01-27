@@ -165,11 +165,10 @@ final _router = GoRouter(
         child: NotenUebersichtScreen(fachId: state.pathParameters['fachId']!),
       ),
     ),
+    // v0.33.0: Redirect zu SchuelerDetailScreen (Navigation vereinheitlicht)
     GoRoute(
       path: '/noten/schueler/:studentId',
-      pageBuilder: (context, state) => NoTransitionPage(
-        child: NotenUebersichtScreen(studentId: state.pathParameters['studentId']!),
-      ),
+      redirect: (context, state) => '/schueler/${state.pathParameters['studentId']}',
     ),
     // Noten-Eingabe für einzelnen Leistungsnachweis
     GoRoute(

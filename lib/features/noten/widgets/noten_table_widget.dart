@@ -253,14 +253,15 @@ class NotenTableWidget extends StatelessWidget {
                       onNoteChanged: onNoteChanged,
                       getNoteColor: getNoteColor,
                     ),
-                    const SizedBox(width: NotenSpacing.xs),
-                    CompactTendenzButtons(
-                      inputKey: key,
-                      eingabe: eingabe,
-                      studentId: student.id,
-                      lnId: ln.id,
-                      onTendenzChanged: onTendenzChanged,
-                    ),
+                    // v0.33.0: Tendenz-Buttons aus UI entfernt (F-004)
+                    // const SizedBox(width: NotenSpacing.xs),
+                    // CompactTendenzButtons(
+                    //   inputKey: key,
+                    //   eingabe: eingabe,
+                    //   studentId: student.id,
+                    //   lnId: ln.id,
+                    //   onTendenzChanged: onTendenzChanged,
+                    // ),
                   ],
                 ),
               ),

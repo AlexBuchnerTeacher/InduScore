@@ -3,7 +3,7 @@ name: induscore
 description: "InduScore - Notenverwaltung für Berufsschulen - Referat für Bildung und Sport München"
 publish_to: 'none'
 
-version: 0.32.0+34 # v0.32.0: Feature-Guards Polish & SnackBar Refactoring
+version: 0.33.0+35 # v0.33.0: UI Improvements - Navigation, Breadcrumbs, Animationen
 
 environment:
   sdk: ^3.10.0

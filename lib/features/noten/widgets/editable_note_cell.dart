@@ -36,20 +36,77 @@ class EditableNoteCell extends ConsumerStatefulWidget {
   ConsumerState<EditableNoteCell> createState() => _EditableNoteCellState();
 }
 
-class _EditableNoteCellState extends ConsumerState<EditableNoteCell> {
+class _EditableNoteCellState extends ConsumerState<EditableNoteCell>
+    with SingleTickerProviderStateMixin {
+  // v0.33.0: Animation bei Notenänderung
+  late AnimationController _animationController;
+  late Animation<double> _highlightAnimation;
+  int? _previousNote;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousNote = widget.note;
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _highlightAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void didUpdateWidget(EditableNoteCell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Trigger Animation wenn Note sich ändert
+    if (oldWidget.note != widget.note) {
+      _previousNote = oldWidget.note;
+      _animationController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: _buildTooltipMessage(),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildNoteDropdown(),
-          if (widget.note != null && !widget.compact) ...[
-            const SizedBox(width: 4),
-            _buildTendenzButtons(),
+    return AnimatedBuilder(
+      animation: _highlightAnimation,
+      builder: (context, child) {
+        // Highlight-Farbe basierend auf Animation
+        final highlightOpacity = (1 - _highlightAnimation.value) * 0.4;
+        final highlightColor = widget.note != null && widget.note! <= 3
+            ? Colors.green.withValues(alpha: highlightOpacity)
+            : widget.note != null && widget.note! >= 5
+                ? Colors.red.withValues(alpha: highlightOpacity)
+                : Colors.blue.withValues(alpha: highlightOpacity);
+        
+        return Container(
+          decoration: BoxDecoration(
+            color: highlightOpacity > 0.01 ? highlightColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: child,
+        );
+      },
+      child: Tooltip(
+        message: _buildTooltipMessage(),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildNoteDropdown(),
+            // v0.33.0: Tendenz-Buttons aus UI entfernt (F-004)
+            // DB-Feld bleibt erhalten, UI wird versteckt
+            // if (widget.note != null && !widget.compact) ...[
+            //   const SizedBox(width: 4),
+            //   _buildTendenzButtons(),
+            // ],
           ],
-        ],
+        ),
       ),
     );
   }

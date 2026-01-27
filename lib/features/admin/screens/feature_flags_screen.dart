@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/rbs_theme.dart';
 import '../../../core/widgets/rbs_components.dart';
 import '../../../models/feature_flags.dart';
@@ -33,6 +34,11 @@ class FeatureFlagsScreen extends ConsumerWidget {
             icon: const Icon(Icons.restore),
             onPressed: () => _showResetDialog(context, ref),
             tooltip: 'Auf Defaults zurücksetzen',
+          ),
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/'),
+            tooltip: 'Zum Dashboard',
           ),
         ],
       ),

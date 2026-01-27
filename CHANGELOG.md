@@ -7,15 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- **Kürzel-Caching Problem** - Noteneingabe zeigt nun korrekt das Kürzel aus AppUser-Profil
-  - `currentUserKuerzelProvider` als `FutureProvider` mit robustem Async-Handling
-  - Debug-Logging für bessere Nachverfolgung der Kürzel-Auflösung
-  - Automatische Provider-Invalidierung bei Login/Logout
-  - Verbesserte Fallback-Logik (AppUser.kuerzel → E-Mail-Extraktion → '??')
-  - Korrekte Verwendung in `noten_eingabe_screen.dart` und `noten_uebersicht_screen.dart`
-
 <!-- Next release content goes here -->
+
+## [0.33.0] - 2025-07-04
+
+### Added
+- **Breadcrumb-Navigation** in Detail-Screens (Home > Klassen > 12IT1 > Schüler)
+- **Share-Button** in Schüler-Detailansicht zum Teilen von Noten
+- **Highlight-Animation** bei Notenänderungen (grün/blau/rot je nach Note)
+- **Home-Button** konsistent in allen Screens (Profile, Settings, FeatureFlags)
+- Neues Widget: `BreadcrumbNavigation` für wiederverwendbare Breadcrumbs
+- Neuer Service: `ShareStudentGrades` für formatierte Notenausgabe
+
+### Changed
+- **Navigation vereinheitlicht**: `/noten/schueler/{id}` leitet jetzt zu `/schueler/{id}` weiter
+- **Kürzel nur Admin**: Automatische Kürzel-Generierung aus E-Mail entfernt
+- Neue User werden ohne Kürzel angelegt (Admin muss es setzen)
+- `currentUserKuerzelProvider` gibt "—" zurück wenn kein Kürzel gesetzt
+
+### Removed
+- **Tendenz-Buttons aus UI** (EditableNoteCell, StudentSubjectCard, NotenTableWidget)
+- `_extractKuerzelFromEmail()` Fallback-Funktion
+- `_getFallbackKuerzel()` Helper-Funktion
+- Doppelte Schüler-Noten-Route (NotenUebersichtScreen für Schüler)
+
+### Fixed
+- Konsistente Navigation in allen Detail-Screens
 
 ## [0.32.1] - 2025-12-31
 

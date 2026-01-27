@@ -156,15 +156,15 @@ class StudentSubjectCard extends StatelessWidget {
             onNoteChanged: onNoteChanged,
             getNoteColor: getNoteColor,
           ),
-          const SizedBox(width: 8),
-          // Tendenz
-          TendenzButtons(
-            inputKey: key,
-            eingabe: eingabe,
-            studentId: student.id,
-            lnId: ln.id,
-            onTendenzChanged: onTendenzChanged,
-          ),
+          // v0.33.0: Tendenz-Buttons aus UI entfernt (F-004)
+          // const SizedBox(width: 8),
+          // TendenzButtons(
+          //   inputKey: key,
+          //   eingabe: eingabe,
+          //   studentId: student.id,
+          //   lnId: ln.id,
+          //   onTendenzChanged: onTendenzChanged,
+          // ),
         ],
       ),
     );
