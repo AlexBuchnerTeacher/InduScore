@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.33.3] - 2026-01-27
+
+### Documentation
+- **Release-Prozess vollständig dokumentiert** in `copilot-instructions.md`
+- Pre-Release Checks (flutter analyze, test, build) als Pflicht definiert
+- Branch-Cleanup, Issue-Management, PR-Workflow dokumentiert
+- Entscheidungstabelle: Wann CHANGELOG, Release Notes, GitHub Release
+
 ## [0.33.2] - 2026-01-27
 
 ### Changed
