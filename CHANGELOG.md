@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Next release content goes here -->
 
+## [0.33.1] - 2026-01-27
+
+### Fixed
+- **Kürzel bei Notenänderung**: Verwendet jetzt das vom Admin gesetzte Kürzel aus dem AppUser-Profil
+  statt automatisch generierte Initialen aus der E-Mail-Adresse
+- Matrix-Widgets (Klassen, Schüler, LN) auf `currentUserKuerzelProvider` umgestellt
+- `NotenMatrixLogic.getUserKuerzel()` als @Deprecated markiert
+
 ## [0.33.0] - 2025-07-04
 
 ### Added
