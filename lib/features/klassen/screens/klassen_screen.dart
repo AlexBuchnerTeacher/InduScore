@@ -262,7 +262,7 @@ class _KlassenScreenState extends ConsumerState<KlassenScreen> {
     // final schuljahr = ref.read(currentSchuljahrProvider);
     try {
       setState(() => _isImporting = true);
-      final picked = await FilePicker.platform.pickFiles(
+      final picked = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
         withData: true,
