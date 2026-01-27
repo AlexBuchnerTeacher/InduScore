@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin User erstellen</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Admin User erstellen</h1>
+    <button onclick="createAdmin()">Admin anlegen: BU (alexander.buchner@bs-ie.muenchen.musin.de)</button>
+    <pre id="output"></pre>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Firebase Config laden
+        const response = await fetch('flutter_bootstrap.js');
+        const text = await response.text();
+        const configMatch = text.match(/serviceWorker\.config\s*=\s*({[\s\S]*?});/);
+        
+        if (!configMatch) {
+            document.getElementById('output').textContent = 'FEHLER: Firebase Config nicht gefunden';
+        }
+
+        const firebaseConfig = JSON.parse(configMatch[1]);
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window.createAdmin = async function() {
+            const output = document.getElementById('output');
+            output.textContent = 'Starte...\n';
+
+            try {
+                // 1. Firebase Auth User erstellen
+                output.textContent += 'Erstelle Firebase Auth User...\n';
+                const email = 'alexander.buchner@bs-ie.muenchen.musin.de';
+                const password = 'IndusCore2025!'; // ÄNDERE DIES SPÄTER!
+                
+                let uid;
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    uid = userCredential.user.uid;
+                    output.textContent += `✅ Auth User erstellt: ${uid}\n`;
+                } catch (e) {
+                    if (e.code === 'auth/email-already-in-use') {
+                        output.textContent += '⚠️  Auth User existiert bereits, verwende vorhandenen\n';
+                        // Wir müssen die UID anders bekommen - verwenden wir eine feste ID
+                        uid = 'bu-admin';
+                    } else {
+                        throw e;
+                    }
+                }
+
+                // 2. Firestore AppUser erstellen
+                output.textContent += 'Erstelle Firestore AppUser...\n';
+                
+                const adminUser = {
+                    email: 'alexander.buchner@bs-ie.muenchen.musin.de',
+                    name: 'Alexander Buchner',
+                    kuerzel: 'BU',
+                    rolle: 'admin',
+                    status: 'aktiv',
+                    klassenIds: [],
+                    createdAt: Timestamp.now(),
+                    lastLoginAt: null
+                };
+
+                await setDoc(doc(db, 'users', uid), adminUser);
+                
+                output.textContent += '✅ Firestore AppUser erstellt!\n\n';
+                output.textContent += '📋 Details:\n';
+                output.textContent += `   ID:      ${uid}\n`;
+                output.textContent += `   E-Mail:  ${adminUser.email}\n`;
+                output.textContent += `   Name:    ${adminUser.name}\n`;
+                output.textContent += `   Kürzel:  ${adminUser.kuerzel}\n`;
+                output.textContent += `   Rolle:   ${adminUser.rolle}\n`;
+                output.textContent += '\n⚠️  WICHTIG: Passwort ist "IndusCore2025!" - Bitte nach Login ändern!\n';
+                
+            } catch (error) {
+                output.textContent += `\n❌ FEHLER: ${error.message}\n${error.stack}`;
+            }
+        };
+    </script>
+</body>
+</html>
